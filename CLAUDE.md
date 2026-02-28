@@ -39,6 +39,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 ## Templates (Copy-Paste Starters)
 | Template | Style | Purpose |
 |----------|-------|---------|
+| `templates/main.tex.template` | Both | LaTeX starter (Palatino, biblatex, theorem envs, boilerplate) |
 | `templates/CLAUDE.md.template` | Both | Project-level CLAUDE.md for a new research project |
 | `templates/jcode-CLAUDE.md.template` | Both | Implementation subdirectory CLAUDE.md |
 | `templates/Project.toml.template` | Both | Julia project skeleton |

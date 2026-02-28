@@ -69,6 +69,7 @@ Templates are provided for both styles.
 ### Templates
 | File | Architecture | Description |
 |------|-------------|-------------|
+| `templates/main.tex.template` | Both | LaTeX starter (Palatino, biblatex, theorem envs, boilerplate) |
 | `templates/CLAUDE.md.template` | Both | Project-level CLAUDE.md |
 | `templates/jcode-CLAUDE.md.template` | Both | Implementation subdirectory CLAUDE.md |
 | `templates/Project.toml.template` | Both | Julia project skeleton |

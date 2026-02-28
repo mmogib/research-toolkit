@@ -1,0 +1,217 @@
+
+\documentclass{article}
+
+% =================================================
+% Paragraph spacing
+% =================================================
+\usepackage[skip=10pt plus1pt, indent=0pt]{parskip}
+\usepackage{setspace}
+
+% =================================================
+% Encoding & fonts (kept conservative)
+% =================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{mathptmx}          % legacy Times math (kept intentionally)
+\usepackage[sc]{mathpazo}      % Palatino (takes precedence)
+\linespread{1.05}
+\usepackage{microtype}
+
+% =================================================
+% Mathematics
+% =================================================
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage[fleqn]{nccmath}
+
+% =================================================
+% Graphics & floats
+% =================================================
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{float}
+\usepackage{adjustbox}
+\usepackage{ragged2e}
+\usepackage{subfig}
+\usepackage{xcolor}
+\graphicspath{{imgs/}}
+% =================================================
+% Tables
+% =================================================
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+% =================================================
+% Page layout
+% =================================================
+\usepackage[hmarginratio=1:1,top=23mm,columnsep=20pt]{geometry}
+
+% =================================================
+% Lists & document structure
+% =================================================
+\usepackage{enumitem}
+\usepackage{abstract}
+
+% =================================================
+% Captions, titles, headers
+% =================================================
+\usepackage{caption}
+\captionsetup{
+  format=hang,
+  font=small,
+  labelfont=bf,
+  textfont=it
+  }
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+\titleformat{\section}[block]
+  {\large\scshape\centering}{\thesection.}{1em}{}
+
+\fancyfoot{}
+
+% =================================================
+% Algorithms
+% =================================================
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\SetKwInput{KwInitialization}{Initialization}
+\SetKwInput{KwOutput}{Output}
+
+% =================================================
+% TikZ & PGFPlots
+% =================================================
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\usepgfplotslibrary{
+  groupplots,
+  polar,
+  smithchart,
+  statistics,
+  dateplot,
+  ternary,
+  patchplots,
+  fillbetween
+}
+
+\usetikzlibrary{
+  arrows.meta,
+  backgrounds
+}
+
+% =================================================
+% Bibliography
+% =================================================
+\usepackage[
+  backend=biber,
+  style=numeric,        % numeric citation style
+  sorting=nyt,          % alphabetically by author-year-title
+  giveninits=true,       % initials for first names
+  maxbibnames=99,        % include all authors
+  doi=true,
+  url=false              % optional: hide URLs unless needed
+]{biblatex}
+\addbibresource{references.bib}
+
+% =================================================
+% Author
+% =================================================
+\usepackage[affil-sl]{authblk}
+
+% =================================================
+% Hyperlinks (loaded late)
+% =================================================
+\usepackage{hyperref}
+
+% =================================================
+% Theorem environments
+% =================================================
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{as}[theorem]{Assumption}
+
+\newtheorem{co}{Condition}
+\newtheorem{property}{Property}
+\newtheorem{problem}{Problem}
+
+% =================================================
+% Proof environment
+% =================================================
+\def\QED{~\rule[-1pt]{6pt}{6pt}\par\medskip}
+\def\qed{~\rule[-1pt]{5pt}{5pt}\par\medskip}
+\newenvironment{proof}{{\bf Proof.\ }}{\hfill\QED}
+
+% =================================================
+% Custom commands
+% =================================================
+\newcommand{\R}{\mathbb{R}}
+
+% =================================================
+% Inline equation helper
+% =================================================
+\makeatletter
+\newcommand*{\inlineequation}[2][]{%
+  \begingroup
+    \refstepcounter{equation}%
+    \ifx\\#1\\\else\label{#1}\fi
+    \relpenalty=10000
+    \binoppenalty=10000
+    \ensuremath{#2}~~~\@eqnnum
+  \endgroup
+}
+\makeatother
+
+\date{}
+
+\begin{document}
+%% TITLE — fill in
+\title{\large TITLE}
+%% AUTHORS — fill in
+%% \author[1]{Author Name}
+%% \affil[1]{Department, University, Country}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+\textbf{Keywords}:
+
+\textbf{AMS Subject Classification}:
+
+%% === PAPER BODY ===
+
+
+
+%% === BACK MATTER ===
+
+\section*{Declarations}
+
+ \textbf{Conflict of interest:} The authors declare that they have no conflict of interest.
+
+\section*{Data Availability}
+The data generated during this study are derived from numerical experiments and publicly available image sources. All results are fully reproducible from the methods and algorithms described in the manuscript. No new datasets were created or analyzed beyond those generated algorithmically for illustrative purposes. The code used to generate the data can be made available upon reasonable request.
+
+\section*{Funding}
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors. (Funding not applicable).
+
+\section*{AI Use Declaration}
+During the preparation of this work the authors used Claude (Anthropic) in order to assist with manuscript editing, including tightening prose, verifying LaTeX formatting, and checking internal consistency of cross-references and notation. After using this tool, the authors reviewed and edited the content as needed and take full responsibility for the content of the publication.
+
+\section*{Acknowledgment}
+The authors gratefully acknowledge the institutional support provided by King Fahd University of Petroleum \& Minerals (KFUPM). The authors also acknowledge the support of the Interdisciplinary Research Center for Smart Mobility and Logistics (IRC-SML), KFUPM, which facilitated the research environment in which this work was conducted.
+
+\printbibliography
+\end{document}
