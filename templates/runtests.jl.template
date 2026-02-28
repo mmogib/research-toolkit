@@ -1,0 +1,72 @@
+# Test suite for ModuleName
+#
+# Run: julia --project=. test/runtests.jl
+
+push!(LOAD_PATH, joinpath(@__DIR__, "..", "src"))
+using ModuleName
+using Test, LinearAlgebra
+
+@testset "ModuleName" begin
+
+    # ── Types & Config ──────────────────────────────────────────────────────
+    @testset "Config defaults" begin
+        cfg = AlgorithmConfig()
+        @test cfg.ε == 1e-6
+        @test cfg.maxiter == 5000
+        @test cfg.verbose == false
+    end
+
+    # ── Problem Loading ─────────────────────────────────────────────────────
+    @testset "Problem loading" begin
+        for id in [1, 5, 15]
+            prob, F, JF = get_problem(id)
+            @test prob.n > 0
+            @test prob.m > 0
+            Fx = F(prob.x0)
+            @test length(Fx) == prob.m
+            @test all(isfinite.(Fx))
+            J = JF(prob.x0)
+            @test size(J) == (prob.m, prob.n)
+            @test all(isfinite.(J))
+        end
+    end
+
+    # ── Gradient Verification ───────────────────────────────────────────────
+    @testset "Gradient check (smooth)" begin
+        for id in [1, 5, 15]
+            prob, F, JF = get_problem(id)
+            err = check_derivatives(F, JF, prob.x0; h=1e-7)
+            @test err < 1e-5
+        end
+    end
+
+    # ── Core Algorithm ──────────────────────────────────────────────────────
+    @testset "Algorithm convergence" begin
+        prob, F, JF = get_problem(15)  # Small, well-behaved problem
+        cfg = AlgorithmConfig(ε=1e-6, maxiter=1000, verbose=false)
+        result = solve(F, JF, prob.x0; cfg=cfg)
+        @test result.status == :optimal
+        @test result.stationarity < 1e-5
+        @test result.iterations < 1000
+        @test all(isfinite.(result.Fx))
+    end
+
+    # ── Edge Cases ──────────────────────────────────────────────────────────
+    @testset "Edge cases" begin
+        # Already optimal starting point
+        # ...
+
+        # Single objective (m=1 special case)
+        # ...
+    end
+
+    # ── I/O Utilities ───────────────────────────────────────────────────────
+    @testset "TeeIO" begin
+        buf = IOBuffer()
+        tee = TeeIO(devnull, buf)
+        print(tee, "hello")
+        flush(tee)
+        @test String(take!(buf)) == "hello"
+    end
+
+end  # @testset "ModuleName"

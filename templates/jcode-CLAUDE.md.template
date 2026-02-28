@@ -1,0 +1,74 @@
+# [ModuleName] — Julia Implementation
+
+## Overview
+Julia implementation of [algorithm/method] for [problem domain].
+
+## Structure
+```
+jcode/
+├── Project.toml           # Dependencies
+├── CLAUDE.md              # This file
+├── src/
+│   ├── ModuleName.jl      # Main module (includes + exports)
+│   ├── types.jl           # Type definitions, config structs, result types
+│   ├── [core files]       # Algorithm implementation files
+│   ├── utils.jl           # Utilities
+│   ├── io_utils.jl        # TeeIO logging, file export
+│   └── problems.jl        # Test problem definitions
+├── test/
+│   └── runtests.jl        # Test suite
+├── results/               # Output directory
+│   ├── logs/              # Auto-generated log files
+│   └── [experiment dirs]  # Per-experiment output
+└── scripts/
+    ├── s10_[verify].jl    # Verification (gradients, etc.)
+    ├── s20_[basic].jl     # Basic algorithm runner
+    ├── s35_[oat].jl       # OAT parameter screening
+    ├── s40_[lhs].jl       # LHS parameter search
+    ├── s45_[benchmark].jl # Multi-start benchmark
+    ├── s50_[ablation].jl  # Ablation study
+    └── s70_[figures].jl   # Figure generation
+```
+
+## Dependencies
+- **JuMP** + **HiGHS**: [LP/QP solver purpose]
+- **LazySets**: [Feasible set representations]
+- **LinearAlgebra**, **Printf**, **Random**: Standard library
+
+## Running Scripts
+```bash
+cd jcode
+julia --project=. scripts/s10_[verify].jl               # verify gradients
+julia --project=. scripts/s20_[basic].jl --all           # run on all problems
+julia --project=. scripts/s45_[benchmark].jl --all --resume  # benchmark (resume-safe)
+julia --project=. scripts/s45_[benchmark].jl --summary   # generate summary
+julia --project=. test/runtests.jl                        # run tests
+```
+
+## Usage (REPL)
+```julia
+push!(LOAD_PATH, "src")
+using ModuleName
+
+prob, F, JF = get_problem(1)
+cfg = AlgorithmConfig(maxiter=1000, ε=1e-6, verbose=true)
+result = solve(F, JF, prob.x0; cfg=cfg)
+```
+
+## Type Hierarchy
+```
+[Document your type hierarchy here]
+```
+
+## Key Design Decisions
+- [Decision 1 and rationale]
+- [Decision 2 and rationale]
+
+## Rules
+- **DO NOT run Julia scripts.** Mohammed runs scripts locally. Only create/edit scripts.
+- Tests (`runtests.jl`) may be run to verify code changes.
+
+## Status
+- [Current state: what works, what's pending]
+- [Number of tests passing]
+- [Experiments complete vs. pending]

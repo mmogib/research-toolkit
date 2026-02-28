@@ -1,0 +1,81 @@
+# [Project Title] — [Short Description]
+
+## Overview
+[One paragraph: what this project is about, the core problem, the approach.]
+
+**Authors**:
+- Dr. Mohammed Alshahrani (main & corresponding author) <mshahrani@kfupm.edu.sa>
+- [Co-author Name] <email>
+- [Co-author Name] <email>
+
+**Affiliations**:
+- [1] Department of Mathematics, KFUPM, Saudi Arabia
+- [2] [Other affiliation]
+
+**Paper status**: [Draft / Theory complete / Experiments in progress / Under review]
+
+## Structure
+```
+project-name/
+├── CLAUDE.md              # This file
+├── paper/
+│   ├── main.tex           # LaTeX manuscript
+│   ├── references.bib     # Bibliography (Zotero-managed)
+│   └── imgs/              # Figures
+├── jcode/                 # Julia implementation (see jcode/CLAUDE.md)
+│   ├── src/               # Source code
+│   ├── test/              # Tests
+│   ├── scripts/           # Numbered experiment scripts (s10_, s20_, ...)
+│   └── results/           # Output data (CSV, logs, figures)
+├── notes/                 # Working notes
+│   └── done/              # Completed/archived notes
+└── refs/                  # Reference papers (PDFs)
+```
+
+## Delegation
+- **jcode/**: Julia implementation — see `jcode/CLAUDE.md`
+
+## Toolkit
+See `D:\Dropbox\Research\research-toolkit\` for coding style, templates, and workflow guides.
+Skills: `~/.claude/skills/mohammed-research-skills/` (workflow, writing, title-abstract)
+
+## Roles
+- **Mohammed**: Main author, decides direction, compiles LaTeX, runs scripts
+- **Claude**: Assists with brainstorming, reviewing, editing, checking proofs, improving writing
+
+## Rules
+1. **DO NOT run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
+2. **DO NOT compile LaTeX** — Mohammed compiles locally.
+3. **DO NOT use Python scripts** — Use the Edit tool for all file modifications.
+4. **References**: Never add bib entries directly. Mohammed adds via Zotero.
+5. **Notes workflow**: Plans and session findings go to `notes/`. Move completed to `notes/done/`.
+6. **Keep this CLAUDE.md current** after significant sessions.
+
+## Paper Key Elements
+
+### Title
+[Paper title]
+
+### Core Problem
+[Mathematical formulation of the problem]
+
+### Key Contributions
+1. [Contribution 1]
+2. [Contribution 2]
+3. [Contribution 3]
+
+### Paper Sections
+1. **Introduction** — [status]
+2. **Preliminaries** — [status]
+3. **[Theory section]** — [status]
+4. **[Algorithm section]** — [status]
+5. **Convergence Analysis** — [status]
+6. **Numerical Experiments** — [status]
+7. **Conclusion** — [status]
+
+### Known Issues / WIP
+- [Issue 1]
+- [Issue 2]
+
+## Status
+[Current state of the project. Updated after each session.]
