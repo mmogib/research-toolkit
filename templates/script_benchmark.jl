@@ -12,6 +12,9 @@
 #   julia --project=. scripts/s45_benchmark.jl --all --verbose     # verbose output
 # ============================================================================
 
+# --- Load project code (adapt to your coding style) ---
+# Style A (Module):  push!(LOAD_PATH, joinpath(@__DIR__, "..", "src")); using ModuleName
+# Style B (Flat):    include(joinpath(@__DIR__, "..", "src", "includes.jl"))
 push!(LOAD_PATH, joinpath(@__DIR__, "..", "src"))
 using ModuleName
 using Printf, Random, Dates

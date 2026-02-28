@@ -29,8 +29,9 @@ This toolkit captures Mohammed's exact research workflow, Julia coding style, an
 2. In the project's `CLAUDE.md`, add:
    ```
    ## Toolkit
-   See `D:\Dropbox\Research\research-toolkit\` for coding style, templates, and workflow guides.
+   See `<path-to-research-toolkit>` for coding style, templates, and workflow guides.
    ```
+   Replace `<path-to-research-toolkit>` with the actual local path where this toolkit is cloned.
 
 3. Choose a coding architecture (see below) and copy the appropriate templates.
 
@@ -94,4 +95,4 @@ Three custom skills at `~/.claude/skills/mohammed-research-skills/`:
 
 ## Portability
 
-Everything lives in `D:\Dropbox\Research\research-toolkit/`. No global configuration dependencies. Any new project references this directory in its CLAUDE.md.
+Clone this repo anywhere on your machine. No global configuration dependencies. Any new project references this directory in its CLAUDE.md. The `/init-project` command auto-discovers the toolkit path.

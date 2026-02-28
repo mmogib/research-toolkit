@@ -7,8 +7,9 @@ A portable, topic-independent reference for Claude to understand Mohammed's exac
 In any new research project, add to the project's `CLAUDE.md`:
 ```
 ## Toolkit
-See `D:\Dropbox\Research\research-toolkit\` for coding style, templates, and workflow guides.
+See `<path-to-research-toolkit>` for coding style, templates, and workflow guides.
 ```
+Replace `<path-to-research-toolkit>` with the actual local path where this toolkit is cloned.
 Claude will then have access to all guides and templates.
 
 ## Existing Skills
