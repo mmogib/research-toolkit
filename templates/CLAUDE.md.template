@@ -36,7 +36,7 @@ project-name/
 - **jcode/**: Julia implementation — see `jcode/CLAUDE.md`
 
 ## Toolkit
-See `D:\Dropbox\Research\research-toolkit\` for coding style, templates, and workflow guides.
+See `<path-to-research-toolkit>` for coding style, templates, and workflow guides.
 Skills: `~/.claude/skills/mohammed-research-skills/` (workflow, writing, title-abstract)
 
 ## Roles
@@ -48,8 +48,9 @@ Skills: `~/.claude/skills/mohammed-research-skills/` (workflow, writing, title-a
 2. **DO NOT compile LaTeX** — Mohammed compiles locally.
 3. **DO NOT use Python scripts** — Use the Edit tool for all file modifications.
 4. **References**: Never add bib entries directly. Mohammed adds via Zotero.
-5. **Notes workflow**: Plans and session findings go to `notes/`. Move completed to `notes/done/`.
-6. **Keep this CLAUDE.md current** after significant sessions.
+5. **Reference papers**: If you need to consult a cited paper, ask Mohammed to download the PDF into `refs/`. Then read it with the Read tool.
+6. **Notes workflow**: Plans and session findings go to `notes/`. Move completed to `notes/done/`.
+7. **Keep this CLAUDE.md current** after significant sessions.
 
 ## Paper Key Elements
 

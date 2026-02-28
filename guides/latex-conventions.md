@@ -25,6 +25,12 @@ Mohammed's LaTeX writing style and conventions for mathematics research papers.
 - `\addbibresource{references.bib}`
 - `\printbibliography` at end
 
+### Reference Papers (`refs/`)
+- Store downloaded PDFs of cited papers in `refs/`
+- Claude can read these with the Read tool when needed (verify formulas, check proofs, understand referenced algorithms)
+- Workflow: Claude asks Mohammed to download a specific paper into `refs/`, then reads it directly
+- File naming: use the bib key or a descriptive name (e.g., `ChenYangZhao2023.pdf`, `Gerth_Weidner_1990.pdf`)
+
 ## Theorem Environments
 
 ### Shared Counter
