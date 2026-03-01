@@ -37,7 +37,7 @@ project-name/
 
 ## Toolkit
 See `<path-to-research-toolkit>` for coding style, templates, and workflow guides.
-Skills: `~/.claude/skills/mohammed-research-skills/` (workflow, writing, title-abstract)
+Skills: `~/.claude/skills/mohammed-research-skills/` (workflow, writing, title-abstract, jcode-script)
 
 ## Roles
 - **Mohammed**: Main author, decides direction, compiles LaTeX, runs scripts

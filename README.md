@@ -89,10 +89,11 @@ Templates are provided for both styles.
 
 ## Related Skills
 
-Three custom skills at `~/.claude/skills/mohammed-research-skills/`:
+Four custom skills at `~/.claude/skills/mohammed-research-skills/`:
 - **optimization-research-workflow** — 12-phase research workflow, script patterns, CLAUDE.md conventions
 - **math-research-writer** — Theorem/proof structure, LaTeX patterns, convergence analysis
 - **title-abstract** — Academic paper titles and abstracts, journal requirements
+- **jcode-script** — Experiment script generator with consistent patterns (ARGS, CSV, resume, TeeIO, progress)
 
 ## Portability
 

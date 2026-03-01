@@ -1,6 +1,6 @@
 # Skills Reference
 
-Mohammed has three custom skills at `~/.claude/skills/mohammed-research-skills/`. These are invoked via slash commands during Claude Code sessions.
+Mohammed has four custom skills at `~/.claude/skills/mohammed-research-skills/`. These are invoked via slash commands during Claude Code sessions.
 
 ## Available Skills
 
@@ -45,6 +45,22 @@ Mohammed has three custom skills at `~/.claude/skills/mohammed-research-skills/`
 **Reference files** (7):
 - `title-guidelines.md`, `abstract-guidelines.md`, `document-types.md`
 - `journal-requirements.md`, `examples.md`, `checklists.md`, `resources.md`
+
+### 4. `/jcode-script`
+**When to use**: Creating a new experiment script (benchmark, ablation, figure, etc.) with consistent structure and patterns.
+
+**What it provides**:
+- Interactive script type selection with automatic `s{NN}_` numbering
+- Feature composition (ARGS, resume, summary mode, TeeIO, CSV I/O, progress bars, etc.)
+- Infrastructure setup (creates/updates `io_utils.jl`, `utils.jl` as needed)
+- Dependency management (adds packages to Project.toml or deps.jl based on style)
+- Works with both Style A (Module Package) and Style B (Flat Include)
+- Can adapt patterns to Python or MATLAB when explicitly requested
+
+**Reference files** (3):
+- `script-patterns.md` — Composable code blocks for each feature
+- `infrastructure-patterns.md` — Canonical io_utils.jl and utils.jl code
+- `dependency-guide.md` — Feature → package mapping, installation instructions
 
 ## How Skills Relate to the Toolkit
 
