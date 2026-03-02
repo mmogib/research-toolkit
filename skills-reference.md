@@ -1,6 +1,6 @@
 # Skills Reference
 
-Mohammed has four custom skills at `~/.claude/skills/mohammed-research-skills/`. These are invoked via slash commands during Claude Code sessions.
+Mohammed has six custom skills at `~/.claude/skills/mohammed-research-skills/`. These are invoked via slash commands during Claude Code sessions.
 
 ## Available Skills
 
@@ -46,7 +46,16 @@ Mohammed has four custom skills at `~/.claude/skills/mohammed-research-skills/`.
 - `title-guidelines.md`, `abstract-guidelines.md`, `document-types.md`
 - `journal-requirements.md`, `examples.md`, `checklists.md`, `resources.md`
 
-### 4. `/jcode-script`
+### 4. `/init-project`
+**When to use**: Starting a brand new research project from scratch.
+
+**What it provides**:
+- Interactive directory scaffolding (paper/, jcode/, notes/, refs/)
+- CLAUDE.md files for project and implementation subdirectory
+- Julia project setup with chosen architecture (Style A or B)
+- Template copying from the research toolkit
+
+### 5. `/jcode-script`
 **When to use**: Creating a new experiment script (benchmark, ablation, figure, etc.) with consistent structure and patterns.
 
 **What it provides**:
@@ -62,12 +71,25 @@ Mohammed has four custom skills at `~/.claude/skills/mohammed-research-skills/`.
 - `infrastructure-patterns.md` — Canonical io_utils.jl and utils.jl code
 - `dependency-guide.md` — Feature → package mapping, installation instructions
 
+### 6. `/review-paper`
+**When to use**: Reviewing, polishing, or doing a final pass on an academic paper before submission.
+
+**What it provides**:
+- 13-item universal review checklist (notation, proofs, assumptions, abstract, style, etc.)
+- Interactive addition of project-specific review tasks
+- Task distribution between Claude (automatable checks) and user (mathematical judgment)
+- Automated execution of Claude-assigned items with findings reported per item
+- Tracked checklist note in `notes/review_checklist_YYYYMMDD.md`
+
+**Reference files** (1):
+- `checklist-items.md` — Full universal checklist with detailed sub-items, banned words, wordy phrase replacements
+
 ## How Skills Relate to the Toolkit
 
-The skills focus on **workflow and writing**. This toolkit adds:
+The skills focus on **workflow, writing, and review**. This toolkit adds:
 - **Coding style** (`guides/coding-style.md`) — Julia SE patterns not covered by skills
 - **Script patterns** (`guides/script-patterns.md`) — Detailed code patterns with examples
-- **Review checklist** (`guides/paper-review-checklist.md`) — Post-writing polish workflow
+- **Review checklist** (`guides/paper-review-checklist.md`) — Standalone reference version of the review checklist (skill `/review-paper` builds on this)
 - **LaTeX conventions** (`guides/latex-conventions.md`) — Specific notation and environment choices
 - **Templates** — Copy-paste starters for new projects
 
@@ -75,7 +97,7 @@ Together, skills + toolkit cover the full research lifecycle:
 ```
 Skills (workflow)     → How to organize and plan
 Skills (writing)      → How to write math and abstracts
+Skills (review)       → How to polish before submission
 Toolkit (coding)      → How to implement experiments
-Toolkit (review)      → How to polish before submission
 Toolkit (templates)   → How to bootstrap a new project
 ```
