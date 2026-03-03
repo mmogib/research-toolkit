@@ -1,6 +1,6 @@
 # Skills Reference
 
-Mohammed has six custom skills at `~/.claude/skills/mohammed-research-skills/`. These are invoked via slash commands during Claude Code sessions.
+Mohammed has seven custom skills at `~/.claude/skills/mohammed-research-skills/`. These are invoked via slash commands during Claude Code sessions.
 
 ## Available Skills
 
@@ -84,6 +84,20 @@ Mohammed has six custom skills at `~/.claude/skills/mohammed-research-skills/`. 
 **Reference files** (1):
 - `checklist-items.md` — Full universal checklist with detailed sub-items, banned words, wordy phrase replacements
 
+### 7. `/suggest-journals`
+**When to use**: Looking for suitable journals to submit a paper, or reviewing/updating a previous journal shortlist.
+
+**What it provides**:
+- Interactive preference gathering (quartile, indexing, publisher exclusions, access model, response time)
+- Web search across Scimago SJR, publisher journal finders, and community sources (Reddit, ResearchGate, SciRev)
+- Filtering by ISI/Scopus indexing, quartile, publisher, and access model
+- Ranked output with scope fit, impact factor, SJR, and reported response times
+- Formatted note saved to `notes/journal_suggestions_YYYYMMDD.md`
+
+**Reference files** (2):
+- `references/search-strategy.md` — Web search patterns, URL structures, cross-checking methods, red flags
+- `references/output-template.md` — Markdown template for the output note
+
 ## How Skills Relate to the Toolkit
 
 The skills focus on **workflow, writing, and review**. This toolkit adds:
@@ -98,6 +112,7 @@ Together, skills + toolkit cover the full research lifecycle:
 Skills (workflow)     → How to organize and plan
 Skills (writing)      → How to write math and abstracts
 Skills (review)       → How to polish before submission
+Skills (journals)     → Where to submit
 Toolkit (coding)      → How to implement experiments
 Toolkit (templates)   → How to bootstrap a new project
 ```

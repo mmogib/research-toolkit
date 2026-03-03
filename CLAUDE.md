@@ -13,13 +13,14 @@ Replace `<path-to-research-toolkit>` with the actual local path where this toolk
 Claude will then have access to all guides and templates.
 
 ## Existing Skills
-Mohammed has six custom skills at `~/.claude/skills/mohammed-research-skills/`:
+Mohammed has seven custom skills at `~/.claude/skills/mohammed-research-skills/`:
 - **optimization-research-workflow** — 12-phase research workflow, script patterns, benchmark patterns, CLAUDE.md conventions
 - **math-research-writer** — Theorem/proof structure, LaTeX patterns, notation consistency, convergence analysis writing
 - **title-abstract** — Academic paper titles and abstracts (structure, examples, journal requirements)
 - **init-project** — Interactive scaffolding for new research projects: directory structure, CLAUDE.md files, Julia project setup
 - **jcode-script** — Experiment script generator with consistent patterns (ARGS, CSV, resume, TeeIO, progress bars)
 - **review-paper** — Paper review & polish checklist: 13-item universal checklist + project-specific items, task distribution, automated style/notation/bib checks
+- **suggest-journals** — Find suitable Q1–Q2 journals for publication: Scimago search, indexing/publisher/access filters, response time data
 
 See `skills-reference.md` for details on when and how to invoke each skill.
 
