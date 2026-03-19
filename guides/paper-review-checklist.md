@@ -74,12 +74,17 @@ For each theorem, lemma, proposition:
 - [ ] All figures/tables are referenced in the text
 - [ ] No orphan figures/tables (referenced but not present, or present but not referenced)
 
-### 12. Bibliography
+### 12. Bibliography Integrity
+**CRITICAL**: `references.bib` is Zotero-managed. Do NOT add, remove, or edit entries directly. If new references are needed, write them to `paper/temp_refs_to_add.bib` for Mohammed to verify and import through Zotero.
+
 - [ ] All `\cite` keys resolve (no undefined references)
-- [ ] No orphan bib entries (in .bib but never cited) — optional cleanup
+- [ ] No orphan bib entries (in .bib but never cited) — report to Mohammed for cleanup via Zotero
 - [ ] Author names consistent (no duplicate entries for same paper)
 - [ ] Year, journal, volume, pages present for published papers
 - [ ] Preprints marked as such
+- [ ] Every entry has a DOI (flag any without)
+- [ ] No entries with `note={DOI needs verification}` — verify or flag as suspect
+- [ ] `temp_refs_to_add.bib` is empty (all suggestions processed)
 
 ### 13. Style Pass
 - [ ] No AI-sounding prose: "robust", "crucial", "comprehensive", "streamline", "leverage", "fundamental", "notably"

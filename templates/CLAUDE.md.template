@@ -19,9 +19,13 @@
 project-name/
 ├── CLAUDE.md              # This file
 ├── paper/
-│   ├── main.tex           # LaTeX manuscript
-│   ├── references.bib     # Bibliography (Zotero-managed)
-│   └── imgs/              # Figures
+│   ├── main.tex              # LaTeX manuscript
+│   ├── references.bib        # Bibliography — Zotero-managed, NEVER edit directly
+│   ├── temp_refs_to_add.bib  # Claude's suggested references for Mohammed to verify
+│   ├── imgs/                 # Figures (copied from jcode/results/figures/)
+│   └── submissions/          # One subfolder per journal submission
+│       └── JOURNAL/          # e.g., AMC/, JCAM/, SIOPT/
+│           └── cover_letter.tex
 ├── jcode/                 # Julia implementation (see jcode/CLAUDE.md)
 │   ├── src/               # Source code
 │   ├── test/              # Tests
@@ -47,7 +51,7 @@ Skills: `~/.claude/skills/mohammed-research-skills/` (workflow, writing, title-a
 1. **DO NOT run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
 2. **DO NOT compile LaTeX** — Mohammed compiles locally.
 3. **DO NOT use Python scripts** — Use the Edit tool for all file modifications.
-4. **References**: Never add bib entries directly. Mohammed adds via Zotero.
+4. **References**: Never edit `references.bib` — it is Zotero-managed. If new references are needed, write suggested entries to `paper/temp_refs_to_add.bib` with a comment explaining why. Mohammed verifies, imports through Zotero, and confirms. Only then cite the new keys in the manuscript. Never generate bib entries from AI memory — they are frequently hallucinated.
 5. **Reference papers**: If you need to consult a cited paper, ask Mohammed to download the PDF into `refs/`. Then read it with the Read tool.
 6. **Notes workflow**: Plans and session findings go to `notes/`. Move completed to `notes/done/`.
 7. **Keep this CLAUDE.md current** after significant sessions.

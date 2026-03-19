@@ -59,7 +59,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 1. **Never run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
 2. **Never compile LaTeX** — Mohammed compiles locally.
 3. **Never use Python scripts** — Use the Edit tool for all file modifications.
-4. **Never add bib entries directly** — Mohammed adds via Zotero.
+4. **Never edit `references.bib`** — it is Zotero-managed. If new references are needed, write suggested entries to `paper/temp_refs_to_add.bib` with a comment explaining why each is needed. Mohammed verifies via Google Scholar, imports through Zotero, and updates `references.bib`. Wait for confirmation before citing new keys in the manuscript. AI-generated references are frequently hallucinated (real authors + fabricated titles/journals/DOIs) — never generate bib entries from memory.
 5. **Always ask questions if not 100% sure** about the approach.
 6. **When presenting a plan**, always offer to save it as a note.
 7. **Minimize API round trips** — batch parallel reads, prefer Edit over Write for existing files.
