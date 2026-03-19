@@ -10,23 +10,37 @@ This toolkit captures Mohammed's exact research workflow, Julia coding style, an
 
 ### One-time setup (per machine)
 
+**Step 1**: Clone the toolkit into Claude Code's skills directory:
 ```bash
-# 1. Clone the toolkit into Claude Code's skills directory
 git clone https://github.com/mmogib/research-toolkit.git ~/.claude/skills/research-toolkit
+```
 
-# 2. Create symlinks so Claude Code discovers each skill
-#    (Claude looks for SKILL.md at ~/.claude/skills/*/SKILL.md)
+**Step 2**: Create directory symlinks so Claude Code discovers each skill.
+Claude Code looks for `SKILL.md` at `~/.claude/skills/*/SKILL.md` (one level deep), so each skill needs a symlink at the root of `~/.claude/skills/`.
 
-# --- Linux / macOS ---
+**Linux / macOS** (terminal):
+```bash
 cd ~/.claude/skills
 for skill in research-toolkit/skills/*/; do
-    ln -sf "$skill" "$(basename $skill)"
+    ln -sf "$skill" "$(basename "$skill")"
 done
-
-# --- Windows (run as Administrator) ---
-cd %USERPROFILE%\.claude\skills
-for /D %s in (research-toolkit\skills\*) do mklink /D "%~ns" "research-toolkit\skills\%~ns"
 ```
+
+**Windows** (open **cmd.exe as Administrator** — not Git Bash, not PowerShell):
+```cmd
+cd %USERPROFILE%\.claude\skills
+mklink /D init-project research-toolkit\skills\init-project
+mklink /D jcode-script research-toolkit\skills\jcode-script
+mklink /D math-research-writer research-toolkit\skills\math-research-writer
+mklink /D optimization-research-workflow research-toolkit\skills\optimization-research-workflow
+mklink /D review-paper research-toolkit\skills\review-paper
+mklink /D suggest-journals research-toolkit\skills\suggest-journals
+mklink /D title-abstract research-toolkit\skills\title-abstract
+```
+
+> **Note on Windows**: `ln -s` in Git Bash creates *copies*, not symlinks. You must use `mklink /D` from cmd.exe. This requires Administrator privileges or Developer Mode enabled (Settings → For developers → Developer Mode).
+
+> **Note on Claude Code updates**: As of March 2026, Claude Code discovers skills by scanning `~/.claude/skills/*/SKILL.md`. If a future version introduces a native skill installation mechanism, the symlink step may become unnecessary. Check [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code) for the latest setup instructions.
 
 ### Development workflow
 
