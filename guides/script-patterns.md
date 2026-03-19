@@ -1,53 +1,65 @@
-# Experiment Script Patterns
+# Script Patterns — Composable Code Blocks
 
-Reusable patterns for experiment scripts. All patterns are extracted from working code.
+Each section below is a self-contained code block. Compose them in order to build a complete script. Replace `{placeholders}` with project-specific values.
 
-## Script Naming Convention
-Scripts are prefixed `s{NN}_` in increments of 10, allowing insertion without renaming:
-```
-s10_check_gradients.jl      # Verification
-s20_run_algorithm.jl         # Single-algorithm runner
-s30_run_alternative.jl       # Alternative algorithm runner
-s35_oat_screening.jl         # OAT parameter screening
-s40_lhs_search.jl            # LHS parameter search
-s45_multistart.jl            # Multi-start benchmark
-s50_ablation.jl              # Ablation study
-s60_application.jl           # Application experiments
-s65_extension.jl             # Extension experiments (e.g., general cones)
-s70_fig_convergence.jl       # Figure: convergence histories
-s75_fig_pareto.jl            # Figure: Pareto fronts
-```
+---
 
-## Standard Script Header
+## 1. Header Comment Block
+
+Always included. Describes what the script does, where output goes, and how to run it.
+
 ```julia
 # ============================================================================
-# s45: Multi-Start Robustness Test for AlgorithmName
+# s{NN}: {Title}
 # ============================================================================
 #
-# Goal:   Run algorithm on N problems × M starting points
-# Output: results/experiment_name/raw.csv, summary.csv
+# Goal:   {One-line description of what this script does}
+# Output: {Where results go, e.g., results/experiment_name/raw.csv, summary.csv}
+#
 # Usage:
-#   julia --project=. scripts/s45_multistart.jl --all           # all problems
-#   julia --project=. scripts/s45_multistart.jl 3-11 --resume   # range, resume
-#   julia --project=. scripts/s45_multistart.jl --summary        # post-process
+#   julia --project=. scripts/s{NN}_{name}.jl                  # default subset
+#   julia --project=. scripts/s{NN}_{name}.jl --all            # all problems
+#   julia --project=. scripts/s{NN}_{name}.jl 3-11 --resume    # range, resume
+#   julia --project=. scripts/s{NN}_{name}.jl --summary        # post-process
 # ============================================================================
-
-push!(LOAD_PATH, joinpath(@__DIR__, "..", "src"))
-using ModuleName
-using Printf, Random, Dates
 ```
 
-## ARGS Parsing Pattern
+---
+
+## 2. Load Path / Imports
+
+**Style A (Module Package):**
 ```julia
+push!(LOAD_PATH, joinpath(@__DIR__, "..", "src"))
+using {ModuleName}
+using Printf, Statistics
+```
+
+**Style B (Flat Include):**
+```julia
+include(joinpath(@__DIR__, "..", "src", "includes.jl"))
+using Printf, Statistics
+```
+
+Add script-specific packages after the module/include line (e.g., `using ProgressMeter`, `using Plots`).
+
+---
+
+## 3. ARGS Parsing
+
+Standard pattern for flags and problem ID ranges.
+
+```julia
+# --- Parse arguments ---
 flags = filter(a -> startswith(a, "-"), ARGS)
 ids   = filter(a -> !startswith(a, "-"), ARGS)
 
 verbose    = "--verbose" in flags
-do_resume  = "--resume" in flags
-do_summary = "--summary" in flags
+do_resume  = "--resume" in flags      # include only if resume feature selected
+do_summary = "--summary" in flags     # include only if summary feature selected
 
 if "--all" in flags
-    prob_ids = collect(1:N_PROBLEMS)
+    prob_ids = collect(1:{N_PROBLEMS})
 elseif !isempty(ids)
     prob_ids = Int[]
     for s in ids
@@ -59,10 +71,12 @@ elseif !isempty(ids)
         end
     end
 else
-    prob_ids = DEFAULT_SUBSET  # Representative subset for quick testing
+    prob_ids = {DEFAULT_SUBSET}   # representative subset for quick testing
 end
+```
 
-# Keyword overrides
+**Optional: keyword overrides from flags**
+```julia
 for f in flags
     if startswith(f, "--eps=")
         global FIXED_ε = parse(Float64, split(f, "=")[2])
@@ -72,109 +86,264 @@ for f in flags
 end
 ```
 
-## Two-Mode Pattern (Solve vs. Summary)
-```julia
-if do_summary
-    # === POST-PROCESS MODE ===
-    # Read raw CSV → aggregate statistics → write summary CSV
-    summarize_results(raw_csv_path, summary_csv_path, tee)
-    teardown_logging(tee, logpath)
-    exit(0)
-end
+---
 
-# === MAIN SOLVE MODE ===
-# (reached only if not do_summary)
+## 4. TeeIO Logging Setup
+
+Requires `io_utils.jl` to be available (see infrastructure-patterns.md).
+
+```julia
+# --- Setup logging ---
+logpath, tee, logfile = setup_logging("{script_name}")
 ```
 
-## Resume Pattern
-```julia
-completed = Set{Int}()   # or Set{Tuple{Int,Float64}} for multi-parameter
+---
 
-if do_resume && isfile(raw_csv_path)
-    for line in eachline(raw_csv_path)
-        startswith(line, "prob_id") && continue   # Skip header
-        parts = split(line, ","; limit=2)
-        pid = parse(Int, parts[1])
-        # Track completed items
+## 5. Results Directory
+
+Create the output directory for this script.
+
+```julia
+results_dir = joinpath(@__DIR__, "..", "results", "{experiment_name}")
+mkpath(results_dir)
+```
+
+---
+
+## 6. Configuration Constants
+
+Project-specific constants. Adapt names and values to the project.
+
+```julia
+# ============================================================================
+# Configuration
+# ============================================================================
+
+# Algorithm parameters (tuned values or defaults)
+const PARAM_A = {value}
+const PARAM_B = {value}
+
+# Experiment settings
+const N_STARTS   = {50}              # for multi-start scripts
+const RNG_SEED   = {42}              # for reproducibility
+const FIXED_ε    = {1e-4}
+const FIXED_MAXITER = {5000}
+```
+
+---
+
+## 7. Adaptive Parameters
+
+Tolerance and iteration limits that depend on problem dimension.
+
+```julia
+# Adaptive parameters based on problem dimension
+get_ε(n)       = n >= {threshold} ? {relaxed_ε} : {tight_ε}
+get_maxiter(n) = n >= {threshold} ? {large_maxiter} : {small_maxiter}
+```
+
+---
+
+## 8. CSV Constants and Paths
+
+Define CSV headers as constants. Column names use snake_case.
+
+```julia
+raw_csv_path = joinpath(results_dir, "{prefix}_raw.csv")
+const RAW_HEADER = "{col1},{col2},{col3},..."
+const SUMMARY_HEADER = "{col1},{col2},{col3},..."
+```
+
+---
+
+## 9. Summary Mode Block
+
+Two-mode pattern: `--summary` reads raw CSV and produces aggregated output, then exits. Place this BEFORE the main solve loop.
+
+```julia
+# ============================================================================
+# Summary mode: read raw CSV → generate summary
+# ============================================================================
+
+if do_summary
+    if !isfile(raw_csv_path)
+        println(tee, "ERROR: No raw CSV found at $raw_csv_path")
+        teardown_logging(tee, logpath)
+        exit(1)
     end
 
-    # Count completions per problem
-    for (pid, lines) in prob_lines
-        if length(lines) >= expected_count
-            push!(completed, pid)
-        else
-            # Partial: rewrite CSV without incomplete rows
+    # Group raw lines by {grouping_key}
+    grouped = Dict{Int, Vector{String}}()
+    for line in eachline(raw_csv_path)
+        startswith(line, "{first_col_name}") && continue   # skip header
+        parts = split(line, ","; limit=2)
+        isempty(parts) && continue
+        key = tryparse(Int, parts[1])
+        key === nothing && continue
+        push!(get!(grouped, key, String[]), line)
+    end
+
+    println(tee, "=" ^ {width})
+    println(tee, "{Summary Title}")
+    println(tee, "=" ^ {width})
+
+    # --- Print table header ---
+    @printf(tee, "%-5s %-14s %4s %4s  %8s  %10s  %10s\n",
+            "ID", "Name", "n", "m", "success", "med_iters", "med_v")
+    println(tee, "-" ^ {width})
+
+    # --- Aggregate each group ---
+    summary_rows = []
+    for key in sort(collect(keys(grouped)))
+        lines = grouped[key]
+
+        # Parse fields, compute statistics (median, IQR, counts)
+        # ... project-specific aggregation logic ...
+
+        # Print row
+        # Push to summary_rows
+    end
+
+    println(tee, "-" ^ {width})
+
+    # --- Write summary CSV ---
+    summary_csv_path = joinpath(results_dir, "{prefix}_summary.csv")
+    open(summary_csv_path, "w") do io
+        println(io, SUMMARY_HEADER)
+        for s in summary_rows
+            @printf(io, "{format_string}\n", {fields}...)
         end
     end
 
-    n_skip = length(completed)
-    @printf(tee, "Resume: %d problems already done, %d remaining\n",
-            n_skip, length(prob_ids) - n_skip)
+    println(tee, "\nSummary saved to: $summary_csv_path")
+    teardown_logging(tee, logpath)
+    exit(0)
 end
 ```
 
-## CSV I/O Pattern
+---
 
-### Constants
+## 10. Resume Support
+
+Read existing CSV to determine what's already done. Two variants:
+
+**Variant A: Resume by problem ID** (for multi-start scripts where each problem has N rows)
 ```julia
-const RAW_HEADER = "prob_id,prob_name,n,m,start_idx,start_type,status,iters,f_evals,g_evals,v_final,time_s,F_values"
-const SUMMARY_HEADER = "prob_id,prob_name,n,m,n_starts,n_optimal,success_rate,median_iters,median_fevals,median_time,median_v"
-```
+completed = Set{Int}()
 
-### Writing with Immediate Flush
-```julia
-raw_io = open(raw_csv_path, do_resume ? "a" : "w")
-if !do_resume
-    println(raw_io, RAW_HEADER)
-end
-
-# Inside solve loop:
-@printf(raw_io, "%d,%s,%d,%d,%d,%s,%s,%d,%d,%d,%.10e,%.6f,%s\n",
-        prob_id, name, n, m, start_idx, start_type,
-        result.status, result.iterations, result.f_evals, result.g_evals,
-        result.stationarity, result.time_seconds, F_str)
-flush(raw_io)   # CRITICAL: flush after every row (resume-safe)
-```
-
-### Summary Aggregation
-```julia
-function summarize_results(raw_path, summary_path, tee)
-    # Group rows by problem ID
+if do_resume && isfile(raw_csv_path)
     prob_lines = Dict{Int, Vector{String}}()
-    for line in eachline(raw_path)
-        startswith(line, "prob_id") && continue
-        parts = split(line, ",")
-        pid = parse(Int, parts[1])
+    all_lines = String[]
+    for line in eachline(raw_csv_path)
+        startswith(line, "{first_col}") && continue
+        push!(all_lines, line)
+        parts = split(line, ","; limit=2)
+        isempty(parts) && continue
+        pid = tryparse(Int, parts[1])
+        pid === nothing && continue
         push!(get!(prob_lines, pid, String[]), line)
     end
 
-    # Compute per-problem statistics
-    for pid in sort(collect(keys(prob_lines)))
-        lines = prob_lines[pid]
-        statuses = [Symbol(split(l, ",")[7]) for l in lines]
-        n_optimal = count(==(":optimal"), statuses)
-        # ... compute median, IQR, etc. ...
+    expected = {expected_rows_per_problem}
+    partial = Set{Int}()
+    for (pid, lines) in prob_lines
+        if length(lines) >= expected
+            push!(completed, pid)
+        else
+            push!(partial, pid)
+        end
+    end
+
+    # Rewrite CSV without partial rows (they'll be re-run cleanly)
+    if !isempty(partial)
+        println(tee, "RESUME: Removing $(length(partial)) partial problem(s)")
+        open(raw_csv_path, "w") do io
+            println(io, RAW_HEADER)
+            for line in all_lines
+                parts = split(line, ","; limit=2)
+                pid = tryparse(Int, parts[1])
+                pid === nothing && continue
+                pid in completed && println(io, line)
+            end
+        end
+    end
+
+    if !isempty(completed)
+        println(tee, "RESUME: $(length(completed)) completed, skipping")
     end
 end
 ```
 
-## TeeIO Logging Pattern
+**Variant B: Resume by (key1, key2) pair** (for ablation/parameter sweep scripts)
 ```julia
-# Setup at script start
-logpath, tee, logfile = setup_logging("experiment_name")
+completed_pairs = Set{Tuple{Int, Float64}}()
 
-# All output goes to both console AND log file
-println(tee, "Starting experiment...")
-@printf(tee, "Problem %d: %s (n=%d, m=%d)\n", id, name, n, m)
-
-# Detailed errors go to log file only
-@printf(logfile, "  [ERROR] prob %d: %s\n", id, sprint(showerror, ex))
-
-# Teardown at script end
-teardown_logging(tee, logpath)
+if do_resume && isfile(raw_csv_path)
+    for line in eachline(raw_csv_path)
+        startswith(line, "{first_col}") && continue
+        fields = split(line, ",")
+        length(fields) >= {min_fields} || continue
+        k1 = tryparse(Int, fields[{col_idx_1}])
+        k2 = tryparse(Float64, fields[{col_idx_2}])
+        (k1 === nothing || k2 === nothing) && continue
+        push!(completed_pairs, (k1, k2))
+    end
+    if !isempty(completed_pairs)
+        println(tee, "RESUME: $(length(completed_pairs)) completed pairs, skipping")
+    end
+end
 ```
 
-## Progress Bar Pattern
+---
+
+## 11. Main Loop Banner
+
+Print experiment configuration before the solve loop.
+
+```julia
+println(tee, "=" ^ {width})
+println(tee, "{Experiment Title}")
+println(tee, "=" ^ {width})
+println(tee, "Parameters: {param_summary}")
+println(tee, "Problems: $(prob_ids)")
+println(tee, "Resume: $(do_resume ? "enabled ($(length(completed)) done)" : "disabled")")
+println(tee)
+```
+
+---
+
+## 12. CSV File Opening
+
+Open raw CSV in append mode (resume) or write mode (fresh).
+
+```julia
+if do_resume && !isempty(completed)
+    raw_io = open(raw_csv_path, "a")
+else
+    raw_io = open(raw_csv_path, "w")
+    println(raw_io, RAW_HEADER)
+end
+```
+
+---
+
+## 13. Formatted Output Table Header
+
+Aligned column headers for console output.
+
+```julia
+println(tee, "-" ^ {width})
+@printf(tee, "%-5s %-14s %4s %4s  %8s  %10s  %10s  %8s\n",
+        "ID", "Name", "n", "m", "success", "med_iters", "med_v", "elapsed")
+println(tee, "-" ^ {width})
+```
+
+---
+
+## 14. ProgressMeter
+
+Progress bar for inner loops (e.g., multiple starts per problem).
+
 ```julia
 using ProgressMeter
 
@@ -182,7 +351,7 @@ prog = Progress(n_total;
     desc  = @sprintf("  Prob %2d %-14s ", prob_id, name),
     barlen = 30,
     showspeed = true,
-    enabled = !verbose)   # Disable when verbose (avoids conflict with per-iter output)
+    enabled = !verbose)   # disable when verbose (avoids conflict)
 
 for (idx, item) in enumerate(items)
     # ... solve ...
@@ -195,146 +364,263 @@ end
 finish!(prog)
 ```
 
-## Output Formatting
-```julia
-# Printf-based column alignment
-@printf(tee, "%-5s %-14s %4s %4s  %8s  %10s  %10s  %10s\n",
-        "ID", "Name", "n", "m", "success", "med_iters", "med_v", "time")
-println(tee, "-" ^ 80)
+---
 
-for row in results
-    @printf(tee, "%-5d %-14s %4d %4d  %3d/%3d   %10.0f  %10.2e  %10.3f\n",
-            row.id, row.name, row.n, row.m,
-            row.n_ok, row.n_total, row.med_iters, row.med_v, row.med_time)
+## 15. Random Feasible Starting Points
+
+Generate random points inside the feasible set.
+
+```julia
+"""
+    random_feasible_point(K, n, rng)
+
+Generate a uniformly random point in the feasible set K.
+"""
+function random_feasible_point(K, n::Int, rng::AbstractRNG)
+    if K isa LazySets.Hyperrectangle
+        lb = LazySets.low(K)
+        ub = LazySets.high(K)
+        return lb .+ (ub .- lb) .* rand(rng, n)
+    elseif K isa LazySets.HPolytope
+        # Simplex: Dirichlet(1,...,1) via exponential variates
+        raw = -log.(rand(rng, n))
+        return raw ./ sum(raw)
+    else
+        # Fallback: bounding box
+        box = LazySets.overapproximate(K, LazySets.Hyperrectangle)
+        lb = LazySets.low(box)
+        ub = LazySets.high(box)
+        return lb .+ (ub .- lb) .* rand(rng, n)
+    end
 end
-println(tee, "=" ^ 80)
 ```
 
-## Elapsed Time Formatting
+Adapt the function signature and set types to the project. If not using LazySets, use the project's feasible set representation.
+
+---
+
+## 16. Try-Catch Per Solve
+
+Wrap each solve in try-catch. Write error rows to CSV.
+
 ```julia
-elapsed_str = if elapsed < 60
-    @sprintf("%.0fs", elapsed)
-elseif elapsed < 3600
-    @sprintf("%.1fm", elapsed / 60)
-else
-    @sprintf("%.1fh", elapsed / 3600)
+try
+    result = {solve_function}(...)
+
+    # Process result by status
+    if result.status == :optimal
+        n_ok += 1
+    elseif result.status == :maxiter
+        n_maxiter += 1
+    elseif result.status == :linesearch_failed
+        n_lsfail += 1
+    end
+
+    # Write raw CSV row and flush
+    @printf(raw_io, "{format}\n", {fields}...)
+    flush(raw_io)
+catch ex
+    n_error += 1
+    @printf(raw_io, "{error_format}\n", {error_fields}...)
+    flush(raw_io)
+    @printf(logfile, "  [ERROR] prob %d: %s\n", id, sprint(showerror, ex))
 end
 ```
 
-## Main Loop Structure
+---
+
+## 17. Per-Iteration History Recording
+
+Save convergence data for later figure generation.
+
+```julia
+# In the solve call, enable history recording:
+result = {solve_function}(...; record_history=true)
+
+# After solve, write history CSV:
+if !isempty(result.history)
+    param_str = replace(@sprintf("%.2f", param_val), "." => "p")
+    hfile = joinpath(hist_dir, "hist_$(id)_param$(param_str).csv")
+    open(hfile, "w") do io
+        println(io, "iter,{metric_name},{other_metric}")
+        for h in result.history
+            @printf(io, "%d,%.10e,%.10e\n", h.iter, h.metric, h.other)
+        end
+    end
+end
+```
+
+---
+
+## 18. Elapsed Time Formatting
+
+Human-readable elapsed time string.
+
+```julia
+function format_elapsed(elapsed)
+    if elapsed < 60
+        return @sprintf("%.0fs", elapsed)
+    elseif elapsed < 3600
+        return @sprintf("%.1fm", elapsed / 60)
+    else
+        return @sprintf("%.1fh", elapsed / 3600)
+    end
+end
+```
+
+---
+
+## 19. Main Loop Structure
+
+The overall loop pattern. Compose with the blocks above.
+
 ```julia
 t_script_start = time()
 n_done = 0
 
 for prob_id in prob_ids
+    # Resume: skip completed
     if prob_id in completed
-        @printf(tee, "  [SKIP] prob %d (already done)\n", prob_id)
+        @printf(tee, "%-5d (SKIPPED)\n", prob_id)
         continue
     end
 
-    prob, F, JF = get_problem(prob_id)
+    # Load problem
+    {prob, F, JF = get_problem(prob_id)}
     t_prob = time()
 
     # Configure
-    cfg = AlgorithmConfig(
+    cfg = {ConfigType}(
         ε = get_ε(prob.n),
         maxiter = get_maxiter(prob.n),
-        verbose = verbose,
     )
 
-    # Generate starting points
-    starts = generate_starts(prob, N_STARTS, RNG_SEED)
-
-    # Solve loop
-    for (start_idx, (x0, start_type)) in enumerate(starts)
-        try
-            result = solve(F, JF, x0; cfg=cfg)
-            # Write CSV row + flush
-        catch ex
-            # Log error + write error row + flush
-        end
+    # Inner loop (starts, parameter values, etc.)
+    n_ok = 0; n_error = 0
+    for (idx, item) in enumerate(items)
+        # ... try-catch solve block ...
     end
 
+    # Per-problem summary line
+    prob_elapsed = time() - t_prob
     n_done += 1
-    @printf(tee, "  Done (%s)\n", elapsed_str)
+    @printf(tee, "%-5d %-14s %4d %4d  %3d/%3d   %8s\n",
+            prob_id, name, n, m, n_ok, n_total, format_elapsed(prob_elapsed))
 end
 
-total_elapsed = time() - t_script_start
-@printf(tee, "\nComplete: %d problems in %s\n", n_done, format_elapsed(total_elapsed))
-
 close(raw_io)
+println(tee, "-" ^ {width})
+total_elapsed = time() - t_script_start
+@printf(tee, "\nDone. %d problems in %s\n", n_done, format_elapsed(total_elapsed))
+```
+
+---
+
+## 20. Teardown
+
+Always at the end of the script.
+
+```julia
+println(tee, "Raw results: $raw_csv_path")
+println(tee, "\nRun with --summary to generate aggregated report.")
+println(tee, "=" ^ {width})
 teardown_logging(tee, logpath)
 ```
 
-## Adaptive Parameters
+---
+
+## 21. Figure Script Pattern
+
+Minimal structure for figure generation scripts. No ARGS, no TeeIO.
+
 ```julia
-# Tolerance and iteration limits based on problem dimension
-get_ε(n)       = n >= 50 ? 1e-2 : 1e-4
-get_maxiter(n) = n >= 50 ? 10000 : 5000
-```
+using Plots
+using Printf
+using LaTeXStrings
 
-## Multi-Parameter Experiments (Ablation Pattern)
-```julia
-const PARAM_VALUES = [0.0, 0.25, 0.50, 0.75]
+# Backend selection
+gr()          # or: pgfplotsx() for LaTeX-native PDF
 
-for id in prob_ids
-    for param_val in PARAM_VALUES
-        if (id, param_val) in completed
-            continue  # Resume: skip done pairs
-        end
+# ============================================================================
+# Configuration
+# ============================================================================
 
-        cfg = AlgorithmConfig(param = param_val, ε = get_ε(prob.n))
-        result = solve(F, JF, x0; cfg=cfg)
+const DATA_DIR = joinpath(@__DIR__, "..", "results", "{data_source}")
+const FIGS_DIR = joinpath(@__DIR__, "..", "results", "figures")
+mkpath(FIGS_DIR)
+const OUTPUT_PATH = joinpath(FIGS_DIR, "{figure_name}.pdf")
 
-        # Write CSV: include param_val as column
-        @printf(raw_io, "%d,%s,%.6f,%s,%d,...\n", id, name, param_val, result.status, ...)
-        flush(raw_io)
+# Plot styling
+const STYLES = [:solid, :dash, :dashdot, :dot]
+const COLORS = [:royalblue, :firebrick, :forestgreen, :darkorange]
 
-        # Optional: write per-iteration history
-        if !isempty(result.history)
-            param_str = replace(@sprintf("%.2f", param_val), "." => "p")
-            hfile = joinpath(hist_dir, "hist_$(id)_param$(param_str).csv")
-            open(hfile, "w") do io
-                println(io, "iter,stationarity,step_size,F_values")
-                for h in result.history
-                    @printf(io, "%d,%.10e,%.10e,%s\n", h.iter, h.v, h.τ, join(h.Fx, ";"))
-                end
-            end
-        end
-    end
+# ============================================================================
+# Read data
+# ============================================================================
+
+function read_data(path)
+    # Read CSV, return arrays for plotting
 end
+
+# ============================================================================
+# Build figure
+# ============================================================================
+
+subplots = []
+for (id, name) in PROBLEMS
+    p = plot(;
+        xlabel = "{x_label}",
+        ylabel = "{y_label}",
+        title = name,
+        yscale = :log10,          # if appropriate
+        legend = :topright,
+        legendfontsize = 7,
+        titlefontsize = 10,
+        guidefontsize = 9,
+        tickfontsize = 8,
+        grid = true,
+        framestyle = :box,
+    )
+
+    for (i, variant) in enumerate(variants)
+        # Read and plot data
+        plot!(p, xs, ys;
+            label = labels[i],
+            color = COLORS[i],
+            linestyle = STYLES[i],
+            linewidth = 1.5,
+        )
+    end
+    push!(subplots, p)
+end
+
+fig = plot(subplots...;
+    layout = (1, length(subplots)),
+    size = (400 * length(subplots), 350),
+    left_margin = 5Plots.mm,
+    bottom_margin = 5Plots.mm,
+)
+
+savefig(fig, OUTPUT_PATH)
+println("Saved: $OUTPUT_PATH")
 ```
 
-## Figure Generation Pattern
+---
+
+## 22. Shifted Geometric Mean
+
+Aggregation metric that reduces influence of very small values. Used in OAT/LHS scripts.
+
 ```julia
-using Plots; pgfplotsx()  # or gr() for quick preview
+"""
+    shifted_geom_mean(vals, shift)
 
-function make_convergence_figure(hist_dir, output_path)
-    problems = [("Problem A", 1), ("Problem B", 2), ("Problem C", 3)]
-    params = [0.0, 0.25, 0.50, 0.75]
-    styles = [:solid, :dash, :dot, :dashdot]
-
-    plots = []
-    for (name, id) in problems
-        p = plot(; xlabel="Iteration", ylabel="|v(x_k)|",
-                 yscale=:log10, legend=:topright, title=name)
-
-        for (j, param) in enumerate(params)
-            param_str = replace(@sprintf("%.2f", param), "." => "p")
-            hfile = joinpath(hist_dir, "hist_$(id)_param$(param_str).csv")
-            isfile(hfile) || continue
-
-            data = readdlm(hfile, ','; header=true)[1]
-            iters = Int.(data[:, 1])
-            vals  = abs.(data[:, 2])
-
-            plot!(p, iters, vals; label="param=$param", ls=styles[j], lw=1.5)
-        end
-        push!(plots, p)
-    end
-
-    fig = plot(plots...; layout=(1, length(plots)), size=(400*length(plots), 300))
-    savefig(fig, output_path)
-    println("Saved: $output_path")
+SGM(x; s) = (∏(xᵢ + s))^{1/n} - s
+"""
+function shifted_geom_mean(vals::Vector{Float64}, shift::Float64)
+    isempty(vals) && return NaN
+    n = length(vals)
+    log_sum = sum(log(v + shift) for v in vals)
+    return exp(log_sum / n) - shift
 end
 ```
