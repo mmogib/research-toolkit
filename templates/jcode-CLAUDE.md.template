@@ -9,55 +9,55 @@ jcode/
 ├── Project.toml           # Dependencies
 ├── CLAUDE.md              # This file
 ├── src/
-│   ├── ModuleName.jl      # Main module (includes + exports)
-│   ├── types.jl           # Type definitions, config structs, result types
-│   ├── [core files]       # Algorithm implementation files
-│   ├── utils.jl           # Utilities
-│   ├── io_utils.jl        # TeeIO logging, file export
-│   └── problems.jl        # Test problem definitions
+│   ├── includes.jl        # Entry point (defines JCODE_ROOT, include order)
+│   ├── deps.jl            # Centralized package imports
+│   ├── types.jl           # SolverResult, IterRecord, make_result
+│   ├── io_utils.jl        # TeeIO logging (setup_logging, teardown_logging)
+│   ├── benchmark.jl       # DB infrastructure (open_db, config hash, CRUD)
+│   ├── [algorithm].jl     # Main algorithm implementation
+│   ├── problems_nle.jl    # Nonlinear equations test problems
+│   └── [other domain].jl  # Optional: problems_cs.jl, problems_imgrec.jl
 ├── test/
-│   └── runtests.jl        # Test suite
-├── results/               # Output directory
-│   ├── logs/              # Auto-generated log files
-│   └── [experiment dirs]  # Per-experiment output
+│   └── runtests.jl        # Test suite (Style A)
+├── results/
+│   ├── experiments.db     # SQLite: all experiment data
+│   ├── logs/              # TeeIO log files
+│   └── figures/           # Generated plots and LaTeX tables
 └── scripts/
-    ├── s10_[verify].jl    # Verification (gradients, etc.)
-    ├── s20_[basic].jl     # Basic algorithm runner
-    ├── s35_[oat].jl       # OAT parameter screening
-    ├── s40_[lhs].jl       # LHS parameter search
-    ├── s45_[benchmark].jl # Multi-start benchmark
-    ├── s50_[ablation].jl  # Ablation study
-    └── s70_[figures].jl   # Figure generation
+    ├── s01_smoke_test.jl  # Verify solvers + config hash uniqueness
+    ├── s10_oat.jl         # OAT sensitivity (if needed)
+    ├── s20_lhs.jl         # LHS parameter search (if needed)
+    ├── s30_benchmark.jl   # Full benchmark: methods × problems × dims × inits
+    └── s70_figures.jl     # Performance profiles, convergence, LaTeX tables
 ```
 
+## Storage Backend
+- **SQLite** (`results/experiments.db`): content-addressable config hashing, skip-by-default, `--export` for CSV.
+- All scripts share the same DB. Config hashes ensure different parameter sets never collide.
+
+## Solver Interface Contract
+Every solver must:
+1. Return a `SolverResult` (from `types.jl`)
+2. Accept `track::Bool=false` and `callback=nothing` keywords
+3. Declare `const {SOLVER}_VERSION = "1.0.0"` and `const {SOLVER}_DEFAULTS = (...)`
+
 ## Dependencies
-- **JuMP** + **HiGHS**: [LP/QP solver purpose]
-- **LazySets**: [Feasible set representations]
-- **LinearAlgebra**, **Printf**, **Random**: Standard library
+- **SQLite**, **SHA**, **DBInterface**, **JSON3**: Experiment database
+- **DataFrames**, **CSV**: Data export and summary
+- **ProgressMeter**: Progress bars in benchmark scripts
+- **LinearAlgebra**, **Printf**, **Random**, **Statistics**, **Dates**: Standard library
+- Scripts only: **Plots**, **LaTeXStrings**, **BenchmarkProfiles** (for s70)
 
 ## Running Scripts
 ```bash
 cd jcode
-julia --project=. scripts/s10_[verify].jl               # verify gradients
-julia --project=. scripts/s20_[basic].jl --all           # run on all problems
-julia --project=. scripts/s45_[benchmark].jl --all --resume  # benchmark (resume-safe)
-julia --project=. scripts/s45_[benchmark].jl --summary   # generate summary
-julia --project=. test/runtests.jl                        # run tests
-```
-
-## Usage (REPL)
-```julia
-push!(LOAD_PATH, "src")
-using ModuleName
-
-prob, F, JF = get_problem(1)
-cfg = AlgorithmConfig(maxiter=1000, ε=1e-6, verbose=true)
-result = solve(F, JF, prob.x0; cfg=cfg)
-```
-
-## Type Hierarchy
-```
-[Document your type hierarchy here]
+julia --project=. scripts/s01_smoke_test.jl                     # verify setup
+julia --project=. scripts/s30_benchmark.jl --all                # full run (skips done)
+julia --project=. scripts/s30_benchmark.jl --all --force        # re-run everything
+julia --project=. scripts/s30_benchmark.jl --quick              # dev subset
+julia --project=. scripts/s30_benchmark.jl --summary            # aggregate stats
+julia --project=. scripts/s30_benchmark.jl --export             # dump to CSV
+julia --project=. scripts/s70_figures.jl --all                  # profiles + tables
 ```
 
 ## Key Design Decisions
@@ -67,8 +67,8 @@ result = solve(F, JF, prob.x0; cfg=cfg)
 ## Rules
 - **DO NOT run Julia scripts.** Mohammed runs scripts locally. Only create/edit scripts.
 - Tests (`runtests.jl`) may be run to verify code changes.
+- Scripts skip completed runs by default. Use `--force` to re-run.
 
 ## Status
 - [Current state: what works, what's pending]
-- [Number of tests passing]
 - [Experiments complete vs. pending]

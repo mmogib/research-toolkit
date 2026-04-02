@@ -1,239 +1,332 @@
 # ============================================================================
-# s45: Multi-Start Benchmark for [AlgorithmName]
+# s{NN}: Main Benchmark — all algorithms × problems × dims × inits
 # ============================================================================
 #
-# Goal:   Run [algorithm] on N problems × M starting points
-# Output: results/[experiment]/raw.csv, summary.csv
+# SQLite-backed, content-addressable, with selective history tracking.
+# Skip-by-default: completed (config_hash, problem, dim, init) combos are
+# skipped automatically. Use --force to override.
 #
 # Usage:
-#   julia --project=. scripts/s45_benchmark.jl --all              # all problems
-#   julia --project=. scripts/s45_benchmark.jl 3-11 --resume      # range, resume
-#   julia --project=. scripts/s45_benchmark.jl --summary           # post-process
-#   julia --project=. scripts/s45_benchmark.jl --all --verbose     # verbose output
+#   julia --project=. scripts/s{NN}_benchmark.jl --all                # full run
+#   julia --project=. scripts/s{NN}_benchmark.jl --all --force        # re-run all
+#   julia --project=. scripts/s{NN}_benchmark.jl --all --verbose      # progress bar
+#   julia --project=. scripts/s{NN}_benchmark.jl --quick              # dev subset
+#   julia --project=. scripts/s{NN}_benchmark.jl --problems=P1,P5     # subset
+#   julia --project=. scripts/s{NN}_benchmark.jl --dims=10000         # one dim
+#   julia --project=. scripts/s{NN}_benchmark.jl --methods={Algo1},{Algo2}
+#   julia --project=. scripts/s{NN}_benchmark.jl --summary            # print stats
+#   julia --project=. scripts/s{NN}_benchmark.jl --export             # CSV export
+#
+# Results: results/experiments.db
+# Log:     results/logs/benchmark_<timestamp>.log
 # ============================================================================
 
-# --- Load project code (adapt to your coding style) ---
-# Style A (Module):  push!(LOAD_PATH, joinpath(@__DIR__, "..", "src")); using ModuleName
-# Style B (Flat):    include(joinpath(@__DIR__, "..", "src", "includes.jl"))
-push!(LOAD_PATH, joinpath(@__DIR__, "..", "src"))
-using ModuleName
-using Printf, Random, Dates
+# --- Load project code ---
+# Style A: push!(LOAD_PATH, joinpath(@__DIR__, "..", "src")); using {ModuleName}
+# Style B:
+include(joinpath(@__DIR__, "..", "src", "includes.jl"))
 using ProgressMeter
 
-# ── Constants ───────────────────────────────────────────────────────────────
-const N_STARTS   = 50       # Random starting points per problem
-const RNG_SEED   = 42       # Reproducibility
-const TUNED_PARAM1 = 1e-4   # Tuned parameter (from OAT/LHS)
-const TUNED_PARAM2 = 0.5    # Tuned parameter
-
-const RAW_HEADER = "prob_id,prob_name,n,m,start_idx,start_type,status,iters,f_evals,g_evals,v_final,time_s,F_values"
-const SUMMARY_HEADER = "prob_id,prob_name,n,m,n_starts,n_optimal,success_rate,median_iters,median_fevals,median_time,median_v"
-
-# Adaptive tolerance
-get_ε(n)       = n >= 50 ? 1e-2 : 1e-4
-get_maxiter(n) = n >= 50 ? 10000 : 5000
-
-# Excluded problems (document reasons)
-const EXCLUDED = Set{Int}()  # e.g., Set([1, 12, 14])
-
-# ── ARGS Parsing ────────────────────────────────────────────────────────────
-flags = filter(a -> startswith(a, "-"), ARGS)
-ids   = filter(a -> !startswith(a, "-"), ARGS)
-
-verbose    = "--verbose" in flags
-do_resume  = "--resume" in flags
-do_summary = "--summary" in flags
-
-if "--all" in flags
-    prob_ids = collect(1:54)  # Adjust range
-elseif !isempty(ids)
-    prob_ids = Int[]
-    for s in ids
-        if contains(s, "-")
-            parts = split(s, "-")
-            append!(prob_ids, parse(Int, parts[1]):parse(Int, parts[2]))
-        else
-            push!(prob_ids, parse(Int, s))
-        end
-    end
-else
-    # Default: representative subset
-    prob_ids = [1, 5, 15, 24]
+# ── WorkItem (must be at top level — Julia requires struct outside function) ─
+struct WorkItem
+    method::String
+    config_hash::String
+    prob_id::Int
+    prob_str::String
+    dim::Int
+    init_label::String
+    x0::Vector{Float64}
+    track::Bool
 end
 
-# Remove excluded problems
-filter!(id -> id ∉ EXCLUDED, prob_ids)
+function main()
+    # ══════════════════════════════════════════════════════════════════════
+    # EXPERIMENT CONFIGURATION — single source of truth
+    # ══════════════════════════════════════════════════════════════════════
 
-# ── Output Setup ────────────────────────────────────────────────────────────
-results_dir = joinpath(@__DIR__, "..", "results", "benchmark")
-mkpath(results_dir)
+    const_eps = 1e-9
+    const_maxiter = 1000
 
-raw_csv_path     = joinpath(results_dir, "raw.csv")
-summary_csv_path = joinpath(results_dir, "summary.csv")
-
-logpath, tee, logfile = setup_logging("benchmark")
-
-println(tee, "=" ^ 90)
-println(tee, "Multi-Start Benchmark")
-println(tee, "Problems: $(length(prob_ids)), Starts: $(N_STARTS + 1) (1 default + $N_STARTS random)")
-println(tee, "=" ^ 90)
-
-# ── Summary Mode ────────────────────────────────────────────────────────────
-if do_summary
-    # Read raw CSV → aggregate → write summary CSV
-    if !isfile(raw_csv_path)
-        println(tee, "ERROR: raw CSV not found: $raw_csv_path")
-        teardown_logging(tee, logpath)
-        exit(1)
-    end
-
-    # Group rows by problem ID
-    prob_lines = Dict{Int, Vector{String}}()
-    for line in eachline(raw_csv_path)
-        startswith(line, "prob_id") && continue
-        parts = split(line, ","; limit=2)
-        pid = parse(Int, parts[1])
-        push!(get!(prob_lines, pid, String[]), line)
-    end
-
-    # Print header
-    @printf(tee, "\n%-5s %-14s %4s %4s  %8s  %10s  %10s  %10s  %10s\n",
-            "ID", "Name", "n", "m", "success", "med_iters", "med_fevals", "med_time", "med_v")
-    println(tee, "-" ^ 90)
-
-    # Compute per-problem statistics
-    summary_io = open(summary_csv_path, "w")
-    println(summary_io, SUMMARY_HEADER)
-
-    for pid in sort(collect(keys(prob_lines)))
-        lines = prob_lines[pid]
-        # Parse fields, compute statistics...
-        # @printf(tee, ...) for console output
-        # @printf(summary_io, ...) for CSV
-    end
-
-    close(summary_io)
-    println(tee, "\nSummary saved to: $summary_csv_path")
-    teardown_logging(tee, logpath)
-    exit(0)
-end
-
-# ── Resume Detection ────────────────────────────────────────────────────────
-completed = Set{Int}()
-
-if do_resume && isfile(raw_csv_path)
-    prob_counts = Dict{Int, Int}()
-    for line in eachline(raw_csv_path)
-        startswith(line, "prob_id") && continue
-        pid = parse(Int, split(line, ",")[1])
-        prob_counts[pid] = get(prob_counts, pid, 0) + 1
-    end
-
-    expected = N_STARTS + 1
-    for (pid, count) in prob_counts
-        if count >= expected
-            push!(completed, pid)
-        end
-    end
-
-    @printf(tee, "Resume: %d/%d problems already done\n",
-            length(completed), length(prob_ids))
-end
-
-# ── Main Solve Loop ─────────────────────────────────────────────────────────
-raw_io = open(raw_csv_path, do_resume ? "a" : "w")
-if !do_resume
-    println(raw_io, RAW_HEADER)
-end
-
-t_script = time()
-n_done = 0
-
-for prob_id in prob_ids
-    if prob_id in completed
-        @printf(tee, "  [SKIP] prob %d (resume)\n", prob_id)
-        continue
-    end
-
-    prob, F, JF = get_problem(prob_id)
-    t_prob = time()
-
-    # Configure
-    cfg = AlgorithmConfig(
-        # param1 = TUNED_PARAM1,
-        # param2 = TUNED_PARAM2,
-        ε = get_ε(prob.n),
-        maxiter = get_maxiter(prob.n),
-        verbose = verbose,
+    # Solver configs: name => (fn, version, params)
+    # The SAME NamedTuple `params` is hashed AND splatted to the solver.
+    # ── Adapt to your project's solvers ──────────────────────────────────
+    solvers = Dict(
+        # "AlgoName" => (
+        #     fn      = solve_algo,
+        #     version = ALGO_VERSION,
+        #     params  = ALGO_DEFAULTS,   # or tuned: (param1=0.5, param2=0.1)
+        # ),
     )
 
-    # Generate starting points
-    rng = Random.MersenneTwister(RNG_SEED)
-    n_starts_total = N_STARTS + 1
-    starts = [(prob.x0, "default")]
-    for i in 1:N_STARTS
-        x0_rand = rand(rng, prob.n)  # Adjust for feasible set
-        push!(starts, (x0_rand, "random"))
+    all_problems = ["P$id" for id in PROBLEM_IDS]
+    all_methods = collect(keys(solvers))
+
+    # Dimension tiers
+    dims_small = [1_000, 5_000, 10_000]
+    dims_mid   = [20_000, 50_000]
+    dims_large = [80_000, 100_000]
+    all_dims   = vcat(dims_small, dims_mid, dims_large)
+
+    # Selective history tracking: record per-iteration data for a subset
+    track_filter = (
+        problems = ["P1", "P5"],          # representative subset
+        dims     = [10_000, 100_000],     # one per tier
+        inits    = ["v1", "v3", "v7"],    # zero, unit, ramp
+        methods  = all_methods,
+    )
+
+    function should_track(method, prob, dim, init)
+        return prob in track_filter.problems &&
+               dim in track_filter.dims &&
+               init in track_filter.inits &&
+               method in track_filter.methods
     end
 
-    # Counters
-    n_ok = 0; n_maxiter = 0; n_lsfail = 0; n_error = 0
-    iters_ok = Float64[]
+    # ══════════════════════════════════════════════════════════════════════
+    # CLI PARSING
+    # ══════════════════════════════════════════════════════════════════════
 
-    prog = Progress(n_starts_total;
-        desc = @sprintf("  Prob %2d %-14s ", prob_id, prob.name),
-        barlen = 30, showspeed = true, enabled = !verbose)
+    flags = Set{String}()
+    kv = Dict{String,String}()
+    for a in ARGS
+        if startswith(a, "--") && contains(a, "=")
+            k, v = split(a[3:end], "="; limit=2)
+            kv[k] = v
+        elseif startswith(a, "--")
+            push!(flags, a[3:end])
+        end
+    end
 
-    for (start_idx, (x0, start_type)) in enumerate(starts)
-        try
-            result = solve(F, JF, x0; cfg=cfg)
+    do_all     = "all" in flags
+    do_force   = "force" in flags
+    do_summary = "summary" in flags
+    do_export  = "export" in flags
+    do_verbose = "verbose" in flags
+    do_quick   = "quick" in flags
 
-            if result.status == :optimal
-                n_ok += 1
-                push!(iters_ok, result.iterations)
-            elseif result.status == :maxiter
-                n_maxiter += 1
-            else
-                n_lsfail += 1
+    # Selection (--quick overrides to a small subset)
+    sel_problems = haskey(kv, "problems") ? String.(split(kv["problems"], ",")) : all_problems
+    sel_methods  = haskey(kv, "methods") ? String.(split(kv["methods"], ",")) : all_methods
+
+    if do_quick
+        sel_dims = dims_small[1:1]
+        sel_problems = all_problems[1:min(3, length(all_problems))]
+    elseif haskey(kv, "dims")
+        sel_dims = [parse(Int, s) for s in split(kv["dims"], ",")]
+    elseif do_all
+        sel_dims = all_dims
+    else
+        sel_dims = Int[]
+    end
+
+    # ══════════════════════════════════════════════════════════════════════
+    # SETUP
+    # ══════════════════════════════════════════════════════════════════════
+
+    logpath, tee, logfile = setup_logging("benchmark")
+    db = open_db()
+    run_id = Dates.format(now(), "yyyyMMdd_HHMMss")
+
+    # ── Summary mode (early exit) ────────────────────────────────────────
+    if do_summary
+        print_summary(db, tee, all_methods)
+        teardown_logging(tee, logpath)
+        return
+    end
+
+    # ── Export mode (early exit) ─────────────────────────────────────────
+    if do_export
+        export_path = joinpath(JCODE_ROOT, "results", "benchmark_export.csv")
+        n = export_results_csv(db, export_path)
+        println(tee, "Exported $n rows to: $export_path")
+        teardown_logging(tee, logpath)
+        return
+    end
+
+    # ── Validate selection ───────────────────────────────────────────────
+    if isempty(sel_problems) || isempty(sel_dims) || isempty(sel_methods)
+        println(tee, "Nothing selected. Use --all or specify --problems=, --dims=, --methods=")
+        teardown_logging(tee, logpath)
+        return
+    end
+
+    if isempty(solvers)
+        println(tee, "NO SOLVERS CONFIGURED — add entries to the `solvers` dict")
+        teardown_logging(tee, logpath)
+        return
+    end
+
+    # ══════════════════════════════════════════════════════════════════════
+    # COMPUTE CONFIG HASHES + ENSURE IN DB
+    # ══════════════════════════════════════════════════════════════════════
+
+    solver_hashes = Dict{String,String}()
+    for (name, cfg) in solvers
+        name in sel_methods || continue
+        hash, hash_input = make_config_hash(name, cfg.version, cfg.params,
+                                            const_eps, const_maxiter)
+        solver_hashes[name] = hash
+        ensure_config!(db, hash, name, cfg.version, cfg.params,
+                      const_eps, const_maxiter, hash_input)
+    end
+
+    # ══════════════════════════════════════════════════════════════════════
+    # BUILD WORK LIST
+    # ══════════════════════════════════════════════════════════════════════
+
+    work = WorkItem[]
+    for dim in sel_dims
+        for pid in PROBLEM_IDS
+            prob_str = "P$pid"
+            prob_str in sel_problems || continue
+            for method in sel_methods
+                haskey(solver_hashes, method) || continue
+                hash = solver_hashes[method]
+                inits = get_initial_points(dim, pid)
+
+                for (init_label, x0) in inits
+                    track = should_track(method, prob_str, dim, init_label)
+
+                    # Skip-by-default logic (D14):
+                    # 1. --force → always run
+                    # 2. result exists, no tracking needed → skip
+                    # 3. result exists, tracking needed, history exists → skip
+                    # 4. result exists, tracking needed, no history → re-run
+                    # 5. no result → run
+                    if !do_force && is_done(db, hash, prob_str, dim, init_label)
+                        if track
+                            hist_check = DBInterface.execute(db,
+                                "SELECT 1 FROM history WHERE config_hash=? AND problem=? AND dimension=? AND init_point=? LIMIT 1",
+                                (hash, prob_str, dim, init_label)) |> DataFrame
+                            nrow(hist_check) > 0 && continue
+                        else
+                            continue
+                        end
+                    end
+                    push!(work, WorkItem(method, hash, pid, prob_str, dim,
+                                        init_label, x0, track))
+                end
             end
+        end
+    end
 
-            F_str = join([@sprintf("%.10e", fi) for fi in result.Fx], ";")
-            @printf(raw_io, "%d,%s,%d,%d,%d,%s,%s,%d,%d,%d,%.10e,%.6f,%s\n",
-                    prob_id, prob.name, prob.n, prob.m,
-                    start_idx, start_type, result.status,
-                    result.iterations, result.f_evals, result.g_evals,
-                    result.stationarity, result.time_seconds, F_str)
-            flush(raw_io)
+    # ══════════════════════════════════════════════════════════════════════
+    # PRINT CONFIG
+    # ══════════════════════════════════════════════════════════════════════
 
-        catch ex
-            n_error += 1
-            @printf(raw_io, "%d,%s,%d,%d,%d,%s,error,0,0,0,NaN,0.0,\n",
-                    prob_id, prob.name, prob.n, prob.m, start_idx, start_type)
-            flush(raw_io)
-            @printf(logfile, "  [ERROR] prob %d, start %d: %s\n",
-                    prob_id, start_idx, sprint(showerror, ex))
+    println(tee, "=" ^ 75)
+    println(tee, "  Benchmark — $(Dates.now())")
+    println(tee, "=" ^ 75)
+    println(tee, "  Methods:  $(join(sel_methods, ", "))")
+    println(tee, "  Problems: $(length(sel_problems))")
+    println(tee, "  Dims:     $(join(sel_dims, ", "))")
+    println(tee, "  Total:    $(length(work)) runs")
+    n_track = count(w -> w.track, work)
+    println(tee, "  Tracked:  $n_track (with convergence history)")
+    println(tee, "  Force:    $do_force")
+    println(tee, "  Quick:    $do_quick")
+    println(tee, "  DB:       $(DB_PATH)")
+    println(tee)
+    for (name, cfg) in solvers
+        name in sel_methods || continue
+        println(tee, "  $name v$(cfg.version) [$(solver_hashes[name])]")
+    end
+    println(tee, "=" ^ 75)
+
+    if isempty(work)
+        println(tee, "Nothing to do — all runs already complete.")
+        teardown_logging(tee, logpath)
+        return
+    end
+
+    # ══════════════════════════════════════════════════════════════════════
+    # MAIN LOOP
+    # ══════════════════════════════════════════════════════════════════════
+
+    t_total = time()
+    n_done = 0; n_conv = 0; n_fail = 0
+
+    prog = do_verbose ?
+        Progress(length(work); barlen=40, showspeed=true, desc="  Running: ") :
+        nothing
+
+    for w in work
+        prob = get_problem(w.prob_id)
+        cfg = solvers[w.method]
+
+        # Build solver callback for progress bar
+        cb = nothing
+        if do_verbose && prog !== nothing
+            cb = (k::Int, metric::Float64, mi::Int) -> begin
+                ProgressMeter.update!(prog, n_done;
+                    showvalues=[
+                        (:done,    "$n_done/$(length(work))"),
+                        (:conv,    "$n_conv / $n_fail"),
+                        (:current, "$(w.method) $(w.prob_str) m=$(w.dim) $(w.init_label)"),
+                        (:iter,    @sprintf("k=%d/%d  metric=%.2e", k, mi, metric)),
+                    ])
+            end
         end
 
-        ProgressMeter.update!(prog, start_idx;
-            showvalues = [(:optimal, "$n_ok/$start_idx"), (:errors, n_error)])
+        # ── Run solver ───────────────────────────────────────────────────
+        result = try
+            cfg.fn(prob.F, prob.proj, copy(w.x0);
+                   cfg.params..., eps=const_eps, maxiter=const_maxiter,
+                   track=w.track, callback=cb)
+        catch e
+            make_result(converged=false, iterations=const_maxiter,
+                       f_evals=0, cpu_time=0.0, x=copy(w.x0), flag=:error)
+        end
+
+        # ── Update counters ──────────────────────────────────────────────
+        n_done += 1
+        result.converged ? (n_conv += 1) : (n_fail += 1)
+
+        # ── Save to DB ───────────────────────────────────────────────────
+        insert_result!(db, w.config_hash, w.prob_str, w.dim,
+                      w.init_label, run_id, result)
+        if w.track && !isempty(result.history)
+            insert_history!(db, w.config_hash, w.prob_str, w.dim,
+                           w.init_label, result.history)
+        end
+
+        # ── Progress / output ────────────────────────────────────────────
+        if prog !== nothing
+            ProgressMeter.update!(prog, n_done;
+                showvalues=[
+                    (:done,    "$n_done/$(length(work))"),
+                    (:conv,    "$n_conv / $n_fail"),
+                    (:current, "$(w.method) $(w.prob_str) m=$(w.dim) $(w.init_label)"),
+                    (:iter,    result.converged ? "CONVERGED" : string(result.flag)),
+                ])
+        end
+
+        if !do_verbose
+            status = result.converged ? "OK" : "FAIL"
+            @printf(tee, "  %-8s %-4s m=%-6d %-4s  %4s  IT=%-5d FE=%-5d  %.3fs\n",
+                    w.method, w.prob_str, w.dim, w.init_label,
+                    status, result.iterations, result.f_evals, result.cpu_time)
+        end
     end
-    finish!(prog)
 
-    prob_elapsed = time() - t_prob
-    elapsed_str = prob_elapsed < 60 ? @sprintf("%.0fs", prob_elapsed) :
-                  prob_elapsed < 3600 ? @sprintf("%.1fm", prob_elapsed/60) :
-                  @sprintf("%.1fh", prob_elapsed/3600)
+    prog !== nothing && finish!(prog)
 
-    @printf(tee, "  → %d/%d optimal, %d maxiter, %d lsfail, %d error  [%s]\n",
-            n_ok, n_starts_total, n_maxiter, n_lsfail, n_error, elapsed_str)
+    # ══════════════════════════════════════════════════════════════════════
+    # FINAL SUMMARY
+    # ══════════════════════════════════════════════════════════════════════
 
-    n_done += 1
+    elapsed = time() - t_total
+    println(tee)
+    println(tee, "-" ^ 75)
+    @printf(tee, "Done: %d runs in %.1fs (%.1f min)\n", length(work), elapsed, elapsed/60)
+    @printf(tee, "  Converged: %d   Failed: %d   Rate: %.1f%%\n",
+            n_conv, n_fail, 100 * n_conv / max(n_done, 1))
+    println(tee, "  DB: $(DB_PATH)")
+    println(tee, "-" ^ 75)
+    println(tee, "Run with --summary for aggregate statistics.")
+    println(tee, "Run with --export for CSV export.")
+
+    teardown_logging(tee, logpath)
 end
 
-close(raw_io)
-
-total_elapsed = time() - t_script
-@printf(tee, "\nComplete: %d problems in %.0fs (%.1f min)\n",
-        n_done, total_elapsed, total_elapsed / 60)
-
-teardown_logging(tee, logpath)
+main()

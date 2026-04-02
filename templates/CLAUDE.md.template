@@ -27,10 +27,10 @@ project-name/
 │       └── JOURNAL/          # e.g., AMC/, JCAM/, SIOPT/
 │           └── cover_letter.tex
 ├── jcode/                 # Julia implementation (see jcode/CLAUDE.md)
-│   ├── src/               # Source code
+│   ├── src/               # Source code (types, benchmark DB, problems, algorithm)
 │   ├── test/              # Tests
-│   ├── scripts/           # Numbered experiment scripts (s10_, s20_, ...)
-│   └── results/           # Output data (CSV, logs, figures)
+│   ├── scripts/           # Numbered experiment scripts (s01_, s30_, s70_, ...)
+│   └── results/           # experiments.db, logs/, figures/
 ├── notes/                 # Working notes
 │   └── done/              # Completed/archived notes
 └── refs/                  # Reference papers (PDFs)

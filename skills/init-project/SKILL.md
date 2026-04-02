@@ -55,29 +55,48 @@ Ask the user the following interactively using AskUserQuestion. Ask one group at
   - Style A: Code in `module ... end`, explicit exports, `@kwdef` configs, `@testset` tests. Best for reusable libraries, multiple algorithms, namespace isolation.
   - Style B: No module wrapper, `include("src/includes.jl")`, iterator protocol, preset system, multi-solver benchmarking. Best for single-algorithm, rapid prototyping, many variants.
 
-**Group 3 — Project scope (optional, can be filled later):**
+**Group 3 — Storage and problem domains:**
+- Storage backend: SQLite (default, recommended) or CSV-only?
+  - SQLite: single `experiments.db` file, content-addressable config hashing, queryable, `--export` for CSV output.
+  - CSV: manual file I/O, Set-based skip logic, backup before overwrite.
+- Problem domains (checklist — select all that apply):
+  - [ ] Nonlinear equations (monotone F(x) = 0 with projection) — copies `problems_nle.jl` starter
+  - [ ] Compressed sensing (sparse recovery via NCP) — copies `problems_cs.jl` starter
+  - [ ] Image restoration (blur + noise via NCP) — copies `problems_imgrec.jl` starter
+  - [ ] Other / custom (empty `problems.jl` with interface contract only)
+
+**Group 4 — Project scope (optional, can be filled later):**
 - Co-authors (names and emails), or use default (Mohammed only)?
 - Brief description of the core problem (one sentence) — or skip for now?
 
 ## Step 4: Read Templates
 
-Based on the chosen style, read the appropriate templates from the toolkit directory:
+Based on the chosen style and options, read the appropriate templates from the toolkit directory:
 
 **Always read:**
 - `templates/CLAUDE.md.template`
 - `templates/jcode-CLAUDE.md.template`
 - `templates/Project.toml.template`
-- `templates/main.tex.template` (LaTeX starter with preamble, theorem envs, boilerplate)
-- `templates/script_benchmark.jl` (for reference, not to copy verbatim)
+- `templates/main.tex.template` (LaTeX starter)
+- `templates/types_template.jl` (SolverResult, IterRecord, make_result)
+- `templates/script_smoke_test.jl`
 
 **Style A additionally:**
 - `templates/module_template.jl`
 - `templates/runtests.jl.template`
 
 **Style B additionally:**
-- `templates/includes_template.jl`
+- `templates/includes_template.jl` (has JCODE_ROOT)
 - `templates/deps_template.jl`
 - `templates/iterator_solver_template.jl`
+
+**If SQLite backend:**
+- `templates/benchmark_db_template.jl`
+
+**Per selected problem domain:**
+- Nonlinear equations: `templates/problems_nle_template.jl`
+- Compressed sensing: `templates/problems_cs_template.jl`
+- Image restoration: `templates/problems_imgrec_template.jl`
 
 ## Step 5: Generate Project Structure
 
@@ -94,10 +113,19 @@ Create the following directory tree:
 │   └── submissions/              ← One subfolder per journal (cover letters, responses)
 ├── jcode/
 │   ├── CLAUDE.md                 ← Populated from template + user answers
-│   ├── Project.toml              ← Populated with correct module name
-│   ├── src/                      ← Style-dependent starter files
+│   ├── Project.toml              ← Populated with correct module name + DB deps
+│   ├── src/
+│   │   ├── includes.jl           ← Style B entry point with JCODE_ROOT
+│   │   ├── deps.jl               ← Centralized dependencies (incl. SQLite if chosen)
+│   │   ├── types.jl              ← SolverResult, IterRecord, make_result
+│   │   ├── io_utils.jl           ← TeeIO, setup_logging, teardown_logging
+│   │   ├── benchmark.jl          ← DB infrastructure (if SQLite) or CSV helpers
+│   │   ├── problems_nle.jl       ← (if selected) nonlinear equations starter
+│   │   ├── problems_cs.jl        ← (if selected) compressed sensing starter
+│   │   ├── problems_imgrec.jl    ← (if selected) image restoration starter
+│   │   └── algorithm.jl          ← Style B: iterator solver template
 │   ├── scripts/
-│   │   └── s10_smoke_test.jl     ← Generic smoke test stub
+│   │   └── s01_smoke_test.jl     ← Smoke test with solver + hash checks
 │   ├── test/                     ← Style A: runtests.jl; Style B: empty
 │   └── results/
 │       └── logs/
@@ -122,31 +150,43 @@ Create the following directory tree:
 **jcode/Project.toml**:
 - Set `name` to the codename
 - Generate a UUID via Julia or leave as placeholder comment
-- Include standard dependencies (JuMP, HiGHS, LinearAlgebra, Printf, Random, Test)
-- Comment out optional deps (Ipopt, LazySets, Plots, ProgressMeter) with notes
+- Include standard dependencies (LinearAlgebra, Printf, Random, Statistics, Dates, Test)
+- If SQLite: add SQLite, SHA, DBInterface, JSON3, DataFrames, CSV, ProgressMeter
+- If CSV-only: add DataFrames, CSV, ProgressMeter
+- Comment out optional deps (Plots, LaTeXStrings, BenchmarkProfiles, LazySets) with notes
 
-**jcode/src/** (Style A):
+**jcode/src/** (both styles — always created):
+- `types.jl` — from `templates/types_template.jl` (SolverResult, IterRecord, make_result)
+- `io_utils.jl` — TeeIO implementation (from infrastructure-patterns.md)
+- Domain problem files — from selected templates (e.g., `problems_nle_template.jl`)
+
+**jcode/src/** (Style A additionally):
 - `{ModuleName}.jl` — module file with includes and exports (from template)
-- `types.jl` — empty file with header comment: `# Type definitions for {ModuleName}`
-- `problems.jl` — empty file with header comment
-- `utils.jl` — empty file with header comment
-- `io_utils.jl` — TeeIO implementation (copy from template, this is reusable as-is)
+  - Include types.jl, io_utils.jl, benchmark.jl, domain files
+  - Export SolverResult, make_result, setup_logging, teardown_logging, TeeIO, open_db, make_config_hash, etc.
 
-**jcode/src/** (Style B):
-- `includes.jl` — from template
-- `deps.jl` — from template
+**jcode/src/** (Style B additionally):
+- `includes.jl` — from `templates/includes_template.jl` (with JCODE_ROOT, correct include order)
+  - Uncomment the domain-specific includes matching the user's checklist
+- `deps.jl` — from `templates/deps_template.jl`
+  - If CSV-only: comment out SQLite, SHA, DBInterface, JSON3
 - `algorithm.jl` — iterator solver template (with TODOs marked)
-- `problems.jl` — empty file with header comment
-- `benchmark.jl` — empty file with header comment
+
+**jcode/src/benchmark.jl** (storage-dependent):
+- If SQLite: from `templates/benchmark_db_template.jl`
+- If CSV-only: create minimal file with CSV helpers (header writing, append, Set-based skip, backup)
 
 **refs/**:
 - Empty directory. Mohammed downloads reference papers (PDFs) here when Claude needs to consult them.
 - Workflow: Claude asks "Can you download [paper] into refs/?", Mohammed downloads it, Claude reads it with the Read tool.
 - Typical uses: verifying a cited formula, checking a proof technique, understanding a referenced algorithm.
 
-**jcode/scripts/s10_smoke_test.jl**:
-- Generic smoke test: load module/includes, run solver on first problem, print pass/fail
+**jcode/scripts/s01_smoke_test.jl**:
+- From `templates/script_smoke_test.jl`
 - Adapt load pattern to chosen style (Style A: `using`, Style B: `include`)
+- Wrapped in `main()`, with TeeIO logging
+- Includes Part 1 (solver convergence) and Part 2 (config hash uniqueness)
+- Solver list left empty with comment for user to fill in
 
 **jcode/test/runtests.jl** (Style A only):
 - From template, with module name filled in
@@ -157,11 +197,13 @@ After generating all files, print a summary:
 - List all files created (with full paths)
 - List any files skipped (because they already existed)
 - Remind the user of next steps:
-  1. Fill in the placeholder sections in CLAUDE.md
-  2. Define test problems in `jcode/src/problems.jl`
-  3. Implement the algorithm in `jcode/src/`
-  4. Start with `s10_smoke_test.jl` to verify basic functionality
-  5. If the toolkit was cloned fresh, consider customizing it
+  1. Run `julia --project=jcode/ -e 'import Pkg; Pkg.instantiate()'` to install dependencies
+  2. Fill in the placeholder sections in CLAUDE.md
+  3. Define test problems in the appropriate `problems_*.jl` file
+  4. Implement the algorithm in `jcode/src/algorithm.jl`
+  5. Add your solver to the `solvers` list in `s01_smoke_test.jl`
+  6. Run the smoke test to verify basic functionality
+  7. Use `/jcode-script` to create additional scripts (OAT, LHS, benchmark, figures)
 
 ## Important Rules
 - NEVER overwrite existing files. If a file exists, skip it and report that you skipped it.

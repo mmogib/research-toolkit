@@ -353,6 +353,56 @@ function Base.getproperty(r::AlgorithmResult, s::Symbol)
 end
 ```
 
+### Solver Interface Contract
+
+Every solver in a project must satisfy this contract so that scripts (benchmark, OAT, LHS, smoke test) can call them uniformly.
+
+**1. Return type**: Every solver must return a `SolverResult` (see `templates/types_template.jl`):
+```julia
+struct SolverResult
+    converged::Bool
+    iterations::Int
+    f_evals::Int
+    cpu_time::Float64
+    x::Vector{Float64}
+    flag::Symbol                # :converged, :maxiter, :linesearch_failed, :error
+    history::Vector{IterRecord} # empty if track=false
+    # + project-specific fields (residual, psnr, etc.)
+end
+```
+
+**2. Required keywords**: Every solver must accept these two keyword arguments:
+```julia
+function solve_myalgo(F, proj, x0; params..., eps, maxiter,
+                      track::Bool=false,       # record per-iteration history
+                      callback=nothing)        # live progress updates
+    # ...
+    # Inside main loop:
+    callback !== nothing && callback(k, norm_Fk, maxiter)
+    # ...
+    if track
+        push!(history, IterRecord(k, f_evals, time() - t0))
+    end
+end
+```
+
+**3. Version constant + defaults NamedTuple**: Every solver file must declare:
+```julia
+const MYALGO_VERSION  = "1.0.0"    # semver: bugfix→PATCH, logic→MINOR
+const MYALGO_DEFAULTS = (param1=0.5, param2=0.1, gamma=1.8)
+```
+- `VERSION` is included in the config hash (changing it invalidates old results).
+- `DEFAULTS` is the NamedTuple that is both hashed AND splatted to the solver.
+- Changing defaults does NOT require a version bump (params are in the hash).
+
+**4. `make_result` for error paths**: Use the keyword constructor from `types.jl`:
+```julia
+catch ex
+    result = make_result(converged=false, iterations=0, f_evals=0,
+                         cpu_time=0.0, x=copy(x0), flag=:error)
+end
+```
+
 ### Cone/Set Types
 ```julia
 abstract type ConeType end

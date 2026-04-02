@@ -18,7 +18,7 @@ Seven custom skills in `skills/` (discovered by Claude Code via symlinks from `~
 - `/math-research-writer` — Theorem/proof structure, LaTeX patterns, notation consistency
 - `/title-abstract` — Academic paper titles and abstracts (structure, examples, journal requirements)
 - `/init-project` — Interactive scaffolding for new research projects
-- `/jcode-script` — Experiment script generator with consistent patterns (ARGS, CSV, resume, TeeIO)
+- `/jcode-script` — Experiment script generator: type selection, SQLite/CSV backend, CLI flags, DB infrastructure
 - `/review-paper` — Paper review & polish checklist: 13-item universal checklist + project-specific items
 - `/suggest-journals` — Find suitable Q1–Q2 journals for publication
 
@@ -39,19 +39,45 @@ See `guides/coding-style.md` for full comparison and patterns.
 | `guides/latex-conventions.md` | Writing style, theorem environments, notation, cross-references, biblatex |
 
 ## Templates (Copy-Paste Starters)
+
+### Project scaffolding
 | Template | Style | Purpose |
 |----------|-------|---------|
 | `templates/main.tex.template` | Both | LaTeX starter (Palatino, biblatex, theorem envs, boilerplate) |
 | `templates/CLAUDE.md.template` | Both | Project-level CLAUDE.md for a new research project |
 | `templates/jcode-CLAUDE.md.template` | Both | Implementation subdirectory CLAUDE.md |
 | `templates/Project.toml.template` | Both | Julia project skeleton |
-| `templates/module_template.jl` | A | Module skeleton (includes, exports, type hierarchy) |
-| `templates/includes_template.jl` | B | Flat entry point with dependency-ordered includes |
-| `templates/deps_template.jl` | B | Centralized dependency management |
-| `templates/iterator_solver_template.jl` | B | Algorithm as struct + iterator protocol + presets |
-| `templates/script_benchmark.jl` | Both | Benchmark/experiment script with ARGS, CSV, resume, TeeIO |
-| `templates/script_figure.jl` | Both | Figure generation script skeleton |
 | `templates/runtests.jl.template` | A | Test suite skeleton |
+
+### Architecture templates (src/ files)
+| Template | Style | Purpose |
+|----------|-------|---------|
+| `templates/module_template.jl` | A | Module skeleton (includes, exports, type hierarchy) |
+| `templates/includes_template.jl` | B | Flat entry point with JCODE_ROOT, dependency-ordered includes |
+| `templates/deps_template.jl` | B | Centralized dependency management (stdlib + SQLite + DataFrames) |
+| `templates/types_template.jl` | Both | SolverResult, IterRecord, make_result + solver contract docs |
+| `templates/benchmark_db_template.jl` | Both | DB infrastructure: open_db, config hash, CRUD, export, summary |
+| `templates/iterator_solver_template.jl` | B | Algorithm as struct + iterator protocol + presets |
+
+### Problem domain templates (src/ files, selected per project)
+| Template | Domain | Purpose |
+|----------|--------|---------|
+| `templates/problems_nle_template.jl` | Nonlinear equations | TestProblem struct, projections, starting points with feasibility |
+| `templates/problems_cs_template.jl` | Compressed sensing | NCP reformulation, measurement model, recovery metrics |
+| `templates/problems_imgrec_template.jl` | Image restoration | Blur + BSNR noise, GPSR variable splitting, PSNR metrics |
+
+### Script templates
+| Template | Purpose |
+|----------|---------|
+| `templates/script_smoke_test.jl` | Verify all solvers + config hash uniqueness |
+| `templates/script_oat.jl` | OAT sensitivity: DB-backed, --quick, --summary, --force |
+| `templates/script_parameter_search.jl` | LHS parameter search: DB-backed, --quick, --summary |
+| `templates/script_benchmark.jl` | Full benchmark: SQLite, WorkItem, config hash, skip-by-default, --quick |
+| `templates/script_figures_tables.jl` | Performance profiles, convergence plots, LaTeX tables from DB |
+| `templates/script_figure.jl` | (Legacy) Simple figure generation skeleton |
+
+## Notes (Development Plans & Discussions)
+The `notes/` folder holds development discussions, design plans, and session findings for the toolkit itself. Completed/implemented notes are moved to `notes/done/`. These are internal development artifacts — not part of the toolkit that projects consume.
 
 ## Rules (Apply to All Projects)
 1. **Never run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
@@ -62,7 +88,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 6. **When presenting a plan**, always offer to save it as a note.
 7. **Minimize API round trips** — batch parallel reads, prefer Edit over Write for existing files.
 8. **Backup CSV data** before modifying (copy to `*_backup_YYYYMMDD.csv`).
-9. **Always include --resume** when suggesting multistart/long-running commands.
+9. **Scripts skip completed runs by default** — use `--force` to re-run. Always remind about `--force` when suggesting re-runs.
 10. **Avoid AI slop** — no "robust", "crucial", "comprehensive", "streamline", "leverage" in writing.
 11. **No named-paragraphs or excessive bold** in LaTeX writing.
 12. **Notes workflow** — plans and session findings go to `notes/`. Move completed notes to `notes/done/`.

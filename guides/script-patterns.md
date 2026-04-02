@@ -2,11 +2,15 @@
 
 Each section below is a self-contained code block. Compose them in order to build a complete script. Replace `{placeholders}` with project-specific values.
 
+**Storage backends**: Blocks marked **(DB)** use SQLite via `benchmark.jl`. Blocks marked **(CSV)** use manual CSV I/O. Blocks marked **(Both)** work with either. SQLite is the default for new projects.
+
+**All scripts must be wrapped in `main()`** — see Block 1b.
+
 ---
 
 ## 1. Header Comment Block
 
-Always included. Describes what the script does, where output goes, and how to run it.
+Always included. Describes what the script does, where output goes, and how to run it. Include the flags the script supports.
 
 ```julia
 # ============================================================================
@@ -14,14 +18,29 @@ Always included. Describes what the script does, where output goes, and how to r
 # ============================================================================
 #
 # Goal:   {One-line description of what this script does}
-# Output: {Where results go, e.g., results/experiment_name/raw.csv, summary.csv}
+# Output: {Where results go, e.g., results/experiments.db, results/figures/}
 #
 # Usage:
-#   julia --project=. scripts/s{NN}_{name}.jl                  # default subset
-#   julia --project=. scripts/s{NN}_{name}.jl --all            # all problems
-#   julia --project=. scripts/s{NN}_{name}.jl 3-11 --resume    # range, resume
-#   julia --project=. scripts/s{NN}_{name}.jl --summary        # post-process
+#   julia --project=. scripts/s{NN}_{name}.jl --all              # all problems
+#   julia --project=. scripts/s{NN}_{name}.jl --all --force      # re-run all
+#   julia --project=. scripts/s{NN}_{name}.jl --quick             # dev subset
+#   julia --project=. scripts/s{NN}_{name}.jl --summary           # print stats
+#   julia --project=. scripts/s{NN}_{name}.jl --export            # CSV export
+#   julia --project=. scripts/s{NN}_{name}.jl --problems=P1,P5    # subset
+#   julia --project=. scripts/s{NN}_{name}.jl --dims=10000        # one dim
 # ============================================================================
+```
+
+## 1b. `main()` Function Wrapping
+
+**Always included.** Every script wraps its body in `function main() ... end` to avoid Julia scoped-variable issues in newer versions. Place `main()` call at the very end.
+
+```julia
+function main()
+    # ... entire script body goes here ...
+end
+
+main()
 ```
 
 ---
@@ -41,23 +60,62 @@ include(joinpath(@__DIR__, "..", "src", "includes.jl"))
 using Printf, Statistics
 ```
 
-Add script-specific packages after the module/include line (e.g., `using ProgressMeter`, `using Plots`).
+Both styles make `JCODE_ROOT` available (defined in `includes.jl` or the module as `dirname(@__DIR__)`). Use `JCODE_ROOT` for all paths to `results/`, `src/`, etc.
+
+Add script-specific packages after the module/include line (e.g., `using ProgressMeter`, `using Plots`). Heavy packages (`Plots`, `BenchmarkProfiles`) go in scripts, not in `deps.jl`.
 
 ---
 
 ## 3. ARGS Parsing
 
-Standard pattern for flags and problem ID ranges.
+Standard pattern for boolean flags and key-value arguments.
+
+### 3a. Boolean + Key-Value Parsing (recommended)
 
 ```julia
 # --- Parse arguments ---
-flags = filter(a -> startswith(a, "-"), ARGS)
-ids   = filter(a -> !startswith(a, "-"), ARGS)
+flags = Set{String}()
+kv = Dict{String,String}()
+for a in ARGS
+    if startswith(a, "--") && contains(a, "=")
+        k, v = split(a[3:end], "="; limit=2)
+        kv[k] = v
+    elseif startswith(a, "--")
+        push!(flags, a[3:end])
+    end
+end
 
-verbose    = "--verbose" in flags
-do_resume  = "--resume" in flags      # include only if resume feature selected
-do_summary = "--summary" in flags     # include only if summary feature selected
+do_all     = "all" in flags
+do_force   = "force" in flags       # override skip-if-done
+do_summary = "summary" in flags     # print stats, then exit
+do_export  = "export" in flags      # CSV export, then exit
+do_verbose = "verbose" in flags     # progress bar with live info
+do_quick   = "quick" in flags       # reduced sweep for development
+```
 
+### 3b. Selection from Key-Value Args
+
+```julia
+# Defaults: all problems/methods. Dims requires --all or --dims=.
+sel_problems = haskey(kv, "problems") ? String.(split(kv["problems"], ",")) : all_problems
+sel_dims     = haskey(kv, "dims") ? [parse(Int, s) for s in split(kv["dims"], ",")] :
+               (do_all ? all_dims : Int[])
+sel_methods  = haskey(kv, "methods") ? String.(split(kv["methods"], ",")) : all_methods
+```
+
+### 3c. `--quick` Mode Override
+
+```julia
+if do_quick
+    sel_dims = dims_small[1:1]
+    sel_problems = all_problems[1:min(3, length(all_problems))]
+end
+```
+
+### 3d. Legacy: Problem ID Range Parsing (for simple scripts)
+
+```julia
+ids = filter(a -> !startswith(a, "-"), ARGS)
 if "--all" in flags
     prob_ids = collect(1:{N_PROBLEMS})
 elseif !isempty(ids)
@@ -71,18 +129,7 @@ elseif !isempty(ids)
         end
     end
 else
-    prob_ids = {DEFAULT_SUBSET}   # representative subset for quick testing
-end
-```
-
-**Optional: keyword overrides from flags**
-```julia
-for f in flags
-    if startswith(f, "--eps=")
-        global FIXED_ε = parse(Float64, split(f, "=")[2])
-    elseif startswith(f, "--maxiter=")
-        global FIXED_MAXITER = parse(Int, split(f, "=")[2])
-    end
+    prob_ids = {DEFAULT_SUBSET}
 end
 ```
 
@@ -158,24 +205,44 @@ const SUMMARY_HEADER = "{col1},{col2},{col3},..."
 
 ## 9. Summary Mode Block
 
-Two-mode pattern: `--summary` reads raw CSV and produces aggregated output, then exits. Place this BEFORE the main solve loop.
+Two-mode pattern: `--summary` queries existing results, prints stats, then exits. Place BEFORE the main solve loop.
+
+### 9a. DB Summary Mode (recommended)
 
 ```julia
-# ============================================================================
-# Summary mode: read raw CSV → generate summary
-# ============================================================================
+if do_summary
+    print_summary(db, tee, all_methods)   # from benchmark.jl
+    teardown_logging(tee, logpath)
+    return   # (inside main(), use return instead of exit)
+end
+```
 
+### 9b. `--export` Mode (DB → CSV)
+
+```julia
+if do_export
+    export_path = joinpath(JCODE_ROOT, "results", "{experiment}_export.csv")
+    n = export_results_csv(db, export_path)
+    println(tee, "Exported $n rows to: $export_path")
+    teardown_logging(tee, logpath)
+    return
+end
+```
+
+### 9c. CSV Summary Mode (legacy)
+
+```julia
 if do_summary
     if !isfile(raw_csv_path)
         println(tee, "ERROR: No raw CSV found at $raw_csv_path")
         teardown_logging(tee, logpath)
-        exit(1)
+        return
     end
 
     # Group raw lines by {grouping_key}
     grouped = Dict{Int, Vector{String}}()
     for line in eachline(raw_csv_path)
-        startswith(line, "{first_col_name}") && continue   # skip header
+        startswith(line, "{first_col_name}") && continue
         parts = split(line, ","; limit=2)
         isempty(parts) && continue
         key = tryparse(Int, parts[1])
@@ -183,114 +250,80 @@ if do_summary
         push!(get!(grouped, key, String[]), line)
     end
 
-    println(tee, "=" ^ {width})
-    println(tee, "{Summary Title}")
-    println(tee, "=" ^ {width})
+    # --- Aggregate + print ---
+    # ... project-specific aggregation logic ...
 
-    # --- Print table header ---
-    @printf(tee, "%-5s %-14s %4s %4s  %8s  %10s  %10s\n",
-            "ID", "Name", "n", "m", "success", "med_iters", "med_v")
-    println(tee, "-" ^ {width})
-
-    # --- Aggregate each group ---
-    summary_rows = []
-    for key in sort(collect(keys(grouped)))
-        lines = grouped[key]
-
-        # Parse fields, compute statistics (median, IQR, counts)
-        # ... project-specific aggregation logic ...
-
-        # Print row
-        # Push to summary_rows
-    end
-
-    println(tee, "-" ^ {width})
-
-    # --- Write summary CSV ---
-    summary_csv_path = joinpath(results_dir, "{prefix}_summary.csv")
-    open(summary_csv_path, "w") do io
-        println(io, SUMMARY_HEADER)
-        for s in summary_rows
-            @printf(io, "{format_string}\n", {fields}...)
-        end
-    end
-
-    println(tee, "\nSummary saved to: $summary_csv_path")
     teardown_logging(tee, logpath)
-    exit(0)
+    return
 end
 ```
 
 ---
 
-## 10. Resume Support
+## 10. Skip-by-Default + `--force` Override
 
-Read existing CSV to determine what's already done. Two variants:
+Scripts skip completed runs automatically. Use `--force` to re-run everything.
 
-**Variant A: Resume by problem ID** (for multi-start scripts where each problem has N rows)
+### 10a. DB Skip Logic (recommended)
+
+Used during work list construction. Each work item is checked against the DB.
+
 ```julia
-completed = Set{Int}()
+# Inside work list loop:
+if !do_force && is_done(db, config_hash, prob_str, dim, init_label)
+    continue   # already done, skip
+end
+push!(work, WorkItem(...))
+```
 
-if do_resume && isfile(raw_csv_path)
-    prob_lines = Dict{Int, Vector{String}}()
-    all_lines = String[]
-    for line in eachline(raw_csv_path)
-        startswith(line, "{first_col}") && continue
-        push!(all_lines, line)
-        parts = split(line, ","; limit=2)
-        isempty(parts) && continue
-        pid = tryparse(Int, parts[1])
-        pid === nothing && continue
-        push!(get!(prob_lines, pid, String[]), line)
-    end
+For runs with selective history tracking, check whether history exists too:
 
-    expected = {expected_rows_per_problem}
-    partial = Set{Int}()
-    for (pid, lines) in prob_lines
-        if length(lines) >= expected
-            push!(completed, pid)
-        else
-            push!(partial, pid)
-        end
-    end
-
-    # Rewrite CSV without partial rows (they'll be re-run cleanly)
-    if !isempty(partial)
-        println(tee, "RESUME: Removing $(length(partial)) partial problem(s)")
-        open(raw_csv_path, "w") do io
-            println(io, RAW_HEADER)
-            for line in all_lines
-                parts = split(line, ","; limit=2)
-                pid = tryparse(Int, parts[1])
-                pid === nothing && continue
-                pid in completed && println(io, line)
-            end
-        end
-    end
-
-    if !isempty(completed)
-        println(tee, "RESUME: $(length(completed)) completed, skipping")
+```julia
+if !do_force && is_done(db, hash, prob_str, dim, init_label)
+    if track
+        # Result exists but history might be missing
+        hist_check = DBInterface.execute(db,
+            "SELECT 1 FROM history WHERE config_hash=? AND problem=? AND dimension=? AND init_point=? LIMIT 1",
+            (hash, prob_str, dim, init_label)) |> DataFrame
+        nrow(hist_check) > 0 && continue   # both exist, skip
+    else
+        continue   # result exists, no tracking needed
     end
 end
 ```
 
-**Variant B: Resume by (key1, key2) pair** (for ablation/parameter sweep scripts)
-```julia
-completed_pairs = Set{Tuple{Int, Float64}}()
+### 10b. CSV Skip Logic
 
-if do_resume && isfile(raw_csv_path)
+Read existing CSV rows into a Set, skip matching keys.
+
+```julia
+completed = Set{Tuple{String, Int, String}}()  # (method, dim, init_label)
+
+if !do_force && isfile(raw_csv_path)
     for line in eachline(raw_csv_path)
-        startswith(line, "{first_col}") && continue
+        startswith(line, "{first_col}") && continue   # skip header
         fields = split(line, ",")
         length(fields) >= {min_fields} || continue
-        k1 = tryparse(Int, fields[{col_idx_1}])
-        k2 = tryparse(Float64, fields[{col_idx_2}])
-        (k1 === nothing || k2 === nothing) && continue
-        push!(completed_pairs, (k1, k2))
+        key = (fields[1], parse(Int, fields[3]), fields[4])
+        push!(completed, key)
     end
-    if !isempty(completed_pairs)
-        println(tee, "RESUME: $(length(completed_pairs)) completed pairs, skipping")
+    if !isempty(completed)
+        println(tee, "Skipping $(length(completed)) completed runs (use --force to re-run)")
     end
+end
+```
+
+### 10c. CSV Backup (before overwrite)
+
+When using CSV and about to overwrite, back up first.
+
+```julia
+if isfile(raw_csv_path)
+    backup_dir = joinpath(results_dir, "backup")
+    mkpath(backup_dir)
+    ts = Dates.format(now(), "yyyymmdd_HHMMss")
+    cp(raw_csv_path, joinpath(backup_dir, "raw_$(ts).csv"))
+    println(tee, "Backed up existing CSV → backup/raw_$(ts).csv")
 end
 ```
 
@@ -529,9 +562,9 @@ teardown_logging(tee, logpath)
 
 ---
 
-## 21. Figure Script Pattern
+## 21. Figure Script Pattern (Legacy)
 
-Minimal structure for figure generation scripts. No ARGS, no TeeIO.
+Minimal structure for simple figure scripts. For the full DB-backed figures+tables pattern, see `templates/script_figures_tables.jl`.
 
 ```julia
 using Plots
@@ -622,5 +655,205 @@ function shifted_geom_mean(vals::Vector{Float64}, shift::Float64)
     n = length(vals)
     log_sum = sum(log(v + shift) for v in vals)
     return exp(log_sum / n) - shift
+end
+```
+
+---
+
+## 23. Config Hashing (DB)
+
+Content-addressable experiment IDs. The SAME NamedTuple is hashed AND splatted to the solver — zero divergence.
+
+```julia
+# In the script's EXPERIMENT CONFIGURATION section:
+solvers = Dict(
+    "AlgoName" => (
+        fn      = solve_algo,
+        version = ALGO_VERSION,
+        params  = (param1=0.5, param2=0.1, param3=1.8),
+    ),
+)
+
+# Compute hashes and register in DB:
+solver_hashes = Dict{String,String}()
+for (name, cfg) in solvers
+    hash, hash_input = make_config_hash(name, cfg.version, cfg.params,
+                                        const_eps, const_maxiter)
+    solver_hashes[name] = hash
+    ensure_config!(db, hash, name, cfg.version, cfg.params,
+                  const_eps, const_maxiter, hash_input)
+end
+```
+
+The `make_config_hash` and `ensure_config!` functions live in `src/benchmark.jl` (see `templates/benchmark_db_template.jl`).
+
+---
+
+## 24. WorkItem Struct
+
+Flat work list for the main loop. Struct must be defined at top level (outside `main()`).
+
+```julia
+struct WorkItem
+    method::String
+    config_hash::String
+    prob_id::Int
+    prob_str::String
+    dim::Int
+    init_label::String
+    x0::Vector{Float64}
+    track::Bool              # selective history tracking
+end
+```
+
+Build the work list inside `main()`:
+
+```julia
+work = WorkItem[]
+for dim in sel_dims
+    for pid in PROBLEM_IDS
+        prob_str = "P$pid"
+        prob_str in sel_problems || continue
+        for method in sel_methods
+            hash = solver_hashes[method]
+            inits = get_initial_points(dim, pid)
+            for (init_label, x0) in inits
+                track = should_track(method, prob_str, dim, init_label)
+                # Skip-by-default logic (see Block 10a)
+                if !do_force && is_done(db, hash, prob_str, dim, init_label)
+                    continue
+                end
+                push!(work, WorkItem(method, hash, pid, prob_str, dim,
+                                    init_label, x0, track))
+            end
+        end
+    end
+end
+```
+
+---
+
+## 25. Solver Callback for Progress
+
+Live iteration info inside the progress bar. The callback is passed to the solver and called once per iteration.
+
+```julia
+# Build callback for this work item:
+cb = nothing
+if do_verbose && prog !== nothing
+    cb = (k::Int, metric::Float64, mi::Int) -> begin
+        ProgressMeter.update!(prog, n_done;
+            showvalues=[
+                (:done,    "$n_done/$(length(work))"),
+                (:conv,    "$n_conv / $n_fail"),
+                (:current, "$(w.method) $(w.prob_str) m=$(w.dim) $(w.init_label)"),
+                (:iter,    @sprintf("k=%d/%d  metric=%.2e", k, mi, metric)),
+            ])
+    end
+end
+
+# Pass to solver:
+result = solver_fn(prob.F, prob.proj, x0; params...,
+                   eps=const_eps, maxiter=const_maxiter,
+                   track=w.track, callback=cb)
+```
+
+The solver must accept `callback=nothing` and call it inside its main loop:
+```julia
+callback !== nothing && callback(k, norm_Fk, maxiter)
+```
+
+---
+
+## 26. Performance Profiles (DB)
+
+Build and plot Dolan-More performance profiles from DB results.
+
+```julia
+using BenchmarkProfiles
+
+function build_profile_matrix(df, metric::Symbol)
+    instances = unique(df[:, [:problem, :dimension, :init_point]])
+    n_inst = nrow(instances)
+    n_meth = length(METHOD_ORDER)
+    T = fill(PENALTY, n_inst, n_meth)
+    method_idx = Dict(m => i for (i, m) in enumerate(METHOD_ORDER))
+
+    for (row_idx, inst) in enumerate(eachrow(instances))
+        for r in eachrow(df)
+            if r.problem == inst.problem && r.dimension == inst.dimension &&
+               r.init_point == inst.init_point && haskey(method_idx, r.method)
+                col = method_idx[r.method]
+                if r.converged == 1
+                    T[row_idx, col] = max(Float64(getproperty(r, metric)), 1e-10)
+                end
+            end
+        end
+    end
+    return T
+end
+
+# Usage:
+T = build_profile_matrix(df, :iterations)
+performance_profile(PlotsBackend(), T, METHOD_ORDER; logscale=true, ...)
+```
+
+---
+
+## 27. LaTeX Table Generation
+
+Write LaTeX tables from aggregated DB results. Bold best values per row.
+
+```julia
+# Find best values across methods for a (problem, dim) row:
+best_iter = Inf; best_feval = Inf; best_cpu = Inf
+for m in METHOD_ORDER
+    sub = filter(r -> r.method == m && r.problem == prob && r.dimension == dim, agg)
+    if nrow(sub) > 0 && sub.n_conv[1] > 0
+        best_iter  = min(best_iter,  sub.avg_iter[1])
+        best_feval = min(best_feval, sub.avg_feval[1])
+        best_cpu   = min(best_cpu,   sub.avg_cpu[1])
+    end
+end
+
+# Format cell: bold if best
+it_str = it ≈ best_iter ? "\\textbf{$it}" : "$it"
+```
+
+See `templates/script_figures_tables.jl` for complete table generators (per-tier, overall summary, tier-averaged).
+
+---
+
+## 28. Starting Points with Feasibility
+
+Labeled starting points for benchmark scripts. Labels become DB `init_point` values.
+
+```julia
+function get_initial_points(n::Int, prob_id::Int)
+    points = Tuple{String, Vector{Float64}}[]
+    push!(points, ("v1", zeros(n)))
+    push!(points, ("v2", fill(0.5, n)))
+    push!(points, ("v3", ones(n)))
+    push!(points, ("v4", fill(2.0, n)))
+    push!(points, ("v5", fill(1/n, n)))
+    push!(points, ("v6", [1.0/k for k in 1:n]))
+    push!(points, ("v7", [(k-1)/(n-1) for k in 1:n]))
+    push!(points, ("v8", [k/n for k in 1:n]))
+    push!(points, ("v9", [1.0/3.0^k for k in 1:n]))
+    push!(points, ("v10", fill(1.1, n)))
+
+    # Project into feasible set
+    prob = get_problem(prob_id)
+    for i in eachindex(points)
+        label, x0 = points[i]
+        x0_feas = ensure_feasible(prob.proj, x0)
+        x0_feas !== x0 && (points[i] = (label, x0_feas))
+    end
+    return points
+end
+
+function ensure_feasible(proj::Function, x0::Vector{Float64})
+    x_proj = proj(x0)
+    norm(x_proj - x0) > 1e-12 ? x_proj : x0
 end
 ```

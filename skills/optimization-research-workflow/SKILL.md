@@ -33,15 +33,22 @@ your-project/
 │   ├── CLAUDE.md          # Implementation-level context (params, scripts, usage)
 │   ├── Project.toml       # Julia project dependencies
 │   ├── src/               # Source code
-│   │   ├── includes.jl    # Entry point
+│   │   ├── includes.jl    # Entry point (defines JCODE_ROOT)
 │   │   ├── deps.jl        # Package imports (ALL shared deps here)
+│   │   ├── types.jl       # SolverResult, IterRecord, make_result
+│   │   ├── io_utils.jl    # TeeIO, setup_logging, teardown_logging
 │   │   ├── algorithm.jl   # Main algorithm (struct + iterator + solve)
-│   │   ├── direction.jl   # Direction computation
-│   │   ├── linesearch.jl  # Line search
-│   │   ├── projection.jl  # Projection methods
-│   │   ├── problems.jl    # Test problem definitions
-│   │   └── benchmark.jl   # Multi-solver benchmarking infrastructure
-│   └── scripts/           # Experiment scripts (ARGS dispatch pattern)
+│   │   ├── problems_nle.jl  # Nonlinear equations test problems
+│   │   ├── problems_cs.jl   # (optional) Compressed sensing
+│   │   └── benchmark.jl   # DB infrastructure (config hash, CRUD)
+│   ├── scripts/           # Experiment scripts (skip-by-default, --force)
+│   │   ├── s01_smoke_test.jl
+│   │   ├── s30_benchmark.jl
+│   │   └── s70_figures_tables.jl
+│   └── results/
+│       ├── experiments.db  # SQLite: all experiment data
+│       ├── logs/           # TeeIO log files
+│       └── figures/        # Generated plots and tables
 ├── paper/                 # LaTeX manuscript
 ├── refs/                  # Reference papers (PDFs)
 └── notes/                 # Plans, session findings, working documents
@@ -68,10 +75,12 @@ your-project/
 
 ## Key Patterns
 
-- **ARGS dispatch** — All scripts support `julia --project=. scripts/XX_name.jl part1 part2` for modular execution. See `../../guides/script-patterns.md`.
-- **CSV accumulation** — Benchmark tiers save independently; re-running a tier replaces only its rows. See `references/benchmark-patterns.md`.
-- **Batch checkpointing** — Parameter search saves after every N configs; auto-resumes on restart.
-- **SolverConfig pattern** — Uniform `(name, kwargs, constructor)` interface for multi-solver benchmarks.
+- **SQLite + config hashing** — All experiment results stored in `experiments.db` with content-addressable config hashes. The SAME NamedTuple is hashed AND splatted to the solver — zero divergence.
+- **Skip-by-default + `--force`** — Completed runs are skipped automatically. Use `--force` to re-run. No accidental data loss.
+- **CLI flags** — Scripts support `--all`, `--quick`, `--force`, `--verbose`, `--summary`, `--export`, `--problems=`, `--dims=`, `--methods=`. See `../../guides/script-patterns.md`.
+- **Solver contract** — Every solver returns `SolverResult`, accepts `track=false` + `callback=nothing`, declares `VERSION` and `DEFAULTS`. See `../../guides/coding-style.md`.
+- **`main()` wrapping** — All scripts wrap body in `function main() ... end` for Julia scoping safety.
+- **TeeIO logging** — All scripts log to both console and timestamped file via `setup_logging`.
 
 ## Rules
 

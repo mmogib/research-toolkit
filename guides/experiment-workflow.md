@@ -11,19 +11,30 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
 **Inputs:** Algorithm name, paper draft or idea, reference papers.
 
 **Steps:**
-1. Copy `optimization-research-template/` to your project location.
-2. Edit `CLAUDE.md` — fill in algorithm name, problem class (e.g., "nonlinear equations with convex constraints"), constraint types.
-3. Edit `jcode/CLAUDE.md` — fill in algorithm steps, parameter descriptions, preset placeholders.
+1. Use `/init-project` to scaffold the project. It will ask:
+   - Architecture style (A: Module or B: Flat Include)
+   - Storage backend (SQLite default, or CSV)
+   - Problem domains (checklist: nonlinear equations, compressed sensing, image restoration, other)
+2. Edit `CLAUDE.md` — fill in algorithm name, problem class, constraint types.
+3. Edit `jcode/CLAUDE.md` — fill in algorithm steps, parameter descriptions.
 4. Add reference papers to `refs/`.
 5. Run `julia --project=jcode/ -e 'import Pkg; Pkg.instantiate()'` to set up dependencies.
 
-**Outputs:** Working project skeleton with customized CLAUDE.md files.
+**Scaffolded files** (created by `/init-project`):
+- `src/types.jl` — SolverResult, IterRecord, make_result
+- `src/benchmark.jl` — DB infrastructure (open_db, config hash, CRUD) or CSV helpers
+- `src/io_utils.jl` — TeeIO logging
+- `src/problems_*.jl` — starter files for selected problem domains
+- `scripts/s01_smoke_test.jl` — basic solver verification
 
-**Gate:** Can open the project in Claude Code and Claude understands the algorithm from CLAUDE.md.
+**Outputs:** Working project skeleton with DB layer, problem starters, and smoke test.
+
+**Gate:** Smoke test runs without error. Can open the project in Claude Code and Claude understands the algorithm from CLAUDE.md.
 
 **Pitfalls:**
 - Don't over-customize the template before the algorithm is implemented; you'll revise CLAUDE.md many times.
 - Make sure `deps.jl` loads without error before proceeding.
+- If using SQLite, verify `using SQLite` works (may need `Pkg.add("SQLite")`).
 
 ---
 
@@ -118,13 +129,14 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
 3. Add tests for special cases: all p_choice options, all ls_type variants, all direction types, all constraint types.
 4. Verify `SolverConfig` pattern works with all algorithms.
 
-**Outputs:** `01_smoke_test.jl` passes all tests (target: 95%+ pass rate).
+**Outputs:** `s01_smoke_test.jl` passes all tests. Config hash uniqueness verified.
 
-**Gate:** >95% of smoke tests pass. Any failures are understood (e.g., known-hard problems that all solvers fail on).
+**Gate:** All solvers converge on a simple problem. Config hashes are distinct across solvers and sensitive to parameter perturbation.
 
 **Pitfalls:**
 - Not testing all parameter combinations — smoke tests should cover the full combinatorial space.
 - Ignoring errors from reference algorithms — they may indicate bugs in shared infrastructure.
+- Not checking config hash uniqueness — collisions cause silent result overwrites in the DB.
 
 ---
 
@@ -142,7 +154,7 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
 5. Rank parameters by importance (iteration count range across sweep values).
 6. Identify coupled parameters and run joint sweeps if needed (e.g., γ-θ̄ grid).
 
-**Outputs:** `results/sensitivity/` with CSV files and plots. Importance ranking.
+**Outputs:** OAT results in `results/experiments.db` (method `{ALGO}_OAT`). Importance ranking.
 
 **Gate:** Can identify top 3-5 most impactful parameters. No parameter causes catastrophic failure at its default value.
 
@@ -169,11 +181,12 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
 7. Update constructor defaults and PRESETS dictionary.
 
 **Key patterns:**
-- Batch checkpointing: save after every N configs, auto-resume on restart.
-- Deterministic seeds: same samples every run for reproducibility.
-- Validation: reject parameter combinations that violate convergence constraints before running.
+- All results saved to `experiments.db` with content-addressable config hashing (method `{ALGO}_LHS`).
+- Skip-by-default: completed (config_hash, problem, dim, init) combos are skipped. Use `--force` to re-run.
+- Deterministic seeds: same LHS samples every run for reproducibility.
+- Use `--quick` during development to test with reduced sweep.
 
-**Outputs:** Tuned default parameters, optional scale-dependent presets. Updated `MISTTDFPM_PRESETS`.
+**Outputs:** LHS results in `experiments.db`. Tuned default parameters, optional scale-dependent presets.
 
 **Gate:** Tuned defaults outperform paper defaults on SGM metric. New defaults pass smoke tests.
 
@@ -199,21 +212,31 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
 6. Generate: summary table, per-dimension tables, performance profiles (iterations, F-evals, CPU), head-to-head comparisons.
 7. Write results into paper Section 4.
 
+**Storage:** All results go to `results/experiments.db` with per-solver config hashes. Skip-by-default: completed runs are skipped; use `--force` to re-run. Selective history tracking for convergence plots (configurable subset of problems/dims/inits).
+
 **Key metrics:**
 - Convergence rate across all problems
 - Mean iterations (lower is better)
 - Mean F-evaluations (lower is better)
-- Geometric mean ratios in head-to-head comparisons (<1 = your algorithm wins)
-- Dolan-Moré performance profiles
+- Dolan-Moré performance profiles (per tier and aggregate)
 
-**Outputs:** `results/experiment1/` with raw CSV, profile matrices, plots, LaTeX tables.
+**CLI examples:**
+```bash
+julia --project=. scripts/s30_benchmark.jl --all              # full run (skips done)
+julia --project=. scripts/s30_benchmark.jl --all --verbose    # with progress bar
+julia --project=. scripts/s30_benchmark.jl --quick            # dev subset
+julia --project=. scripts/s30_benchmark.jl --summary          # aggregate stats from DB
+julia --project=. scripts/s30_benchmark.jl --export           # dump to CSV
+```
+
+**Outputs:** Results in `experiments.db`. Figures and tables generated by a separate `s70_figures_tables.jl` script from DB queries.
 
 **Gate:** Your algorithm shows clear advantages on at least one major metric (iterations or F-evals). Results are consistent across dimensions.
 
 **Pitfalls:**
-- Running too few starting points — 5-10 provides robust statistics.
-- Not using CSV accumulation — if the run crashes, you lose everything. The tier-based approach preserves completed tiers.
-- Forgetting to set timeout — some problems diverge and waste hours.
+- Running too few starting points — 10 stratified points provides good coverage.
+- Not using `--verbose` for long runs — you won't see progress.
+- Not checking `--summary` before writing the paper — aggregate stats may reveal issues.
 
 ---
 
@@ -225,11 +248,11 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
 
 **Steps:**
 1. Formulate the application as F(x) = 0 with x ∈ C. Prove monotonicity.
-2. Implement problem constructors in `problems.jl`.
-3. Add smoke test for the application.
+2. Implement problem constructors in a separate domain file (e.g., `problems_cs.jl`, `problems_imgrec.jl`). Add to `includes.jl`.
+3. Add application problems to the smoke test.
 4. (Optional) Run application-specific sensitivity analysis and parameter search.
-5. Run benchmark across problem sizes.
-6. Generate application-specific metrics (e.g., PSNR for image restoration, gap for traffic).
+5. Run benchmark across problem sizes. Same DB, same config hashing — application results coexist with NLE results in `experiments.db` (problem field is TEXT: `"cameraman_256"`, `"CS_n256_k20"`, etc.).
+6. Generate application-specific metrics (e.g., PSNR for image restoration, MSE for CS, gap for traffic).
 
 **Common applications for projection methods:**
 - Compressed sensing (GPSR → NCP → Fischer-Burmeister)

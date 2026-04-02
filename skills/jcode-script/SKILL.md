@@ -1,15 +1,16 @@
 ---
 name: jcode-script
 description: Create experiment scripts with consistent structure and patterns.
-  Guides through script type selection, feature composition, dependency management,
-  and infrastructure setup (io_utils.jl, utils.jl). Ensures scripts follow
-  established conventions for ARGS parsing, CSV I/O, resume, logging, and more.
+  Guides through script type selection, storage backend, CLI flags, feature
+  composition, dependency management, and infrastructure setup. Ensures scripts
+  follow established conventions for DB/CSV I/O, skip-by-default resume,
+  config hashing, logging, and main() wrapping.
 invocation: user
 ---
 
 # /jcode-script — Experiment Script Generator
 
-Create experiment scripts with consistent structure and patterns. Works with both Style A (Module Package) and Style B (Flat Include) Julia projects, and can adapt principles to Python or MATLAB when explicitly requested.
+Create experiment scripts with consistent structure and patterns. Works with both Style A (Module Package) and Style B (Flat Include) Julia projects.
 
 ## Workflow
 
@@ -22,21 +23,23 @@ Before asking any questions, gather project context:
    - Algorithm name, problem domain, key types
    - Existing dependencies
    - Module name (Style A) or entry point path (Style B)
+   - Storage backend already in use (SQLite or CSV)
 
 2. **Scan existing scripts** in `scripts/` (or ask user for location if no standard structure):
    - List existing `s{NN}_*.jl` files to determine next available number
-   - Note which features are already in use (resume, summary mode, etc.)
+   - Note which features are already in use (DB, resume, summary, etc.)
 
 3. **Check existing infrastructure**:
    - Does `io_utils.jl` exist? Does it have TeeIO, setup_logging, teardown_logging?
-   - Does `utils.jl` exist? What helpers does it provide?
+   - Does `benchmark.jl` exist? Does it have open_db, make_config_hash, etc.?
+   - Does `types.jl` exist? Does it have SolverResult, make_result?
    - Does `results/` directory exist? What subdirectories?
 
-If the project directory structure is not standard (no `scripts/`, no `src/`), ask the user where to save the script and where the source code lives.
+If the project directory structure is not standard, ask where to save the script and where the source code lives.
 
 ### Phase 2: User Questions
 
-Ask the user three things (use AskUserQuestion tool):
+Ask the user interactively:
 
 #### Question 1: Script Type
 
@@ -44,75 +47,82 @@ Present script types with suggested `s{NN}_` numbers based on **logical order** 
 
 | Logical Order | Type | Suggested Prefix | Purpose |
 |---|---|---|---|
-| 1 | Verification | `s10_` | Gradient/derivative checks, sanity tests |
-| 2 | Single-run test | `s20_` | Run algorithm on a few problems, verify it works |
-| 3 | Comparison run | `s30_` | Run alternative/baseline algorithm for comparison |
-| 4 | Parameter screening (OAT) | `s35_` | One-at-a-time sensitivity analysis |
-| 5 | Parameter tuning (LHS) | `s40_` | Latin Hypercube or grid search for best params |
-| 6 | Multi-start benchmark | `s45_` | Full benchmark: N problems × M starting points |
-| 7 | Ablation study | `s50_` | Isolate effect of a specific design choice |
-| 8 | Application experiment | `s60_` | Real-world / application problems |
-| 9 | Extension experiment | `s65_` | Algorithm extensions (e.g., general cones) |
-| 10 | Figure generation | `s70_` | Publication-quality plots from CSV data |
-| 11 | Table generation | `s75_` | LaTeX tables from CSV data |
-| 12 | Custom | User specifies | Any other script type |
+| 1 | Smoke test | `s01_` | Verify all solvers run, config hash uniqueness |
+| 2 | OAT sensitivity | `s10_` | One-at-a-time parameter sweeps |
+| 3 | Parameter search (LHS) | `s20_` | Latin Hypercube sampling for best params |
+| 4 | Benchmark | `s30_` | Full benchmark: methods × problems × dims × inits |
+| 5 | Application | `s50_`–`s65_` | Domain-specific experiments (CS, image, traffic, etc.) |
+| 6 | Figures + tables | `s70_` | Performance profiles, convergence plots, LaTeX tables |
+| 7 | Custom | User specifies | Any other script type |
 
 **Numbering rules:**
 - Scripts are numbered in increments of 10 (with 5-gaps for insertion)
-- If `s10_` exists and user wants another verification script, suggest `s11_` or `s12_`
-- If user wants a type between two existing scripts, suggest the midpoint
+- If `s10_` exists and user wants another sensitivity script, suggest `s11_` or `s12_`
 - Always confirm the final name with the user
 
-#### Question 2: Features
+#### Question 2: Storage Backend
 
-Based on the script type AND the project context, propose a curated feature list. Mark features as recommended (ON) or optional (OFF) based on what makes sense for this specific script type and project.
+Only ask on the **first script creation** per project. Subsequent scripts inherit the project's choice.
 
-Available features (see `../../guides/script-patterns.md` for code blocks):
+> "This project uses [SQLite / CSV / not yet decided]. SQLite is recommended (single DB file, atomic writes, queryable, content-addressable config hashing). Do you want SQLite (default) or CSV?"
 
-| Feature | What it adds |
-|---|---|
-| **Header comment block** | Goal, output, usage examples (always included) |
-| **ARGS parsing** | `--all`, ID ranges (`1-10`), `--verbose`, custom flags |
-| **`--resume` support** | Skip completed rows by reading existing CSV |
-| **`--summary` mode** | Two-mode script: solve vs. post-process |
-| **TeeIO logging** | Dual console + log file output via setup_logging |
-| **CSV I/O (raw)** | Per-solve CSV with immediate flush |
-| **CSV I/O (summary)** | Aggregated statistics CSV |
-| **ProgressMeter** | Progress bars for long-running loops |
-| **Adaptive parameters** | ε/maxiter that depend on problem dimension |
-| **Random feasible starts** | Generate random starting points in the feasible set |
-| **Per-iteration history** | Record convergence data for later plotting |
-| **Try-catch per solve** | Error handling with CSV error rows |
-| **Formatted output table** | `@printf` aligned columns to console |
-| **Elapsed time tracking** | Per-problem and total elapsed time formatting |
+- **SQLite** (default): Uses `benchmark.jl` with `open_db`, `make_config_hash`, `ensure_config!`, `is_done`, `insert_result!`, `insert_history!`. Includes `--export` flag for CSV output.
+- **CSV**: Uses manual CSV I/O with `flush()` per row, Set-based skip logic, and backup before overwrite.
 
-**Default recommendations by script type:**
+If SQLite is chosen and `benchmark.jl` doesn't exist, create it from `templates/benchmark_db_template.jl`.
 
-- **Verification**: ARGS, TeeIO, formatted output. No CSV, no resume.
-- **Single-run / Comparison**: ARGS, TeeIO, formatted output. Optional CSV.
-- **OAT screening**: ARGS, TeeIO, CSV raw + summary, try-catch, formatted output, elapsed time.
-- **LHS tuning**: ARGS, TeeIO, CSV raw + summary, try-catch, formatted output, elapsed time.
-- **Multi-start benchmark**: ALL features recommended (ARGS, resume, summary, TeeIO, CSV raw + summary, ProgressMeter, adaptive params, random starts, try-catch, formatted output, elapsed time).
-- **Ablation study**: ARGS, resume, summary, TeeIO, CSV raw + summary, per-iteration history, try-catch, formatted output, elapsed time.
-- **Application**: Same as multi-start benchmark.
-- **Extension**: Same as multi-start benchmark.
-- **Figure generation**: Minimal — no ARGS parsing, no TeeIO, no CSV. Just read data + plot.
-- **Table generation**: Minimal — read CSV, format LaTeX table, write to file.
-- **Custom**: Ask user what they need.
+#### Question 3: CLI Flags
 
-Present the recommended set and let the user toggle features on/off.
+Present the **recommended flag set** for the chosen script type. Let the user toggle on/off or add custom flags.
 
-#### Question 3: Dependencies
+**Standard flag catalog:**
 
-After determining features, check which packages are needed and not yet available in the project. Then ask:
+| Flag | Type | Purpose |
+|------|------|---------|
+| `--all` | Boolean | Run all problems/dims/methods (vs. default subset) |
+| `--quick` | Boolean | Reduced sweep for development |
+| `--force` | Boolean | Override skip-if-done, re-run everything |
+| `--verbose` | Boolean | Progress bar with live iteration info |
+| `--summary` | Boolean | Print aggregate stats, then exit |
+| `--export` | Boolean | Dump DB results to CSV, then exit |
+| `--problems=` | Key-value | Subset of problems |
+| `--dims=` | Key-value | Subset of dimensions |
+| `--methods=` | Key-value | Subset of methods |
+| `--tier=` | Key-value | Dimension tier (small, mid, large) |
+| `--profiles` | Boolean | Profiles only (figures script) |
+| `--convergence` | Boolean | Convergence plots only (figures script) |
+| `--tables` | Boolean | LaTeX tables only (figures script) |
+
+**Default flags per script type:**
+
+| Script type | Default ON | Available (user can add) |
+|-------------|-----------|------------------------|
+| **Smoke test** | _(none)_ | `--verbose` |
+| **OAT sensitivity** | `--summary`, `--force` | `--quick`, `--verbose`, `--export` |
+| **Parameter search** | `--summary`, `--force`, `--quick` | `--verbose`, `--export` |
+| **Benchmark** | `--all`, `--force`, `--verbose`, `--summary`, `--export`, `--quick`, `--problems=`, `--dims=`, `--methods=` | `--tier=` |
+| **Figures + tables** | `--all`, `--profiles`, `--convergence`, `--tables`, `--tier=` | `--verbose` |
+| **Application** | Same as benchmark | Domain-specific (e.g., `--datasets=`, `--noise=`) |
+| **Custom** | User decides | Full catalog available |
+
+Present: "Here are the recommended CLI flags for a [type] script: [list]. Add/remove/customize?"
+
+#### Question 4: Scope / Features
+
+Context-dependent based on script type:
+
+- **Smoke test**: Which solvers to test? Config hash checks?
+- **OAT/LHS**: Which parameters to sweep? What dimensions? How many samples?
+- **Benchmark**: Which methods? Dimension tiers? History tracking subset?
+- **Figures + tables**: Which outputs? (profiles, convergence, tables) Which tiers?
+- **Application**: What domain? What metrics (MSE, PSNR, accuracy)?
+- **Custom**: What does this script do? What data does it read/write?
+
+#### Question 5: Dependencies
+
+After determining features, check which packages are needed and not yet available.
 
 > "This script needs [package list]. Should I add them to [Project.toml / deps.jl], or will you?"
-
-If the agent handles it:
-- **Style A**: Add to `Project.toml` `[deps]` section AND add `using PackageName` to the module file
-- **Style B**: Add `using PackageName` to `deps.jl`
-
-If the user handles it: note which packages are needed and move on.
 
 See `references/dependency-guide.md` for the feature → package mapping.
 
@@ -122,43 +132,50 @@ See `references/dependency-guide.md` for the feature → package mapping.
 
 Before generating the script, ensure supporting files exist.
 
-**`io_utils.jl`** — Required if TeeIO logging is selected:
+**`io_utils.jl`** — Required for all scripts (TeeIO logging is default):
 - Check if `io_utils.jl` exists in `src/`
-- If missing: create it with TeeIO, setup_logging, teardown_logging
-- If exists but incomplete: add missing functions
-- See `references/infrastructure-patterns.md` for canonical code
+- If missing: create from toolkit's `io_utils.jl` pattern (see `references/infrastructure-patterns.md`)
+- If exists: verify it has `setup_logging`, `teardown_logging`
 
-**Integration after creating/updating `io_utils.jl`:**
-- **Style A**: Add `include("io_utils.jl")` to module file, add exports for `TeeIO`, `setup_logging`, `teardown_logging`
-- **Style B**: Add `include("io_utils.jl")` to `includes.jl`
+**`types.jl`** — Required for scripts that run solvers:
+- Check if `types.jl` exists in `src/`
+- If missing: create from `templates/types_template.jl`
+- Must have: `SolverResult`, `IterRecord`, `make_result`
 
-**`utils.jl`** — Required if the script needs shared helpers:
-- `check_derivatives` → needed for verification scripts
-- `elapsed_str` formatting → needed for scripts with elapsed time tracking
-- Other project-specific helpers as needed
-- See `references/infrastructure-patterns.md` for canonical code
+**`benchmark.jl`** — Required if SQLite backend is selected:
+- Check if `benchmark.jl` exists in `src/`
+- If missing: create from `templates/benchmark_db_template.jl`
+- Must have: `open_db`, `make_config_hash`, `ensure_config!`, `is_done`, `insert_result!`, `insert_history!`
+
+**Integration after creating infrastructure files:**
+- **Style A**: Add `include(...)` to module file, add exports
+- **Style B**: Add `include(...)` to `includes.jl` in correct dependency order
 
 **`results/` directories:**
-- Create the output subdirectory for this script (e.g., `results/multistart/`, `results/ablation/`)
-- Ensure `results/logs/` exists if TeeIO is selected
+- Ensure `results/logs/` exists (for TeeIO)
+- Ensure `results/figures/` exists (for figure scripts)
 
 #### Step 2: Compose the Script
 
 Assemble the script from the selected feature blocks. The script follows this structure:
 
 ```
-1. Header comment block (goal, output, usage)
+1. Header comment block (goal, output, usage with selected flags)
 2. Load path / imports
-3. ARGS parsing (if selected)
-4. Setup logging (if TeeIO selected)
-5. Configuration constants
-6. Helper functions (if needed)
-7. CSV constants and paths (if CSV selected)
-8. Summary mode block (if selected) — exits early
-9. Resume support block (if selected)
-10. Main loop header (banner, config printout)
-11. Main loop body (with try-catch, progress, CSV writes)
-12. Cleanup (close CSV, print summary, teardown logging)
+3. WorkItem struct (if benchmark — must be outside main())
+4. function main()
+5.   CLI flag parsing (only selected flags)
+6.   Setup logging (TeeIO)
+7.   Open DB (if SQLite) or setup CSV paths
+8.   Configuration constants
+9.   Summary/export early exit (if selected)
+10.  Helper functions (if needed)
+11.  Main loop / work list construction
+12.  Main loop body (with try-catch, progress, DB/CSV writes)
+13.  Final summary
+14.  Cleanup (teardown logging)
+15. end
+16. main()
 ```
 
 See `../../guides/script-patterns.md` for the code block for each feature.
@@ -167,32 +184,25 @@ See `../../guides/script-patterns.md` for the code block for each feature.
 
 Replace all placeholder names with project-specific values:
 - Module name / include path
-- Algorithm function name and config type
-- Problem getter function
+- Algorithm function name and solver params
+- Problem getter function (`get_problem`)
 - Result field names
-- CSV column names matching the project's data model
+- DB/CSV column names matching the project's data model
 - Results directory names
 
 #### Step 4: Verify
 
 After generating, verify:
 - [ ] All imports are available (either in module or deps.jl)
-- [ ] io_utils.jl is included in the module/includes chain
+- [ ] Infrastructure files (io_utils.jl, types.jl, benchmark.jl) are included
 - [ ] Results directory will be created by the script (mkpath)
-- [ ] Script header comment has correct usage examples
-- [ ] CSV headers match the @printf format strings (column count, types)
-
-## Language Adaptation
-
-Default language is **Julia**. If the user explicitly requests Python or MATLAB:
-
-- **Python**: Adapt patterns using `argparse`, `csv` module, `logging`, `tqdm` for progress. TeeIO becomes a dual-handler logger. CSV I/O via `csv.writer` with flush.
-- **MATLAB**: Adapt patterns using `inputParser`, `fprintf` for dual output, `readtable`/`writetable` for CSV.
-
-The structural principles (header, ARGS, resume, two-mode, progress, CSV flush) transfer directly; only syntax changes.
+- [ ] Script header comment has correct usage examples with selected flags
+- [ ] DB columns / CSV headers match the @printf format strings
+- [ ] Script is wrapped in `function main() ... end` + `main()` at bottom
+- [ ] JCODE_ROOT is used for paths (not `joinpath(@__DIR__, "..")`)
 
 ## Reference Files
 
-- `../../guides/script-patterns.md` — Composable code blocks for each feature
-- `references/infrastructure-patterns.md` — Canonical io_utils.jl and utils.jl code
+- `../../guides/script-patterns.md` — 28 composable code blocks for each feature
+- `references/infrastructure-patterns.md` — Canonical io_utils.jl code
 - `references/dependency-guide.md` — Feature → package mapping, installation instructions
