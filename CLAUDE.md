@@ -12,6 +12,16 @@ See `<path-to-research-toolkit>` for coding style, templates, and workflow guide
 Replace `<path-to-research-toolkit>` with the actual local path where this toolkit is cloned.
 Claude will then have access to all guides and templates.
 
+## Deployment
+This toolkit is a git repo. Skills are discovered by Claude Code via symlinks from `~/.claude/skills/` pointing into this repo.
+
+**After making changes** (editing templates, guides, or skills), remember to:
+1. Commit and push from the development location.
+2. `git pull` at the deployed location if it differs (e.g., if you develop on one machine and deploy on another, or if the Dropbox sync is not the same directory the symlinks point to).
+3. Verify symlinks still resolve: `ls -la ~/.claude/skills/mohammed-research-skills/` should point to this repo's `skills/` directory.
+
+**Quick check:** `cd <deployed-path> && git status` — if behind, `git pull`.
+
 ## Skills (Slash Commands)
 Seven custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
 - `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns
