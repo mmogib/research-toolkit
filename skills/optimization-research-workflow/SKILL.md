@@ -13,10 +13,9 @@ End-to-end workflow for developing, benchmarking, and publishing optimization al
 
 ## Quick Start
 
-1. **Copy the project template:**
-   ```
-   cp -r "D:\Dropbox\Research\Templates\optimization-research-template" "D:\Dropbox\Research\Projects\YOUR_PROJECT"
-   ```
+1. **Scaffold a new project** using one of:
+   - **Full project**: Run `/init-project` — interactive scaffolding with all templates.
+   - **Single template**: Copy from `../../templates/` (e.g., `../../templates/main.tex.template`).
 
 2. **Customize `CLAUDE.md`** — fill in algorithm name, problem class, constraint types.
 

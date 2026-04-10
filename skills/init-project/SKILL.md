@@ -16,7 +16,7 @@ You are setting up a new research project for Mohammed. Follow these steps exact
 The research toolkit contains templates, guides, and conventions. Find it:
 
 1. Search for a directory containing `CLAUDE.md` with the text "Mohammed's Research Toolkit" in these locations (use Glob and Grep, search in parallel):
-   - `D:/Dropbox/Research/research-toolkit/`
+   - `~/.claude/skills/research-toolkit/`
    - `~/research-toolkit/`
    - `~/Research/research-toolkit/`
    - `~/Dropbox/Research/research-toolkit/`
@@ -139,7 +139,7 @@ Create the following directory tree:
 **CLAUDE.md** (project-level):
 - Fill in: project title, codename, authors, toolkit path, structure diagram
 - Include the toolkit reference line: `See [toolkit-path] for coding style, templates, and workflow guides.`
-- Include skills reference: `Skills: ~/.claude/skills/mohammed-research-skills/`
+- Include skills reference: `Skills: ~/.claude/skills/research-toolkit/`
 - Include all standard rules (never run scripts, never compile LaTeX, etc.)
 - Leave sections like "Key Contributions" and "Paper Sections" with placeholder text for the user to fill in
 

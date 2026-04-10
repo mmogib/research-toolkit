@@ -4,12 +4,17 @@ How to instantiate and customize the optimization research project template.
 
 ---
 
-## Step 1: Copy the Template
+## Step 1: Create the Project
 
+**Option A — Full scaffold** (recommended):
+Run `/init-project` to interactively set up the complete project structure from the toolkit's templates.
+
+**Option B — Manual copy**:
+Copy individual templates from the toolkit (`../../templates/`) into your project directory:
 ```bash
-cp -r "D:\Dropbox\Research\Templates\optimization-research-template" \
-      "D:\Dropbox\Research\Projects\YOUR_PROJECT_NAME"
-cd "D:\Dropbox\Research\Projects\YOUR_PROJECT_NAME"
+mkdir YOUR_PROJECT_NAME && cd YOUR_PROJECT_NAME
+# Then copy the templates you need, e.g.:
+# ../../templates/CLAUDE.md.template, ../../templates/main.tex.template, etc.
 ```
 
 ## Step 2: Initialize Git
