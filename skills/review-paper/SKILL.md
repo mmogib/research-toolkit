@@ -138,7 +138,9 @@ After completing all Claude items, print a summary of remaining user tasks.
 - Grep for weak openings ("It is ", "There are ")
 - Grep for wordy phrases from the replacement table
 - Report with line numbers and suggested replacements
+- **For revision cycles or AI-drafted manuscripts**: invoke `/ai-slop` for the deeper multi-agent sweep that adds reviewer-response framing and revision-tracking language as separate categories with confidence-rated triage. `/review-paper` item 13 catches surface AI tells; `/ai-slop` adds the categories specific to revision cycles.
 
 ## Reference Files
 
 - `../../guides/paper-review-checklist.md` — Full universal checklist with detailed sub-items
+- `../ai-slop/SKILL.md` — Multi-agent deep sweep for revision cycles (complements item 13)

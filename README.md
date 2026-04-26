@@ -29,6 +29,7 @@ done
 **Windows** (open **cmd.exe as Administrator** — not Git Bash, not PowerShell):
 ```cmd
 cd %USERPROFILE%\.claude\skills
+mklink /D ai-slop research-toolkit\skills\ai-slop
 mklink /D init-project research-toolkit\skills\init-project
 mklink /D jcode-script research-toolkit\skills\jcode-script
 mklink /D math-research-writer research-toolkit\skills\math-research-writer
@@ -90,6 +91,7 @@ research-toolkit/
 │   ├── script_figure.jl                   #   Figure generation template
 │   └── runtests.jl.template               #   Style A test suite
 └── skills/                                # Claude Code skills (slash commands)
+    ├── ai-slop/                           #   /ai-slop — multi-agent AI-slop sweep
     ├── init-project/                      #   /init-project — project scaffolding
     ├── jcode-script/                      #   /jcode-script — experiment scripts
     ├── math-research-writer/              #   /math-research-writer — paper writing
@@ -117,6 +119,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 
 | Slash Command | Description |
 |---|---|
+| `/ai-slop` | Multi-agent AI-slop and revision-language sweep (deep style pass for revision cycles) |
 | `/init-project` | Interactive scaffolding for new projects |
 | `/jcode-script` | Experiment script generator (ARGS, CSV, resume, TeeIO) |
 | `/math-research-writer` | Theorem/proof structure, LaTeX, notation |

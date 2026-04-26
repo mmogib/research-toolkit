@@ -107,17 +107,38 @@ For each theorem, lemma, proposition:
 
 ## 13. Style Pass (LAST)
 
+> **For revision cycles or AI-drafted manuscripts**, also run `/ai-slop` for the deeper multi-agent sweep that adds reviewer-response framing and revision-tracking language as separate categories with confidence-rated triage.
+
 ### Banned/flagged words
 Search for and eliminate or replace:
-- AI-sounding filler: "robust", "crucial", "comprehensive", "streamline", "leverage", "fundamental", "notably", "furthermore", "moreover", "noteworthy", "pivotal", "vital"
-- Filler hedging: "it is worth noting that", "it should be mentioned that", "it is important to note that", "it goes without saying"
+- AI-sounding filler (single words): "robust" (non-technical), "crucial", "comprehensive" (un-quantified), "extensive" (un-quantified), "streamline", "leverage" (verb), "fundamental", "notably", "furthermore", "moreover", "noteworthy", "pivotal", "vital", "myriad", "various", "multifaceted", "underscore", "encompass"
+- AI-sounding filler (phrases): "delve into", "deep dive", "valuable insights", "play a crucial/vital/key role", "in the realm of", "shed light on", "navigate the/a" (figurative)
+- AI hedge preambles: "A particularly notable finding is that", "It is worth noting that", "It should be mentioned that", "It is important to note that", "It goes without saying"
+- Closing-flourish patterns: "fundamentally changes the landscape", "essential, not merely a [X]"
 - Vague intensifiers: "significant(ly)" (when not statistical), "critical", "key" (as adjective filler), "convincingly", "effectively" (when adding nothing)
+
+### Reviewer-response framing (revision cycles)
+Phrases that read as if addressing a reviewer rather than a reader — rewrite to remove the audience cue:
+- "to address concerns/comments about", "to address the practical concern that"
+- "as suggested by", "as recommended by"
+- "in response to [the reviewer/the comment]", "following the reviewer"
+- "we have added/included/revised"
+- "newly added", "newly introduced"
+
+### Revision-tracking language (revision cycles)
+Phrases that betray the manuscript is a revision rather than a self-contained paper:
+- "the revised manuscript", "in this revision", "this paper now [...]"
+- "now includes", "has been added", "the new X" (re: our additions, not the literature's)
+- "refreshed", "updated to" (when describing our own changes)
+- Parenthetical "(NEW)", "(added)", or similar markers
+- Section/paragraph titles that signal revision ("Refreshed Tornado", "Updated Results")
 
 ### Structural patterns
 - [ ] No named-paragraphs with bold labels
 - [ ] No sentences starting with "It is..." / "There are..." (weak openings) — rewrite with active subject
 - [ ] No adverb stacking ("very significantly improved")
 - [ ] No redundant qualifiers ("completely unique", "very optimal", "fully general")
+- [ ] No counting mismatches ("Three assumptions" then four items in the list)
 
 ### Wordy phrases → shorter alternatives
 | Replace | With |

@@ -23,7 +23,7 @@ This toolkit is a git repo. Skills are discovered by Claude Code via symlinks fr
 **Quick check:** `cd <deployed-path> && git status` — if behind, `git pull`.
 
 ## Skills (Slash Commands)
-Seven custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
+Eight custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
 - `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns
 - `/math-research-writer` — Theorem/proof structure, LaTeX patterns, notation consistency
 - `/title-abstract` — Academic paper titles and abstracts (structure, examples, journal requirements)
@@ -31,6 +31,7 @@ Seven custom skills in `skills/` (discovered by Claude Code via symlinks from `~
 - `/jcode-script` — Experiment script generator: type selection, SQLite/CSV backend, CLI flags, DB infrastructure
 - `/review-paper` — Paper review & polish checklist: 13-item universal checklist + project-specific items
 - `/suggest-journals` — Find suitable Q1–Q2 journals for publication
+- `/ai-slop` — Multi-agent AI-slop and revision-language sweep: chunked parallel agents, Tier 1/2 triage, complements `/review-paper` item 13 for revision cycles
 
 ## Two Coding Architectures
 At project start, choose one:
