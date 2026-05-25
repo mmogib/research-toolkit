@@ -55,15 +55,27 @@ Ask the user the following interactively using AskUserQuestion. Ask one group at
   - Style A: Code in `module ... end`, explicit exports, `@kwdef` configs, `@testset` tests. Best for reusable libraries, multiple algorithms, namespace isolation.
   - Style B: No module wrapper, `include("src/includes.jl")`, iterator protocol, preset system, multi-solver benchmarking. Best for single-algorithm, rapid prototyping, many variants.
 
-**Group 3 — Storage and problem domains:**
+**Group 3 — Storage and problem domain:**
 - Storage backend: SQLite (default, recommended) or CSV-only?
   - SQLite: single `experiments.db` file, content-addressable config hashing, queryable, `--export` for CSV output.
   - CSV: manual file I/O, Set-based skip logic, backup before overwrite.
-- Problem domains (checklist — select all that apply):
-  - [ ] Nonlinear equations (monotone F(x) = 0 with projection) — copies `problems_nle.jl` starter
-  - [ ] Compressed sensing (sparse recovery via NCP) — copies `problems_cs.jl` starter
-  - [ ] Image restoration (blur + noise via NCP) — copies `problems_imgrec.jl` starter
-  - [ ] Other / custom (empty `problems.jl` with interface contract only)
+- **Problem domain (binary first question)**:
+  - **(a) Nonlinear System of Equations (NLE / NLSE)** — $F(x) = 0,\ x \in X$. Triggers the full NLE/DFMethods follow-up path below.
+  - **(b) Something else** — vector optimization, approximation, eigenvalue problems, variational inequalities not in F(x)=0 form, anything else. Skip all NLE follow-ups; scaffold the generic project only (the user provides their own problem definitions and solver in whatever shape their domain calls for).
+
+**Group 3 follow-ups — only if Group 3 = (a) NLE:**
+
+- **Solver framework** for the F(x) = 0 path:
+  - **DFMethods.jl only** — scaffold the DFMethods.jl-aware adapter, callbacks, sweep helpers, and `TestProblem` registry with `set_factory::Function` returning `AbstractConstraintSet`.
+  - **DFMethods.jl + bring-your-own solvers (coexistence)** — same scaffolding plus the dual-field `TestProblem` (`proj::Function` auto-derived from `set_factory` via `DFMethods.project`); benchmark scripts dispatch on `solver_kind::Symbol` per palette entry.
+  - **No DFMethods** — user supplies own solver and projection. Scaffold `problems_nle.jl` with the generic `proj::Function` schema; no adapter / callbacks / sweep_helpers; no DFMethods deps in `Project.toml`.
+- **Application sub-flavors** (multi-select, optional) — sub-flavors of NLE that reformulate as $F(x) = 0$ with specific structure:
+  - [ ] Compressed sensing (NCP reformulation, soft-thresholding) — adds `problems_cs.jl` + `s50_compressed_sensing.jl`.
+  - [ ] Image restoration (GPSR / blur + noise via NCP) — adds `problems_imgrec.jl` + `s55_image_restoration.jl`.
+  - [ ] Logistic regression (regularized, LIBSVM-style) — adds `problems_logreg.jl` + `s60_logistic_regression.jl`.
+- **Include the 28-problem canonical benchmark library?** (default yes)
+  - **Yes** (recommended) — `src/problems_nle.jl` is scaffolded with the 28 Ibrahim-2026-style monotone problems + 18 named initial-point recipes + `PROBLEM_REGISTRY` + `INITIAL_POINTS` + lookup helpers. Citations preserved in each problem's docstring. Easy starting point for nonlinear-monotone-equations research.
+  - **No** — `src/problems_nle.jl` is scaffolded with the `TestProblem` struct + empty `PROBLEM_REGISTRY` + a comment block telling the user to fill in their own.
 
 **Group 4 — Project scope (optional, can be filled later):**
 - Co-authors (names and emails), or use default (Mohammed only)?
@@ -93,10 +105,32 @@ Based on the chosen style and options, read the appropriate templates from the t
 **If SQLite backend:**
 - `templates/benchmark_db_template.jl`
 
-**Per selected problem domain:**
-- Nonlinear equations: `templates/problems_nle_template.jl`
-- Compressed sensing: `templates/problems_cs_template.jl`
-- Image restoration: `templates/problems_imgrec_template.jl`
+**If Group 3 problem domain = (b) Something else:**
+- No additional problem-domain templates. The user provides their own problem definitions inside `src/`.
+
+**If Group 3 problem domain = (a) NLE and solver framework = No DFMethods:**
+- `templates/problems_nle_template.jl` (generic `proj::Function`-based starter).
+
+**If Group 3 problem domain = (a) NLE and solver framework ∈ {DFMethods only, DFMethods + BYO}:**
+- `templates/dfmethods/adapter_template.jl` → `src/adapter.jl`
+- `templates/dfmethods/callbacks_template.jl` → `src/callbacks.jl`
+- `templates/dfmethods/sweep_helpers_template.jl` → `src/sweep_helpers.jl`
+- `templates/dfmethods/extras_template.jl` → `src/extras.jl` (always scaffolded; pre-populated with the LSIII/LSIV/LSV/LSVI custom line searches that complete the LSI–LSVII palette + comment block for adding custom directions / inertial rules / iterate-update strategies).
+- `templates/dfmethods/constraints_nle_template.jl` → `src/constraints_nle.jl`
+- If canonical 28-problem library = yes: `templates/dfmethods/problems_nle_template.jl` → `src/problems_nle.jl`. Otherwise scaffold a `src/problems_nle.jl` skeleton with the `TestProblem` struct + empty `PROBLEM_REGISTRY`.
+- `templates/dfmethods/script_smoke_test.jl` → `scripts/s01_smoke_test.jl`
+- `templates/dfmethods/script_benchmark.jl` → `scripts/s30_benchmark.jl`
+- `templates/dfmethods/script_recovery.jl` → `scripts/s40_recovery.jl`
+- `templates/dfmethods/script_figures.jl` → `scripts/s70_figures_tables.jl`
+- s10_oat_sensitivity.jl and s20_parameter_search.jl scaffold from the generic templates (`templates/script_oat.jl`, `templates/script_parameter_search.jl`); the user adapts them to use `solve_with_alg` (see `<toolkit>/guides/dfmethods-integration.md` § 7).
+
+**Per selected application sub-flavor (NLE path only):**
+- Compressed sensing checked: `templates/dfmethods/problems_cs_template.jl` → `src/problems_cs.jl` + (TODO: `script_compressed_sensing.jl` in a follow-up cycle).
+- Image restoration checked: `templates/dfmethods/problems_imgrec_template.jl` → `src/problems_imgrec.jl` + (TODO).
+- Logistic regression checked: `templates/dfmethods/problems_logreg_template.jl` → `src/problems_logreg.jl` + (TODO).
+
+**Reading the DFMethods quick-reference (NLE + DFMethods only):**
+- `skills/init-project/references/dfmethods-quickref.md` — short cheat-sheet of `DFProjection` keyword arguments + the six built-in constraint sets. Reference at scaffold time when populating `jcode/CLAUDE.md`'s DFMethods integration section.
 
 ## Step 5: Generate Project Structure
 
@@ -120,12 +154,26 @@ Create the following directory tree:
 │   │   ├── types.jl              ← SolverResult, IterRecord, make_result
 │   │   ├── io_utils.jl           ← TeeIO, setup_logging, teardown_logging
 │   │   ├── benchmark.jl          ← DB infrastructure (if SQLite) or CSV helpers
-│   │   ├── problems_nle.jl       ← (if selected) nonlinear equations starter
-│   │   ├── problems_cs.jl        ← (if selected) compressed sensing starter
-│   │   ├── problems_imgrec.jl    ← (if selected) image restoration starter
-│   │   └── algorithm.jl          ← Style B: iterator solver template
+│   │   ├── problems_nle.jl       ← (if Group 3 = NLE) nonlinear equations starter
+│   │   ├── constraints_nle.jl    ← (if NLE + DFMethods) constraint constructors
+│   │   ├── adapter.jl            ← (if NLE + DFMethods) NonlinearSolution → SolverResult
+│   │   ├── callbacks.jl          ← (if NLE + DFMethods) ProgressUpdateCallback
+│   │   ├── sweep_helpers.jl      ← (if NLE + DFMethods) WorkItem, register_palette, run_sweep
+│   │   ├── extras.jl             ← (if NLE + DFMethods) custom LS / direction templates
+│   │   ├── problems_cs.jl        ← (if CS sub-flavor checked) compressed sensing starter
+│   │   ├── problems_imgrec.jl    ← (if ImgRec sub-flavor checked) image restoration starter
+│   │   ├── problems_logreg.jl    ← (if LogReg sub-flavor checked) logistic regression starter
+│   │   └── algorithm.jl          ← Style B: iterator solver template (only if Group 3 = Something else; in NLE+DFMethods, the algorithm comes from the library — extras.jl holds custom extensions instead)
 │   ├── scripts/
-│   │   └── s01_smoke_test.jl     ← Smoke test with solver + hash checks
+│   │   ├── s01_smoke_test.jl     ← Smoke test with solver + hash checks
+│   │   ├── s10_oat_sensitivity.jl   ← (NLE path only) OAT parameter sweep
+│   │   ├── s20_parameter_search.jl  ← (NLE path only) LHS parameter search
+│   │   ├── s30_benchmark.jl         ← (NLE path only) full palette × problems × dims × inits sweep
+│   │   ├── s40_recovery.jl          ← (NLE path only) targeted re-run of DB failures
+│   │   ├── s50_compressed_sensing.jl  ← (if CS sub-flavor checked) [TODO: follow-up cycle]
+│   │   ├── s55_image_restoration.jl   ← (if ImgRec sub-flavor checked) [TODO: follow-up cycle]
+│   │   ├── s60_logistic_regression.jl ← (if LogReg sub-flavor checked) [TODO: follow-up cycle]
+│   │   └── s70_figures_tables.jl    ← (NLE path only) Dolan-Moré performance profiles
 │   ├── test/                     ← Style A: runtests.jl; Style B: empty
 │   └── results/
 │       └── logs/
@@ -154,6 +202,31 @@ Create the following directory tree:
 - If SQLite: add SQLite, SHA, DBInterface, JSON3, DataFrames, CSV, ProgressMeter
 - If CSV-only: add DataFrames, CSV, ProgressMeter
 - Comment out optional deps (Plots, LaTeXStrings, BenchmarkProfiles, LazySets) with notes
+- **If NLE + DFMethods opted in**: uncomment the DFMethods integration block at the bottom of `templates/Project.toml.template` (adds `DFMethods`, `SciMLBase`, `CommonSolve`, `LineSearch` to `[deps]` and `DFMethods = "0.3.2"` to `[compat]`). The block is shipped commented; uncomment when populating the project's Project.toml.
+
+**jcode/src/ (NLE + DFMethods only — additional populations):**
+- Copy `templates/dfmethods/adapter_template.jl` → `src/adapter.jl`
+- Copy `templates/dfmethods/callbacks_template.jl` → `src/callbacks.jl`
+- Copy `templates/dfmethods/sweep_helpers_template.jl` → `src/sweep_helpers.jl`
+- Copy `templates/dfmethods/extras_template.jl` → `src/extras.jl`
+- Copy `templates/dfmethods/constraints_nle_template.jl` → `src/constraints_nle.jl`
+- If canonical 28-problem library = yes: copy `templates/dfmethods/problems_nle_template.jl` → `src/problems_nle.jl`. Otherwise generate a minimal skeleton with the `TestProblem` struct and an empty `PROBLEM_REGISTRY` + comment block.
+- Per sub-flavor checked: copy the corresponding `templates/dfmethods/problems_<sub>_template.jl` → `src/problems_<sub>.jl`.
+- In Style B, uncomment the DFMethods integration block at the bottom of `templates/includes_template.jl` (constraints_nle → problems_nle → adapter → callbacks → extras → sweep_helpers, in that dependency order). Uncomment the same in `templates/deps_template.jl` (adds the four `using` statements).
+- In Style A, the `{ModuleName}.jl` file includes the same DFMethods src files in the same dependency order, plus re-exports `solve_with_alg`, `ProgressUpdateCallback`, `WorkItem`, `register_palette`, `run_sweep`.
+
+**jcode/scripts/ (NLE path — full s01–s70 set scaffolded at init time):**
+- Copy `templates/dfmethods/script_smoke_test.jl` → `scripts/s01_smoke_test.jl` (NLE + DFMethods variant; otherwise use `templates/script_smoke_test.jl`).
+- Copy `templates/script_oat.jl` → `scripts/s10_oat_sensitivity.jl` (generic template; the user adapts to call `solve_with_alg` if DFMethods).
+- Copy `templates/script_parameter_search.jl` → `scripts/s20_parameter_search.jl`.
+- Copy `templates/dfmethods/script_benchmark.jl` → `scripts/s30_benchmark.jl` (NLE + DFMethods variant; otherwise use `templates/script_benchmark.jl`).
+- If NLE + DFMethods: copy `templates/dfmethods/script_recovery.jl` → `scripts/s40_recovery.jl`.
+- Per sub-flavor checked: scaffold `s50_compressed_sensing.jl` / `s55_image_restoration.jl` / `s60_logistic_regression.jl` from the corresponding template (TODO: follow-up cycle — these templates are not yet shipped; leave a placeholder file with a comment block for now).
+- Copy `templates/dfmethods/script_figures.jl` → `scripts/s70_figures_tables.jl` (NLE + DFMethods variant; otherwise use `templates/script_figures_tables.jl`).
+
+**jcode/CLAUDE.md (NLE + DFMethods only — additional content):**
+- Uncomment the DFMethods integration section at the bottom of `templates/jcode-CLAUDE.md.template` and populate with the project-specific palette names, problem count, and the user's notes.
+- Reference `<toolkit>/guides/dfmethods-integration.md` as the single source of truth.
 
 **jcode/src/** (both styles — always created):
 - `types.jl` — from `templates/types_template.jl` (SolverResult, IterRecord, make_result)
