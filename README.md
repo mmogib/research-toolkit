@@ -120,13 +120,32 @@ See `guides/coding-style.md` for full comparison and patterns.
 | Slash Command | Description |
 |---|---|
 | `/ai-slop` | Multi-agent AI-slop and revision-language sweep (deep style pass for revision cycles) |
-| `/init-project` | Interactive scaffolding for new projects |
-| `/jcode-script` | Experiment script generator (ARGS, CSV, resume, TeeIO) |
+| `/init-project` | Interactive scaffolding for new projects. **DFMethods.jl-aware** for NLE projects (opt-in). |
+| `/jcode-script` | Experiment script generator (ARGS, CSV, resume, TeeIO). **DFMethods.jl-aware** when `adapter.jl` is detected. |
 | `/math-research-writer` | Theorem/proof structure, LaTeX, notation |
-| `/optimization-research-workflow` | 12-phase research pipeline |
+| `/optimization-research-workflow` | 12-phase research pipeline. DFMethods.jl touchpoints in all 12 phases (only for projects that opted in). |
 | `/review-paper` | 13-item paper polish checklist |
 | `/suggest-journals` | Find Q1–Q2 journals for publication |
 | `/title-abstract` | Academic titles and abstracts |
+
+## DFMethods.jl integration
+
+For research projects in the **Nonlinear System of Equations (NLE / NLSE)** family, the toolkit can scaffold an opt-in integration with [DFMethods.jl](https://github.com/mmogib/DFMethods.jl) — a registered Julia package providing a configurable derivative-free projection framework for $F(x) = 0,\ x \in X$.
+
+When `/init-project` Q1 (problem domain) = NLE, follow-up questions wire in:
+
+- The **adapter** at `jcode/src/adapter.jl` (NonlinearSolution → SolverResult bridge)
+- A **live-progress callback** at `jcode/src/callbacks.jl` (ProgressUpdateCallback)
+- **Sweep helpers** at `jcode/src/sweep_helpers.jl` (palette, WorkItem, run_sweep with threaded mode)
+- The **constraint constructors** at `jcode/src/constraints_nle.jl`
+- The **28-problem canonical benchmark library** at `jcode/src/problems_nle.jl` (default yes; can be declined to scaffold a blank skeleton)
+- **Custom extension skeleton** at `jcode/src/extras.jl` (pre-populated with 4 custom line searches that complete the LSI–LSVII palette + comment block for custom directions / inertial rules / iterate-update strategies)
+- Application sub-flavor scaffolds: `problems_cs.jl` / `problems_imgrec.jl` / `problems_logreg.jl` if selected.
+- Full s01 / s10 / s20 / s30 / s40 / s70 scripts in `jcode/scripts/`.
+
+`/jcode-script` then auto-detects the integration (presence of `jcode/src/adapter.jl`) and generates DFMethods-aware variants of s30 / s40 / s70 by default.
+
+Single source of truth for the integration patterns: [`guides/dfmethods-integration.md`](guides/dfmethods-integration.md). The integration is **opt-in** — projects outside the NLE family or projects that decline DFMethods at the solver-framework question are completely unaffected.
 
 ## Portability
 

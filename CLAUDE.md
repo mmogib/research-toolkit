@@ -24,14 +24,16 @@ This toolkit is a git repo. Skills are discovered by Claude Code via symlinks fr
 
 ## Skills (Slash Commands)
 Eight custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
-- `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns
+- `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns. **DFMethods.jl-aware**: per-phase touchpoints for projects that opted into DFMethods at init time.
 - `/math-research-writer` — Theorem/proof structure, LaTeX patterns, notation consistency
 - `/title-abstract` — Academic paper titles and abstracts (structure, examples, journal requirements)
-- `/init-project` — Interactive scaffolding for new research projects
-- `/jcode-script` — Experiment script generator: type selection, SQLite/CSV backend, CLI flags, DB infrastructure
+- `/init-project` — Interactive scaffolding for new research projects. **DFMethods.jl-aware**: when the user picks NLE/NLSE as the problem domain, an opt-in question wires in the DFMethods.jl adapter, callbacks, sweep helpers, constraints / problem registry, and the 28-problem canonical benchmark library (default yes).
+- `/jcode-script` — Experiment script generator: type selection, SQLite/CSV backend, CLI flags, DB infrastructure. **DFMethods.jl-aware**: detects `jcode/src/adapter.jl` to auto-select DFMethods-aware variants of s30 / s40 / s70.
 - `/review-paper` — Paper review & polish checklist: 13-item universal checklist + project-specific items
 - `/suggest-journals` — Find suitable Q1–Q2 journals for publication
 - `/ai-slop` — Multi-agent AI-slop and revision-language sweep: chunked parallel agents, Tier 1/2 triage, complements `/review-paper` item 13 for revision cycles
+
+**DFMethods.jl integration**: the toolkit ships `templates/dfmethods/` (adapter, callbacks, sweep helpers, constraint constructors, the 28-problem canonical NLE library, s01 / s30 / s40 / s70 scripts) and a dedicated single-source-of-truth guide at `guides/dfmethods-integration.md`. The integration is an **opt-in** feature gated on the NLE/NLSE problem domain — projects outside that domain are unaffected. Library: <https://github.com/mmogib/DFMethods.jl> (v0.3.2+).
 
 ## Two Coding Architectures
 At project start, choose one:
@@ -44,8 +46,9 @@ See `guides/coding-style.md` for full comparison and patterns.
 | Guide | Purpose |
 |-------|---------|
 | `guides/coding-style.md` | Both architectures: types, dispatch, naming, iterators, presets, error handling |
-| `guides/script-patterns.md` | Experiment script structure: ARGS, --resume, CSV I/O, TeeIO, progress bars |
+| `guides/script-patterns.md` | Experiment script structure: ARGS, --resume, CSV I/O, TeeIO, progress bars. Blocks 29 + 30 cover DFMethods.jl palette + run_sweep. |
 | `guides/experiment-workflow.md` | End-to-end experiment pipeline: planning, OAT, LHS, benchmark, ablation, figures |
+| `guides/dfmethods-integration.md` | DFMethods.jl integration patterns: adapter, callbacks, sweep helpers, constraint sets, palette + config hashing, threaded sweeps, recovery sweeps, figures, custom extensions. Reference only when a project opts into DFMethods at init time. |
 | `guides/paper-review-checklist.md` | 13-item paper polish checklist (proofs, notation, style, bibliography) |
 | `guides/latex-conventions.md` | Writing style, theorem environments, notation, cross-references, biblatex |
 
