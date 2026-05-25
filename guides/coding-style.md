@@ -88,6 +88,8 @@ using ModuleName
 
 ## Style B — Flat Include
 
+> If this project depends on **DFMethods.jl** (selected via `/init-project`'s NLE-path solver-framework question), see `dfmethods-integration.md` for the adapter, callbacks, sweep-helpers, and problem-registry patterns that supplement the Style B layout below.
+
 ### File Structure
 ```
 src/

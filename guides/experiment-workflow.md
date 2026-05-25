@@ -14,7 +14,9 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
 1. Use `/init-project` to scaffold the project. It will ask:
    - Architecture style (A: Module or B: Flat Include)
    - Storage backend (SQLite default, or CSV)
-   - Problem domains (checklist: nonlinear equations, compressed sensing, image restoration, other)
+   - Problem domain (binary first question: **Nonlinear System of Equations (NLE / NLSE)** vs **Something else**)
+   - If NLE: solver framework (DFMethods.jl only / DFMethods.jl + bring-your-own / no DFMethods), application sub-flavors (CS / ImgRec / LogReg multi-select), canonical 28-problem benchmark library (default yes). See `dfmethods-integration.md` for the patterns when DFMethods is opted in.
+   - If Something else: no further problem-domain questions — generic scaffold only.
 2. Edit `CLAUDE.md` — fill in algorithm name, problem class, constraint types.
 3. Edit `jcode/CLAUDE.md` — fill in algorithm steps, parameter descriptions.
 4. Add reference papers to `refs/`.

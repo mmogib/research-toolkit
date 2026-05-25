@@ -857,3 +857,32 @@ function ensure_feasible(proj::Function, x0::Vector{Float64})
     norm(x_proj - x0) > 1e-12 ? x_proj : x0
 end
 ```
+
+## 29. DFMethods Palette Construction (NLE / DFMethods opt-in)
+
+For projects scaffolded with DFMethods.jl as the NLE solver framework, the palette is built via `register_palette(db, cli)` in `src/sweep_helpers.jl`. Each palette entry carries a `solver_kind::Symbol` (`:dfmethods` in DFMethods-only mode; `:dfmethods` or `:custom` in coexistence mode); the resolver dispatches to `solve_with_alg` (DFMethods) vs `solve_with_custom` (BYO) per entry.
+
+```julia
+# In s30_benchmark.jl:
+palette  = register_palette(db, cli)                           # builds + DB-registers each entry
+worklist = WorkItem[]
+for entry in palette, name in cli[:problems], n in cli[:dims], (init_label, x0) in get_initial_points(n, id_of(name))
+    push!(worklist, WorkItem(entry.label, entry.config_hash, entry.alg, name, get_problem(name), n, init_label, x0))
+end
+existing = existing_set(db, worklist)                          # set of (config_hash, prob, n, init) in DB
+cli[:force] || filter!(item -> (item.config_hash, item.prob_name, item.n, item.init_name) ∉ existing, worklist)
+```
+
+Requires the project to have `adapter.jl`, `callbacks.jl`, `sweep_helpers.jl` in `src/`. See `dfmethods-integration.md` §§ 6–7 for the full pattern and the content-addressable `config_hash` contract.
+
+## 30. DFMethods Sweep Loop (`run_sweep`)
+
+`run_sweep(db, palette, worklist, cli, tee, n_total, existing)` in `src/sweep_helpers.jl` is the single entry point for both serial and threaded sweep modes. `cli[:threads] ≤ 1` dispatches to `_run_serial`; `≥ 2` dispatches to `_run_threaded` (producer/consumer with `Channel{WorkItem}` workers + one writer task owning the SQLite handle).
+
+```julia
+# In s30_benchmark.jl, after building palette + worklist:
+tee = setup_logging("s30")
+run_sweep(db, palette, worklist, cli, tee, length(worklist), existing)
+```
+
+The progress display, atomic counters, error absorption, and DB writes are handled inside; the script reads only `cli` overrides and the worklist. See `dfmethods-integration.md` §§ 8–9 for the live-progress callback contract and the threaded architecture invariants (per-task alg rebuild, no shared SQLite handle, errors absorbed inside workers to keep the channel deadlock-free).
