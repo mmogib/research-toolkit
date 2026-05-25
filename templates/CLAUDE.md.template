@@ -84,3 +84,21 @@ Skills: `~/.claude/skills/research-toolkit/` (workflow, writing, title-abstract,
 
 ## Status
 [Current state of the project. Updated after each session.]
+
+<!-- ─── DFMethods.jl integration (uncomment if /init-project opted in) ───────
+## DFMethods.jl integration
+
+This project uses [DFMethods.jl](https://github.com/mmogib/DFMethods.jl)
+v0.3.2+ as the solver framework for the F(x) = 0 path. The harness adapter
+at `jcode/src/adapter.jl` bridges `SciMLBase.NonlinearSolution` to the
+toolkit's canonical `SolverResult`; `jcode/src/callbacks.jl` provides
+`ProgressUpdateCallback` for live `‖F‖` display; `jcode/src/sweep_helpers.jl`
+holds `WorkItem` / `register_palette` / `run_sweep` for the s30 benchmark
+loop. Constraint set lives on the problem (`set_factory::Function` on each
+`TestProblem`), not on the algorithm.
+
+See `<path-to-research-toolkit>/guides/dfmethods-integration.md` for the
+full integration reference. **Do not edit `DFMethods.jl` itself** — it
+ships from the Julia General registry. Custom extensions live in
+`jcode/src/extras.jl`.
+-->

@@ -29,3 +29,9 @@ using ProgressMeter
 # Constraint sets (uncomment if using LazySets for projections)
 # using LazySets
 # import LazySets: σ, an_element
+
+# ─── DFMethods.jl integration (uncomment if /init-project opted in) ─────────
+# using DFMethods
+# using SciMLBase
+# using CommonSolve
+# using LineSearch

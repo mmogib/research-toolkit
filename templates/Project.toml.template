@@ -25,3 +25,12 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+# ─── DFMethods.jl integration (uncomment if /init-project opted in) ─────────
+# DFMethods    = "5fd0b45f-fdf3-4567-a8b1-5e033765ff5d"
+# SciMLBase    = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
+# CommonSolve  = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
+# LineSearch   = "87fe0de2-c867-4266-b59a-2f0a94fc965b"
+#
+# [compat]
+# DFMethods    = "0.3.2"

@@ -72,3 +72,15 @@ julia --project=. scripts/s70_figures.jl --all                  # profiles + tab
 ## Status
 - [Current state: what works, what's pending]
 - [Experiments complete vs. pending]
+
+<!-- ─── DFMethods.jl integration (uncomment if /init-project opted in) ───────
+## DFMethods.jl integration
+
+- **Library**: DFMethods v0.3.2+ from the Julia General registry. `Project.toml` pins via `[compat] DFMethods = "0.3.2"`.
+- **Adapter boundary**: `solve_with_alg(F, set, x0, alg)` in `src/adapter.jl` returns `SolverResult`. Retcode mapping table is in `<toolkit>/guides/dfmethods-integration.md` § 3.
+- **Constraint sets**: defined in `src/constraints_nle.jl`; referenced from `src/problems_nle.jl` `TestProblem.set_factory` closures by Julia symbol name. Built-in DFMethods sets: `RealSpace`, `BoxSet`, `HalfSpace`, `CappedBox`, `Intersection`, `UserSet`.
+- **Custom extensions**: `src/extras.jl` holds custom directions, line searches, inertial rules, or iterate-update strategies. Subtype the relevant DFMethods abstract type; implement the small extension contract. Examples at `DFMethods.jl/examples/*.jl`.
+- **Sweep loop**: `s30_benchmark.jl` calls `register_palette` + `run_sweep` from `src/sweep_helpers.jl`. Skip-by-default resume via content-addressable `config_hash` (one DB row per `(config_hash, problem, dim, init)`).
+- **Threading**: `--threads N` for N ≥ 2 activates producer/consumer with `Channel{WorkItem}` + N workers + 1 writer task. Launch Julia with `-t (N+1)`.
+- **Rule**: don't edit `DFMethods.jl` — open an upstream issue at <https://github.com/mmogib/DFMethods.jl/issues> if you hit a missing feature.
+-->

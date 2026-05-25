@@ -110,3 +110,12 @@ end
 # Example:
 #   const MYALGO_VERSION  = "1.0.0"
 #   const MYALGO_DEFAULTS = (alpha=0.5, beta=0.1, gamma=1.8)
+
+# ─── DFMethods.jl integration (informational; uncomment fields as needed) ────
+# When a project depends on DFMethods.jl, the adapter (src/adapter.jl)
+# converts SciMLBase.NonlinearSolution → SolverResult at the script
+# boundary. The canonical project-specific fields on SolverResult are:
+#
+#   residual::Float64           # ‖F(x*)‖; populated by adapter from cache.resid at terminate
+#
+# See ../guides/dfmethods-integration.md § 3 for the retcode-to-flag table.

@@ -23,3 +23,13 @@ include("algorithm.jl")        # 5. Main algorithm(s)
 
 # Infrastructure
 include("benchmark.jl")        # 7. DB layer (open_db, config hash, CRUD)
+
+# ─── DFMethods.jl integration (uncomment if /init-project opted in) ─────────
+# Files scaffolded into src/ when DFMethods.jl is selected; loaded after
+# benchmark.jl. See ../guides/dfmethods-integration.md for the patterns.
+# include("constraints_nle.jl")  # constraint constructors
+# include("problems_nle.jl")     # TestProblem registry + 28 problems (if canonical library)
+# include("adapter.jl")          # solve_with_alg + retcode mapping
+# include("callbacks.jl")        # ProgressUpdateCallback
+# include("extras.jl")           # custom DFMethods extensions (directions / line searches / …)
+# include("sweep_helpers.jl")    # WorkItem, register_palette, run_sweep
