@@ -35,6 +35,12 @@ Before asking any questions, gather project context:
    - Does `types.jl` exist? Does it have SolverResult, make_result?
    - Does `results/` directory exist? What subdirectories?
 
+4. **Detect DFMethods.jl integration**:
+   - Does `jcode/src/adapter.jl` exist? Does `Project.toml` list `DFMethods` in `[deps]`?
+   - If both yes → this is a DFMethods-aware project. Default to the DFMethods-aware variants of the script templates (s30/s40/s70 from `templates/dfmethods/*`). Confirm with the user.
+   - If only one signal present → ask the user explicitly whether to generate the DFMethods-aware variant or the generic one.
+   - If neither → generic templates only.
+
 If the project directory structure is not standard, ask where to save the script and where the source code lives.
 
 ### Phase 2: User Questions
@@ -51,9 +57,14 @@ Present script types with suggested `s{NN}_` numbers based on **logical order** 
 | 2 | OAT sensitivity | `s10_` | One-at-a-time parameter sweeps |
 | 3 | Parameter search (LHS) | `s20_` | Latin Hypercube sampling for best params |
 | 4 | Benchmark | `s30_` | Full benchmark: methods × problems × dims × inits |
+| **4a** | **Benchmark (DFMethods-aware)** | `s30_` | Same as 4, but uses DFMethods's `register_palette` / `run_sweep` / `ProgressUpdateCallback`. Auto-selected when `jcode/src/adapter.jl` is present. |
 | 5 | Application | `s50_`–`s65_` | Domain-specific experiments (CS, image, traffic, etc.) |
+| **5a** | **Recovery (DFMethods-aware)** | `s40_` | Targeted re-run of DB failures with relaxed criteria; recovery summary via SQL self-join. Requires `s30_benchmark.jl` to have run already. |
 | 6 | Figures + tables | `s70_` | Performance profiles, convergence plots, LaTeX tables |
+| **6a** | **Figures + tables (DFMethods-aware)** | `s70_` | Same as 6, but uses the manual `performance_profile_data` + `plot!` loop (per-series color × marker × linestyle); log2 x-axis with integer exponent labels; empty-proxy `:line` series for legend marker rendering. Auto-selected when `jcode/src/adapter.jl` is present. |
 | 7 | Custom | User specifies | Any other script type |
+
+**DFMethods-aware variants** (rows 4a / 5a / 6a) come from `templates/dfmethods/script_benchmark.jl` / `script_recovery.jl` / `script_figures.jl`. The skill auto-selects them when Phase 1 step 4 detects `jcode/src/adapter.jl` present; otherwise the generic variants (rows 4 / 6) are used.
 
 **Numbering rules:**
 - Scripts are numbered in increments of 10 (with 5-gaps for insertion)
@@ -147,6 +158,12 @@ Before generating the script, ensure supporting files exist.
 - If missing: create from `templates/benchmark_db_template.jl`
 - Must have: `open_db`, `make_config_hash`, `ensure_config!`, `is_done`, `insert_result!`, `insert_history!`
 
+**DFMethods infrastructure** (required for DFMethods-aware variants — rows 4a / 5a / 6a):
+- Check that `src/adapter.jl`, `src/callbacks.jl`, `src/sweep_helpers.jl` all exist.
+- If any are missing, copy from `templates/dfmethods/adapter_template.jl` / `callbacks_template.jl` / `sweep_helpers_template.jl` and add their includes to `src/includes.jl` (Style B) or the module file (Style A) in the dependency order documented in `<toolkit>/guides/dfmethods-integration.md` (constraints_nle → problems_nle → adapter → callbacks → extras → sweep_helpers).
+- Verify `Project.toml` has the DFMethods integration block uncommented (DFMethods, SciMLBase, CommonSolve, LineSearch in `[deps]`; `DFMethods = "0.3.2"` in `[compat]`).
+- If `src/extras.jl` is missing and the user mentions custom directions / line searches / inertial rules / iterate-update strategies, copy from `templates/dfmethods/extras_template.jl`.
+
 **Integration after creating infrastructure files:**
 - **Style A**: Add `include(...)` to module file, add exports
 - **Style B**: Add `include(...)` to `includes.jl` in correct dependency order
@@ -179,6 +196,8 @@ Assemble the script from the selected feature blocks. The script follows this st
 ```
 
 See `../../guides/script-patterns.md` for the code block for each feature.
+
+**DFMethods-aware variants (rows 4a / 5a / 6a) bypass the 16-step generic composition** — they are full ported scripts from the user's DFMethods-starter reference. Step 2 for those variants reduces to: (a) copy the corresponding `templates/dfmethods/script_*.jl` file to `scripts/`, (b) edit the `{METHOD_LABELS}` placeholder and the project-specific palette/problem names, (c) skip the per-block composition. Generic script blocks 29 and 30 in `<toolkit>/guides/script-patterns.md` describe the load-bearing `register_palette` + `run_sweep` calls inside the DFMethods-aware variants for reference.
 
 #### Step 3: Adapt to Project
 
