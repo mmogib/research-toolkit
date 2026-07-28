@@ -23,13 +23,14 @@ This toolkit is a git repo. Skills are discovered by Claude Code via symlinks fr
 **Quick check:** `cd <deployed-path> && git status` — if behind, `git pull`.
 
 ## Skills (Slash Commands)
-Eight custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
+Nine custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
 - `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns. **DFMethods.jl-aware**: per-phase touchpoints for projects that opted into DFMethods at init time.
 - `/math-research-writer` — Theorem/proof structure, LaTeX patterns, notation consistency
 - `/title-abstract` — Academic paper titles and abstracts (structure, examples, journal requirements)
 - `/init-project` — Interactive scaffolding for new research projects. **DFMethods.jl-aware**: when the user picks NLE/NLSE as the problem domain, an opt-in question wires in the DFMethods.jl adapter, callbacks, sweep helpers, constraints / problem registry, and the 28-problem canonical benchmark library (default yes).
 - `/jcode-script` — Experiment script generator: type selection, SQLite/CSV backend, CLI flags, DB infrastructure. **DFMethods.jl-aware**: detects `jcode/src/adapter.jl` to auto-select DFMethods-aware variants of s30 / s40 / s70.
 - `/review-paper` — Paper review & polish checklist: 13-item universal checklist + project-specific items
+- `/join-revision` — Join a fully developed manuscript in its review-and-revision phase. Sets up the working system (lean CLAUDE.md hub, flat undated notes, `notes/litrev/` cite-with-confidence records, `channels/` correspondence with an external AI reviewer, `\rev` blue markup), then drives an eight-step review ending in `/ai-slop`. No code is ever run or written — numerical experiments are audited adversarially and requested via a spec note.
 - `/suggest-journals` — Find suitable Q1–Q2 journals for publication
 - `/ai-slop` — Multi-agent AI-slop and revision-language sweep: chunked parallel agents, Tier 1/2 triage, complements `/review-paper` item 13 for revision cycles
 

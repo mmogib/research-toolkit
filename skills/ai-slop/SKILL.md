@@ -159,3 +159,4 @@ Run the grep, eyeball the hits, decide each.
 - `references/agent-prompt-template.md` — parameterized prompt for the chunk agents (Phase 3).
 - `../../guides/paper-review-checklist.md` — canonical banned-words list, wordy-phrase table, structural patterns (item 13). This skill extends item 13 with the revision-cycle categories.
 - `../../skills/review-paper/SKILL.md` — single-pass review skill. `/review-paper` references this skill as the deeper option for revision cycles.
+- `../../skills/join-revision/SKILL.md` — full revision-phase workflow; invokes this skill as its last step, after all other text has stabilized. Projects set up by it use the `\rev{...}` macro noted in Phase 1.

@@ -144,3 +144,4 @@ After completing all Claude items, print a summary of remaining user tasks.
 
 - `../../guides/paper-review-checklist.md` — Full universal checklist with detailed sub-items
 - `../ai-slop/SKILL.md` — Multi-agent deep sweep for revision cycles (complements item 13)
+- `../join-revision/SKILL.md` — Owns the whole revision phase of a finished manuscript (system setup, collaborator roles, `\rev` markup, adversarial numerics audit) and invokes this skill to build the checklist. If the paper is finished and the job is to take it to submission, start there instead of here.
