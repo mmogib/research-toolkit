@@ -23,9 +23,15 @@ project-name/
 │   ├── references.bib        # Bibliography — Zotero-managed, NEVER edit directly
 │   ├── temp_refs_to_add.bib  # Claude's suggested references for Mohammed to verify
 │   ├── imgs/                 # Figures (copied from jcode/results/figures/)
-│   └── submissions/          # One subfolder per journal submission
-│       └── JOURNAL/          # e.g., AMC/, JCAM/, SIOPT/
-│           └── cover_letter.tex
+│   └── submissions/          # Managed by /prepare-submission
+│       ├── journals_templates/       # Publisher templates you download
+│       │   └── JOURNAL/              # e.g., elsarticle.cls + sample + .bst
+│       └── JOURNAL/                  # e.g., AMC/, JCAM/, SIOPT/
+│           └── first_submission_Month_Year/
+│               ├── source_files/     # Derived from main.tex: flat, upload-ready
+│               ├── journal_files/    # Yours: portal downloads, proofs, reports
+│               ├── cover_letter.tex
+│               └── submission_manifest.md
 ├── jcode/                 # Julia implementation (see jcode/CLAUDE.md)
 │   ├── src/               # Source code (types, benchmark DB, problems, algorithm)
 │   ├── test/              # Tests

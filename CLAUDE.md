@@ -23,7 +23,7 @@ This toolkit is a git repo. Skills are discovered by Claude Code via symlinks fr
 **Quick check:** `cd <deployed-path> && git status` — if behind, `git pull`.
 
 ## Skills (Slash Commands)
-Nine custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
+Ten custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
 - `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns. **DFMethods.jl-aware**: per-phase touchpoints for projects that opted into DFMethods at init time.
 - `/math-research-writer` — Theorem/proof structure, LaTeX patterns, notation consistency
 - `/title-abstract` — Academic paper titles and abstracts (structure, examples, journal requirements)
@@ -32,6 +32,7 @@ Nine custom skills in `skills/` (discovered by Claude Code via symlinks from `~/
 - `/review-paper` — Paper review & polish checklist: 13-item universal checklist + project-specific items
 - `/join-revision` — Join a fully developed manuscript in its review-and-revision phase. Sets up the working system (lean CLAUDE.md hub, flat undated notes, `notes/litrev/` cite-with-confidence records, `channels/` correspondence with an external AI reviewer, `\rev` blue markup), then drives an eight-step review ending in `/ai-slop`. No code is ever run or written — numerical experiments are audited adversarially and requested via a spec note.
 - `/suggest-journals` — Find suitable Q1–Q2 journals for publication
+- `/prepare-submission` — Package a finished manuscript for one journal, one cycle. Creates `paper/submissions/[JOURNAL]/[cycle]_submission_[Month]_[Year]/` with a flattened, upload-ready `source_files/` and an empty `journal_files/` (the user's), transforms `main.tex` onto the journal template, trims the bibliography to cited keys, and scaffolds cover letter / response to reviewers / manifest on approval. `paper/main.tex` stays frozen — the derivation restructures and reformats, never changes content; content changes go upstream and are re-derived with `refresh`. Never compiles LaTeX.
 - `/ai-slop` — Multi-agent AI-slop and revision-language sweep: chunked parallel agents, Tier 1/2 triage, complements `/review-paper` item 13 for revision cycles
 
 **DFMethods.jl integration**: the toolkit ships `templates/dfmethods/` (adapter, callbacks, sweep helpers, constraint constructors, the 28-problem canonical NLE library, s01 / s30 / s40 / s70 scripts) and a dedicated single-source-of-truth guide at `guides/dfmethods-integration.md`. The integration is an **opt-in** feature gated on the NLE/NLSE problem domain — projects outside that domain are unaffected. Library: <https://github.com/mmogib/DFMethods.jl> (v0.3.2+).

@@ -1,0 +1,124 @@
+% =====================================================================
+% Response to reviewers — [JOURNAL FULL NAME], manuscript [MANUSCRIPT NUMBER]
+% Cycle: [second / third / ...] submission, [Month] [Year]
+%
+% Structure is scaffolding. The replies are the authors' — leave them as
+% placeholders unless the user dictates the content.
+%
+% Rules:
+%   - Reviewer comments are quoted VERBATIM. Never paraphrase, soften,
+%     or silently correct a reviewer.
+%   - Every reply says where the change landed: section, page, equation.
+%   - Where a suggestion was not adopted, say so plainly and give the
+%     reason. Do not pretend to adopt it.
+% =====================================================================
+
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[sc]{mathpazo}
+\usepackage[margin=1in]{geometry}
+\usepackage[skip=10pt plus1pt, indent=0pt]{parskip}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{mdframed}
+\usepackage{hyperref}
+
+% Reviewer comment: quoted verbatim, boxed.
+\newmdenv[
+  linewidth=0.8pt,
+  linecolor=gray,
+  backgroundcolor=gray!6,
+  skipabove=10pt,
+  skipbelow=6pt,
+  innertopmargin=8pt,
+  innerbottommargin=8pt
+]{comment}
+
+% Our reply.
+\newcommand{\reply}{\medskip\noindent\textbf{Response.}\ }
+
+% Pointer to where the change landed in the manuscript.
+\newcommand{\changed}[1]{\medskip\noindent\textit{Change: #1}}
+
+\title{Response to Reviewers\\[4pt]
+\large Manuscript [MANUSCRIPT NUMBER]: ``[PAPER TITLE]''\\
+\large \emph{[JOURNAL FULL NAME]}}
+\author{}
+\date{[Month] [Year]}
+
+\begin{document}
+\maketitle
+
+\noindent
+We thank the reviewers for their careful reading and their comments. We have revised the manuscript
+accordingly. Below, each comment is reproduced in full and followed by our response and a pointer to
+the corresponding change. Changes in the manuscript are marked in blue.
+% ^ delete the last sentence if no marked copy is submitted
+
+\bigskip
+\noindent
+\textbf{Summary of principal changes}
+
+\begin{itemize}
+  \item [CHANGE 1 — what changed, where]
+  \item [CHANGE 2]
+  \item [CHANGE 3]
+\end{itemize}
+
+% =====================================================================
+\section*{Reviewer 1}
+
+\begin{comment}
+[REVIEWER 1, COMMENT 1 — VERBATIM]
+\end{comment}
+
+\reply
+[RESPONSE]
+
+\changed{[SECTION / PAGE / EQUATION WHERE THE CHANGE LANDED]}
+
+\begin{comment}
+[REVIEWER 1, COMMENT 2 — VERBATIM]
+\end{comment}
+
+\reply
+[RESPONSE]
+
+\changed{[SECTION / PAGE / EQUATION]}
+
+% =====================================================================
+\section*{Reviewer 2}
+
+\begin{comment}
+[REVIEWER 2, COMMENT 1 — VERBATIM]
+\end{comment}
+
+\reply
+[RESPONSE]
+
+\changed{[SECTION / PAGE / EQUATION]}
+
+% ---------------------------------------------------------------------
+% Pattern for a suggestion that was NOT adopted. Say so directly.
+% ---------------------------------------------------------------------
+% \begin{comment}
+% [COMMENT — VERBATIM]
+% \end{comment}
+%
+% \reply
+% We have not made this change, for the following reason. [REASON]. We hope the reviewer finds this
+% acceptable; we have, however, [WHAT WAS DONE INSTEAD, IF ANYTHING] in Section [N].
+
+% =====================================================================
+% \section*{Editor}
+%
+% \begin{comment}
+% [EDITOR COMMENT — VERBATIM]
+% \end{comment}
+%
+% \reply
+% [RESPONSE]
+
+\end{document}
