@@ -42,6 +42,8 @@ mklink /D title-abstract research-toolkit\skills\title-abstract
 ```
 
 > **Note on Windows**: `ln -s` in Git Bash creates *copies*, not symlinks. You must use `mklink /D` from cmd.exe. This requires Administrator privileges or Developer Mode enabled (Settings → For developers → Developer Mode).
+>
+> If neither is available, use a directory junction instead — `mklink /J <name> research-toolkit\skills\<name>` works from an unelevated shell, and Claude Code follows it exactly as it follows a symlink. This is how `prepare-submission` was deployed.
 
 > **Note on Claude Code updates**: As of March 2026, Claude Code discovers skills by scanning `~/.claude/skills/*/SKILL.md`. If a future version introduces a native skill installation mechanism, the symlink step may become unnecessary. Check [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code) for the latest setup instructions.
 
