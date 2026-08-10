@@ -94,10 +94,12 @@ research-toolkit/
 ├── CLAUDE.md                              # Master guide (rules, links)
 ├── README.md                              # This file
 ├── guides/                                # Detailed reference documents
+│   ├── project-hub.md                     #   Root CLAUDE.md hub + notes discipline
 │   ├── coding-style.md                    #   Julia patterns, types, naming, errors
 │   ├── script-patterns.md                 #   ARGS, --resume, CSV, TeeIO, progress
 │   ├── experiment-workflow.md             #   12-phase pipeline (problems → figures)
-│   ├── paper-review-checklist.md          #   13-item paper polish checklist
+│   ├── dfmethods-integration.md           #   DFMethods.jl patterns (opt-in, NLE only)
+│   ├── paper-review-checklist.md          #   14-item paper polish checklist
 │   └── latex-conventions.md               #   Writing style, theorems, biblatex
 ├── templates/                             # Copy-paste starters
 │   ├── CLAUDE.md.template                 #   Project-level CLAUDE.md
@@ -122,7 +124,7 @@ research-toolkit/
     ├── numerics-audit/                    #   /numerics-audit — adversarial numerics audit
     ├── optimization-research-workflow/    #   /optimization-research-workflow — 12 phases
     ├── prepare-submission/                #   /prepare-submission — journal packaging
-    ├── review-paper/                      #   /review-paper — 13-item checklist
+    ├── review-paper/                      #   /review-paper — 14-item checklist
     ├── suggest-journals/                  #   /suggest-journals — journal search
     └── title-abstract/                    #   /title-abstract — titles & abstracts
 ```
@@ -155,7 +157,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 | `/numerics-audit` | Adversarial audit of numerical experiments against the paper's claims. Four modes, including a referee mode for someone else's paper |
 | `/optimization-research-workflow` | 12-phase research pipeline. DFMethods.jl touchpoints in all 12 phases (only for projects that opted in). |
 | `/prepare-submission` | Package a finished manuscript for one journal, one cycle: flattened `source_files/`, template transformation, trimmed `.bib`, cover letter |
-| `/review-paper` | 13-item paper polish checklist |
+| `/review-paper` | 14-item paper polish checklist, canonical slugs, checklist-only mode |
 | `/suggest-journals` | Find Q1–Q2 journals for publication |
 | `/title-abstract` | Academic titles and abstracts |
 

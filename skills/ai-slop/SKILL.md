@@ -6,14 +6,14 @@ invocation: user
 
 # /ai-slop — Multi-Agent AI-Slop & Revision-Language Sweep
 
-A deeper pass than `/review-paper` item 13. Used for revision cycles or AI-drafted manuscripts where reviewer-response framing and revision-tracking language need to be scrubbed in addition to the standard banned-words list. Agents flag and report; the user (with Claude's help) triages and applies.
+A deeper pass than `/review-paper` item 14. Used for revision cycles or AI-drafted manuscripts where reviewer-response framing and revision-tracking language need to be scrubbed in addition to the standard banned-words list. Agents flag and report; the user (with Claude's help) triages and applies.
 
 ## When to Use
 
 - Manuscript is approaching submission or resubmission.
 - A revision cycle has added new content (often in response to reviewer comments) and you want to confirm the new prose doesn't read as reviewer-response.
 - The draft used AI assistance and you want a defensible "we cleaned the prose" pass before shipping.
-- `/review-paper` item 13 found surface slop, but you want the deeper multi-agent treatment with reviewer-response and revision-tracking categories.
+- `/review-paper` item 14 found surface slop, but you want the deeper multi-agent treatment with reviewer-response and revision-tracking categories.
 
 Don't use for: line-by-line copy-editing of grammar/typos, or technical-correctness review (different tasks).
 
@@ -93,7 +93,7 @@ Build a consolidated view organized by **theme**, not by chunk.
 - Citations, labels, table cell values, model/author names.
 - Established technical terms (e.g., "robust optimization" is a term of art).
 
-For the canonical banned-words list and wordy-phrase replacement table, see `../../guides/paper-review-checklist.md` item 13. The skill extends that list with the two revision-cycle categories (reviewer-response framing and revision-tracking language).
+For the canonical banned-words list and wordy-phrase replacement table, see `../../guides/paper-review-checklist.md` item 14. The skill extends that list with the two revision-cycle categories (reviewer-response framing and revision-tracking language).
 
 ## Phase 6 — Apply Tier 1 + Recurring (Batch)
 
@@ -157,6 +157,6 @@ Run the grep, eyeball the hits, decide each.
 ## Reference Files
 
 - `references/agent-prompt-template.md` — parameterized prompt for the chunk agents (Phase 3).
-- `../../guides/paper-review-checklist.md` — canonical banned-words list, wordy-phrase table, structural patterns (item 13). This skill extends item 13 with the revision-cycle categories.
+- `../../guides/paper-review-checklist.md` — canonical banned-words list, wordy-phrase table, structural patterns (item 14). This skill extends item 14 with the revision-cycle categories.
 - `../../skills/review-paper/SKILL.md` — single-pass review skill. `/review-paper` references this skill as the deeper option for revision cycles.
 - `../../skills/join-revision/SKILL.md` — full revision-phase workflow; invokes this skill as its last step, after all other text has stabilized. Projects set up by it use the `\rev{...}` macro noted in Phase 1.

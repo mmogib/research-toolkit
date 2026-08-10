@@ -1,6 +1,33 @@
 # Universal Paper Review Checklist
 
-Complete items in order. Items marked "(if any)" may not apply to every paper — skip if not relevant.
+Complete items in order. Items marked "(if any)" may not apply to every paper.
+
+## Canonical items
+
+**Each item has a stable slug. Never renumber for dispatch.** An item that does not apply is marked
+`N/A` and keeps its number — renumbering the survivors makes "item 12" mean different things in
+different papers, and any skill delegating by number then fires on the wrong subject.
+
+| # | Slug | Title | Conditional |
+|---|---|---|---|
+| 1 | `notation-style` | Notation & LaTeX style consistency | |
+| 2 | `proof-review` | Proof review | |
+| 3 | `assumptions-audit` | Assumptions audit | |
+| 4 | `core-derivation` | Core derivation completeness | if any |
+| 5 | `computational-verification` | Computational verification mention | if any |
+| 6 | `abstract-polish` | Abstract polish | |
+| 7 | `introduction` | Introduction tightening | |
+| 8 | `section-transitions` | Section transitions | |
+| 9 | `redundancy` | Redundancy check | |
+| 10 | `algorithm-presentation` | Algorithm/method presentation | if any |
+| 11 | `captions` | Figure & table captions | |
+| 12 | `bibliography-integrity` | Bibliography integrity | |
+| 13 | `numerics-audit` | Numerical experiments audit | if any |
+| 14 | `style-pass` | Style pass — **LAST** | |
+
+Items 5 and 13 are different subjects and are both retained. Item 5 asks whether the paper *states*
+that computed quantities were validated — finite differences, unit tests, known solutions. Item 13
+asks whether the benchmark results support the paper's claims. Neither substitutes for the other.
 
 ## 1. Notation & LaTeX Style Consistency
 
@@ -105,7 +132,30 @@ For each theorem, lemma, proposition:
 - [ ] No entries with `note={DOI needs verification}` — if found, deploy a web-search agent to verify or flag as suspect
 - [ ] `temp_refs_to_add.bib` is empty (all suggestions have been processed by Mohammed)
 
-## 13. Style Pass (LAST)
+## 13. Numerical Experiments Audit (if any)
+
+Applies to any paper reporting benchmark results. Not the same as item 5 — this one asks whether the
+numbers support the claims.
+
+> **Delegate to `/numerics-audit`.** It runs the five lenses (claim inventory, problem character,
+> comparability, artifact consistency, reproducibility) in the mode that matches who can run
+> experiments. The checks below are the summary; that skill is the procedure.
+
+- [ ] Every empirical claim in the abstract, introduction, and conclusion is checked against the
+      tables — superlatives especially, since one losing row falsifies "in all cases"
+- [ ] Numbers quoted in the prose match their table cells (transcription drift is common after a
+      revision)
+- [ ] Percentages and speedups recompute from the table, in the right direction
+- [ ] The test problems can actually exercise the paper's selling points — for each claimed property,
+      some problem requires it
+- [ ] Stopping criterion, norm, and tolerance identical across methods, and stated
+- [ ] Failure convention stated; averages are not over different success sets per method
+- [ ] Function-evaluation accounting defined and identical across methods
+- [ ] Competitor parameters attributed to their own papers, and verified against the source
+- [ ] Figures agree with tables; performance profiles end at the fraction solved
+- [ ] Seeds, repetitions, and environment stated
+
+## 14. Style Pass (LAST)
 
 > **For revision cycles or AI-drafted manuscripts**, also run `/ai-slop` for the deeper multi-agent sweep that adds reviewer-response framing and revision-tracking language as separate categories with confidence-rated triage.
 

@@ -175,7 +175,10 @@ Only now: the baseline full read (step 1 below). Then report to Mohammed:
 
 ## The review workflow
 
-Run `/review-paper` to build the checklist, carrying the Phase 1 focus areas into it. Track the checklist in
+Run `/review-paper checklist-only` to build the checklist, carrying the Phase 1 focus areas into it.
+That mode returns the checklist and stops — this skill owns the order in which the work happens, and
+a full `/review-paper` run would start executing items (including the style sweep reserved for step 8)
+at step 1. Track the checklist in
 `notes/review-checklist.md` and findings in `notes/review-findings.md`. Then work this order.
 
 **1. Baseline full read.** Read `main.tex` end to end and build the manuscript map. Trust nothing you have
@@ -260,5 +263,5 @@ before moving on. Expect it to catch your long sentences.
 - `references/numerics-audit.md` — full adversarial numerics audit procedure (step 5).
 - `../review-paper/SKILL.md` — the checklist builder invoked at step 1.
 - `../ai-slop/SKILL.md` — the multi-agent prose sweep invoked at step 8.
-- `../../guides/paper-review-checklist.md` — the 13-item universal checklist.
+- `../../guides/paper-review-checklist.md` — the 14-item universal checklist.
 - `../../guides/latex-conventions.md` — writing style, theorem environments, notation, cross-references.

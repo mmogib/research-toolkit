@@ -1,10 +1,12 @@
 ---
 name: review-paper
 description: Paper review and polish checklist for academic papers before submission.
-  Walks through a 13-item universal checklist (notation, proofs, assumptions, abstract,
-  introduction, style, etc.), then adds project-specific items interactively. Distributes
-  tasks between Claude and the user, then Claude executes its assigned items.
-  Use when reviewing, polishing, or doing a final pass on a paper before submission.
+  Walks through a 14-item universal checklist (notation, proofs, assumptions, abstract,
+  introduction, numerics, style, etc.), then adds project-specific items interactively. Distributes
+  tasks between Claude and the user, then Claude executes its assigned items, delegating the
+  bibliography, numerics, and style items to their own skills. Accepts a checklist-only mode that
+  builds the checklist and stops. Use when reviewing, polishing, or doing a final pass on a paper
+  before submission.
 invocation: user
 ---
 
@@ -12,47 +14,71 @@ invocation: user
 
 Walk through a structured review of an academic paper before submission. Produces a tracked checklist note and systematically works through each item.
 
+## Modes
+
+| Invocation | Runs | Use |
+|---|---|---|
+| `/review-paper` | Phases 1–5. Builds the checklist **and executes** Claude's items. | Direct use. |
+| `/review-paper checklist-only` | Phases 1–3, then returns the checklist. **Stops before task distribution and execution.** | When another skill needs the checklist but owns the ordering of the work itself. |
+
+**Item delegations fire only in Phase 5.** Building a checklist never triggers `/litrev`,
+`/numerics-audit`, or `/ai-slop`. A host skill that invokes this one to obtain a checklist and then
+sequences the work itself must get a checklist and nothing else — otherwise item 14 kicks off a full
+prose sweep at the moment the checklist is created, which is the opposite of what it asked for.
+
+## Item identity
+
+Items have **stable canonical numbers and slugs**, listed in
+`../../guides/paper-review-checklist.md`. An item that does not apply is marked `N/A` and **keeps its
+number**. Never renumber the survivors: dispatch is by slug, and a renumbered list makes "item 12"
+mean different things in different papers.
+
 ## Workflow
 
 ### Phase 1: Context Discovery
 
 Before asking questions, gather project context:
 
-1. Read the project's `CLAUDE.md` to understand: paper topic, structure, LaTeX setup
+1. Read the project's `CLAUDE.md` to understand: paper topic, structure, LaTeX setup.
+   **If it is missing, or contains a `## Paper Key Elements` block, it predates the project hub** —
+   say so and suggest `/init-project adopt` before continuing. See `../../guides/project-hub.md`.
+   If a `notes/manuscript-map.md` exists, read it too; under the hub the paper's detail lives there
+   rather than in `CLAUDE.md`.
 2. Locate `.tex` files — identify the main file and any `\input`/`\include` structure
 3. Scan the paper to note what it contains:
-   - Proofs? (items 2, 3 apply)
-   - Named assumptions like (A1)–(An)? (item 3 applies)
-   - Core mathematical derivations? (item 4 applies)
-   - Computational experiments? (item 5 applies)
-   - Algorithm box / pseudocode? (item 10 applies)
-   - Figures and tables? (item 11 applies)
+   - Proofs? (`proof-review`, `assumptions-audit` apply)
+   - Named assumptions like (A1)–(An)? (`assumptions-audit` applies)
+   - Core mathematical derivations? (`core-derivation` applies)
+   - A statement that computed quantities were validated? (`computational-verification` applies)
+   - Benchmark results — tables of iterations, times, comparisons? (`numerics-audit` applies)
+   - Algorithm box / pseudocode? (`algorithm-presentation` applies)
+   - Figures and tables? (`captions` applies)
 4. Check for existing review notes in `notes/`
 
 ### Phase 2: Universal Checklist
 
-Generate `notes/review_checklist_YYYYMMDD.md` with applicable items from `../../guides/paper-review-checklist.md`.
+Generate `notes/review-checklist.md` with the items from `../../guides/paper-review-checklist.md`.
+Flat, topical, undated — one checklist per project, updated in place across review cycles. See
+`../../guides/project-hub.md`.
 
-Format:
+Format — canonical number, slug, and status, with inapplicable items kept and marked `N/A`:
 
 ```markdown
-# Review Checklist — YYYY-MM-DD
+# Review Checklist
 
-## Items
-
-1. **Notation & LaTeX style consistency**
-2. **Proof review**
-3. **Assumptions audit**
-...
-
-## Status
-
-- [ ] 1. Notation & LaTeX style
-- [ ] 2. Proof review
-...
+| # | Slug | Item | Assigned | Status |
+|---|---|---|---|---|
+| 1 | `notation-style` | Notation & LaTeX style consistency | Claude | [ ] |
+| 2 | `proof-review` | Proof review | Claude flags → User | [ ] |
+| 4 | `core-derivation` | Core derivation completeness | — | N/A |
+| 13 | `numerics-audit` | Numerical experiments audit | Claude | [ ] |
+| 14 | `style-pass` | Style pass (LAST) | Claude | [ ] |
 ```
 
-Skip items marked "(if any)" that don't apply based on Phase 1 findings. Renumber accordingly.
+Items marked "(if any)" that do not apply based on Phase 1 findings are marked `N/A`. **They keep
+their numbers.** Do not renumber.
+
+Add a line to `## Active notes` in the project hub pointing at the checklist.
 
 Present the checklist to the user for confirmation.
 
@@ -92,12 +118,17 @@ Default assignments:
 | 9. Redundancy check | Claude flags → User reviews |
 | 10. Algorithm/method presentation | Claude flags → User reviews |
 | 11. Figure/table captions | Claude |
-| 12. Bibliography cleanup | Claude |
-| 13. Style pass | Claude |
+| 12. Bibliography integrity | Claude (delegates to `/litrev`) |
+| 13. Numerical experiments audit | Claude (delegates to `/numerics-audit`) |
+| 14. Style pass | Claude (may delegate to `/ai-slop`) |
 
 Present defaults and let user adjust. User may also reassign project-specific items.
 
+**`checklist-only` stops here.** Return the checklist note and do not run Phase 4 or Phase 5.
+
 ### Phase 5: Execute
+
+**This is the only phase in which item delegations fire.**
 
 Work through Claude's assigned items in checklist order:
 
@@ -119,29 +150,48 @@ After completing all Claude items, print a summary of remaining user tasks.
 - Grep for inconsistent bold/mathbb patterns
 - Check theorem environment counters in preamble
 
-### 5. Computational verification mention
+### 5. `computational-verification` — Computational verification mention
 - Search for "finite difference", "numerical verification", "gradient check" or similar
 - If absent, flag the gap
+- **This is not the numerics audit.** It asks whether the paper *states* that computed quantities were
+  validated. Whether the benchmark results support the claims is item 13.
 
 ### 11. Figure/table captions
 - List all `\caption{...}` and check self-containedness
 - Cross-reference all `\ref{fig:` and `\ref{tab:` with actual labels
 - Flag any orphan figures/tables
 
-### 12. Bibliography cleanup
+### 12. `bibliography-integrity` — Bibliography integrity
 - Extract all `\cite{...}` keys from `.tex` files
 - Compare against `.bib` file entries
 - Report: undefined references, orphan bib entries, duplicate authors
+- The above is mechanical. **For the semantic layer — is what the paper *says* about each cited work
+  actually true? — invoke `/litrev` in `audit-manuscript` mode.** It checks every characterization
+  and every benchmark-parameter attribution against the source, and checks the reverse direction for
+  uncited lineage. A bibliography where every key resolves can still misdescribe every paper in it.
+- Never edit the Zotero-managed `.bib`. New references go to `paper/temp_refs_to_add.bib` as
+  unverified leads; `/litrev` owns that flow.
 
-### 13. Style pass
+### 13. `numerics-audit` — Numerical experiments audit
+- **Invoke `/numerics-audit`.** Declare the mode first — who can run experiments determines where a
+  gap goes, and the audit will not start without it.
+- Applies to any paper reporting benchmark results. `N/A` otherwise.
+- Findings return in three buckets: text fix, needs-a-run, and scope decisions for the user.
+
+### 14. `style-pass` — Style pass
 - Grep for each banned word from the checklist
 - Grep for weak openings ("It is ", "There are ")
 - Grep for wordy phrases from the replacement table
 - Report with line numbers and suggested replacements
-- **For revision cycles or AI-drafted manuscripts**: invoke `/ai-slop` for the deeper multi-agent sweep that adds reviewer-response framing and revision-tracking language as separate categories with confidence-rated triage. `/review-paper` item 13 catches surface AI tells; `/ai-slop` adds the categories specific to revision cycles.
+- **For revision cycles or AI-drafted manuscripts**: invoke `/ai-slop` for the deeper multi-agent sweep that adds reviewer-response framing and revision-tracking language as separate categories with confidence-rated triage. Item 14 catches surface AI tells; `/ai-slop` adds the categories specific to revision cycles.
+- Runs **last**, after every other item has settled the text — including any late numerics rewrites
+  from item 13.
 
 ## Reference Files
 
-- `../../guides/paper-review-checklist.md` — Full universal checklist with detailed sub-items
-- `../ai-slop/SKILL.md` — Multi-agent deep sweep for revision cycles (complements item 13)
+- `../../guides/paper-review-checklist.md` — Full universal checklist, canonical numbers and slugs
+- `../../guides/project-hub.md` — Hub shape and notes discipline; the source of the undated checklist filename
+- `../litrev/SKILL.md` — Cite-with-confidence audit (item 12's semantic layer)
+- `../numerics-audit/SKILL.md` — Adversarial numerics audit (item 13)
+- `../ai-slop/SKILL.md` — Multi-agent deep sweep for revision cycles (complements item 14)
 - `../join-revision/SKILL.md` — Owns the whole revision phase of a finished manuscript (system setup, collaborator roles, `\rev` markup, adversarial numerics audit) and invokes this skill to build the checklist. If the paper is finished and the job is to take it to submission, start there instead of here.
