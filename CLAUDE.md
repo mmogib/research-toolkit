@@ -118,5 +118,5 @@ The `notes/` folder holds development discussions, design plans, and session fin
 9. **Scripts skip completed runs by default** — use `--force` to re-run. Always remind about `--force` when suggesting re-runs.
 10. **Avoid AI slop** — no "robust", "crucial", "comprehensive", "streamline", "leverage" in writing.
 11. **No named-paragraphs or excessive bold** in LaTeX writing.
-12. **Notes workflow** — plans and session findings go to `notes/`. Move completed notes to `notes/done/`.
-13. **Keep CLAUDE.md current** — update after significant sessions.
+12. **Notes workflow** — `notes/` is flat, topical, and **undated**: one note per open topic, updated in place. Settled notes move to `notes/done/`. See `guides/project-hub.md`.
+13. **Keep CLAUDE.md current** — the root file is a **hub**: three Status lines and an `## Active notes` index of pointers. Findings and session history go in the note that owns them, never in the hub. `guides/project-hub.md` is the single source of truth; `/init-project` writes it and `adopt` migrates a legacy one.

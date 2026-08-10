@@ -34,10 +34,10 @@ Phase 8. Final verification grep  ← confirm zero hits in body text
 
 ## Phase 1 — Context Discovery
 
-1. Read the project's `CLAUDE.md` to find the manuscript file path, paper topic, structure, and any revision context (revision cycle? AI-drafted?).
+1. Read the project's `CLAUDE.md` to find the manuscript file path, paper topic, structure, and any revision context (revision cycle? AI-drafted?). **If it is missing or contains a `## Paper Key Elements` block, it predates the project hub** — say so and suggest `/init-project adopt` before continuing (`../../guides/project-hub.md`). Under the hub, the paper's detail lives in `notes/manuscript-map.md`; read that too when it exists.
 2. Locate the main `.tex` file and any `\input` / `\include` structure.
-3. If the project uses a revision-tracking macro (e.g., `\rev{...}` for blue-coloring revisions), note it — patterns inside such wraps are typically the highest-density slop targets.
-4. Check `notes/` for prior `ai_slop_*` reports — if a sweep already ran, focus on newly added content rather than re-flagging.
+3. If the project uses a revision-tracking macro (`\rev{...}` for blue-coloring revisions — the convention and its integrity checks are in `../../guides/latex-conventions.md`), note it. Patterns inside such wraps are typically the highest-density slop targets.
+4. Check `notes/` for a prior `ai-slop*` report — if a sweep already ran, focus on newly added content rather than re-flagging.
 
 ## Phase 2 — Define Chunks
 
@@ -58,7 +58,7 @@ Use the agent prompt template at `references/agent-prompt-template.md`. For each
 
 1. Replace every `<PLACEHOLDER>` with the project-specific value (range, file path, section list, output report path).
 2. Add the relevant section-specific note (math-heavy / results-heavy / fixed-in-prior-pass) — see template.
-3. Save report to `notes/ai_slop_<chunk-id>.md` (e.g., `notes/ai_slop_intro_background.md`).
+3. Save report to `notes/ai-slop-<chunk>.md` (e.g., `notes/ai-slop-intro.md`).
 
 Launch all chunk agents in parallel (single message, multiple Agent tool calls). They run concurrently and each writes its own report. Use `subagent_type: general-purpose` unless the project has a more specific agent type.
 
@@ -129,8 +129,9 @@ If hits remain, decide each: false positive (technical context, leave) or residu
 
 ## Notes Convention
 
-- During execution: reports go to `notes/ai_slop_<chunk-id>.md`.
-- After all fixes are applied and the user is satisfied: the user moves the chunk reports plus a session summary to `notes/done/ai_slop_<YYYYMMDD>/` (manual step — the skill does not auto-archive).
+- During execution: reports go to `notes/ai-slop-<chunk>.md`.
+- After all fixes are applied and the user is satisfied: consolidate the chunk reports into a single `notes/ai-slop.md` and move it to `notes/done/` (manual step — the skill does not auto-archive). A later sweep reopens and updates that topic note rather than creating a dated hierarchy.
+- Flat, topical, undated — see `../../guides/project-hub.md`. Dated directories give one folder per session and none per topic, so the current state has to be reconstructed by reading every folder in order.
 
 ## Common Pitfalls
 

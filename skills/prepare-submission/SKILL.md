@@ -103,7 +103,10 @@ user points at a specific file.
 
 Do this before asking anything. Report a compact inventory, then ask.
 
-1. Read the project `CLAUDE.md`.
+1. Read the project `CLAUDE.md`. **If it is missing or contains a `## Paper Key Elements` block, it
+   predates the project hub** — say so and suggest `/init-project adopt` before continuing
+   (`<toolkit>/guides/project-hub.md`). Under the hub, the paper's detail lives in
+   `notes/manuscript-map.md`; read that too when it exists.
 2. Read `paper/main.tex` and record:
    - `\documentclass` and its options
    - every `\input` / `\include` and the file each resolves to

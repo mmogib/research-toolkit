@@ -17,7 +17,7 @@ Each phase includes objectives, inputs/prerequisites, outputs, decision rules fo
    - Problem domain (binary first question: **Nonlinear System of Equations (NLE / NLSE)** vs **Something else**)
    - If NLE: solver framework (DFMethods.jl only / DFMethods.jl + bring-your-own / no DFMethods), application sub-flavors (CS / ImgRec / LogReg multi-select), canonical 28-problem benchmark library (default yes). See `dfmethods-integration.md` for the patterns when DFMethods is opted in.
    - If Something else: no further problem-domain questions — generic scaffold only.
-2. Edit `CLAUDE.md` — fill in algorithm name, problem class, constraint types.
+2. Edit `CLAUDE.md` — the one-paragraph description, the three Status lines, and the structure. It is a hub, not a log: see `project-hub.md`. `/init-project` writes it; edit only to adjust what it produced.
 3. Edit `jcode/CLAUDE.md` — fill in algorithm steps, parameter descriptions.
 4. Add reference papers to `refs/`.
 5. Run `julia --project=jcode/ -e 'import Pkg; Pkg.instantiate()'` to set up dependencies.
@@ -290,7 +290,10 @@ julia --project=. scripts/s30_benchmark.jl --export           # dump to CSV
 
 **Outputs:** Complete Section 4 (Numerical Experiments) in `paper/main.tex`.
 
-**Gate:** All tables and figures are filled in. Discussion accurately reflects the data.
+**Gate:** All tables and figures are filled in. Discussion accurately reflects the data — **verified by
+`/numerics-audit` in `self-owned` mode, not by reading it over.** This is the last phase where a gap
+is cheap: a missing baseline or an incomparable stopping rule found here costs a script re-run, and
+the same gap found at phase 11 costs a submission delay.
 
 ---
 
@@ -299,7 +302,8 @@ julia --project=. scripts/s30_benchmark.jl --export           # dump to CSV
 **Objective:** Write introduction, related work, and position the contribution.
 
 **Steps:**
-1. Use reference papers in `refs/` to write related work.
+1. Use reference papers in `refs/` to write related work — through `/litrev`, so every cited paper
+   has a note written from its PDF and every characterization is checked against the source.
 2. Identify the gap your algorithm fills.
 3. Write contribution list.
 4. Write introduction following the "problem → context → gap → contribution → outline" structure.
@@ -317,7 +321,8 @@ julia --project=. scripts/s30_benchmark.jl --export           # dump to CSV
 2. Proof review: all lemmas and theorems referenced correctly.
 3. Abstract update: reflects actual results, not aspirational claims.
 4. Use `title-abstract` skill for title and abstract refinement.
-5. Check bibliography completeness.
+5. Check bibliography completeness — mechanically, and semantically via `/litrev`: a bibliography
+   where every key resolves can still misdescribe every paper in it.
 6. Final read-through for clarity and flow.
 
 **Outputs:** Submission-ready paper.

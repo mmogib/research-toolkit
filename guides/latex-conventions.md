@@ -22,7 +22,7 @@ Mohammed's LaTeX writing style and conventions for mathematics research papers.
 ### Bibliography
 - **Biblatex + Biber** (not BibTeX)
 - `references.bib` is **Zotero-managed** — Claude must NEVER edit it directly
-- If new references are needed, Claude writes them to `paper/temp_refs_to_add.bib` with a comment. Mohammed verifies via Google Scholar, imports through Zotero, and updates `references.bib`
+- If new references are needed, Claude writes them to `paper/temp_refs_to_add.bib` as **unverified leads** — never fabricated entries. Mohammed verifies via Google Scholar, imports through Zotero, and updates `references.bib`. `/litrev` owns the flow and the cite-with-confidence record behind it
 - `\addbibresource{references.bib}`
 - `\printbibliography` at end
 - **WARNING**: AI-generated bibliography entries are frequently hallucinated — real author names combined with fabricated titles, journals, volumes, and DOIs. Never generate bib entries from memory. Every entry must come from a PDF in `refs/` or a DOI verified via web search

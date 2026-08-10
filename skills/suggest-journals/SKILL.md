@@ -21,6 +21,8 @@ Find suitable journals for a research paper. Gathers topic context, applies stan
 
 Before asking questions, gather project context:
 
+**Old-hub preflight**: if `CLAUDE.md` is missing, or contains a `## Paper Key Elements` block, it predates the project hub — say so and suggest `/init-project adopt` before continuing. See `../../guides/project-hub.md`. Under the hub, the paper's detail lives in `notes/manuscript-map.md`; read that too when it exists.
+
 1. **Read the project's `CLAUDE.md`** to determine:
    - Research topic and field/subfield
    - Paper type (theoretical, computational, applied, mixed)
@@ -91,7 +93,7 @@ Rank remaining journals by scope fit to the paper's topic. Consider:
 
 Create the output note using the template in `references/output-template.md`:
 
-- Save to `notes/journal_suggestions_YYYYMMDD.md`
+- Save to `notes/journal-suggestions.md`
 - Include all search metadata (query, preferences, date)
 - Present journals in a ranked table
 - Add notes on scope fit and any caveats

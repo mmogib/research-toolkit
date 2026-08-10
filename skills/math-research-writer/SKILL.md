@@ -39,31 +39,25 @@ This skill acts as your dedicated research partner for writing rigorous, publica
 
 ### Setup Your Research Environment
 
-Create a dedicated folder for your paper:
+**Run `/init-project`.** It scaffolds the full structure — `paper/` with the LaTeX template and
+bibliography, `notes/` with `litrev/`, `refs/` — and writes the root `CLAUDE.md` hub, which is what
+lets a later session know where the project stands. For an existing directory, `/init-project adopt`.
+
+Do not scaffold by hand. A project created with `mkdir` and `touch` has no hub, so every subsequent
+session starts blind, and no skill that keys off the hub will work properly.
+
 ```
-mkdir ~/research/paper-title
-cd ~/research/paper-title
+paper/
+  main.tex          from templates/main.tex.template
+  references.bib    Zotero-managed
+  imgs/
+notes/
+  litrev/           one note per reference read from its PDF
+refs/               reference PDFs
+CLAUDE.md           the hub
 ```
 
-Create your draft file:
-```
-touch paper-draft.md
-```
-
-Or create a LaTeX-based project:
-```
-touch main.tex
-touch references.bib
-mkdir imgs
-```
-so latex structure becomes
-```
----
-  - imgs # to contain any images or pdf included in the paper
-  - main.tex
-  - references.bib
-```
-for main.tex structure and content see [template](#latex-template) below
+For `main.tex` structure and content see [template](#latex-template) below.
 
 Open Claude Code from this directory and start writing.
 
@@ -207,6 +201,10 @@ Help structure mathematics papers with mathematical precision:
 
 ## Numerical Experiments
 
+> Once the results exist, **run `/numerics-audit`** before the section is considered done. It tests
+> every empirical claim against the tables and asks whether the test problems can exercise the
+> paper's selling points at all. Declare the mode — `self-owned` when the code is yours.
+
 ### Experiment 1: [Name]
 - **Objective**: Validate Theorem X
 - **Setup**: [Problem instances, parameters]
@@ -220,6 +218,11 @@ Help structure mathematics papers with mathematical precision:
 - **Findings**: [Key comparisons]
 
 ## Literature Review / Related Work
+
+> **Run `/litrev` in `build-from-reading` mode before drafting this section.** Its notes are the set
+> of papers you may characterize. Every citation here must resolve to one; a citation without a note
+> is blocked, not deferred. This is the section where fabricated references enter a paper.
+
 - **Classical results**: [Foundational work - cite]
 - **Recent advances**: [Recent papers building on these ideas]
 - **Our contribution**: [How this paper advances the field]
@@ -707,41 +710,25 @@ Ask periodically:
 
 ### 11. Citation Management for Mathematics
 
-Handle references based on user preference:
+**Never write a bibliography entry from memory, and never show one as an example.** A generated
+entry pairs real authors with an invented title, journal, volume, or DOI, and it looks exactly like a
+correct one. This is the single most damaging error available in academic writing assistance: it is
+undetectable by reading, and it reaches a referee intact.
 
-**Inline Citations (Author-Year)**:
-```markdown
-Nesterov (2004) proved that accelerated gradient methods achieve O(1/k²) convergence.
-```
+**All citation work goes through `/litrev`.** That skill owns the cite-with-confidence record — one
+note per reference actually read from its PDF, keyed by citation key — and the rule that follows from
+it: no note means you have not read the paper, which means you may not characterize it.
 
-**Numbered References**:
-```markdown
-Accelerated gradient methods achieve O(1/k²) convergence [5].
+| Situation | What to do |
+|---|---|
+| Citing a paper while drafting | Check `notes/litrev/<Key>.md`. No note → read the PDF and write one first. |
+| A claim needs support you have not read | A reading task before a writing task. Never write the sentence and find a citation afterwards. |
+| The reference is not in the bibliography | `/litrev`'s request flow: an **unverified lead** in `paper/temp_refs_to_add.bib`, never a fabricated entry. Wait for Mohammed to verify and import via Zotero before citing the key. |
+| Formatting the bibliography | The `.bib` is Zotero-managed and the journal's `.bst` handles the format. Not a drafting concern. |
 
-[5] Nesterov, A. (2004). Introductory lectures on convex optimization. 
-    Springer Science + Business Media.
-```
-
-**Citation Management**:
-- BibTeX format for LaTeX documents
-- MathSciNet references when available
-- Complete author lists for mathematics journals
-- Proper journal abbreviations (J. Optim. Theory Appl., SIAM J. Optim., etc.)
-
-```markdown
-## References
-
-[1] Beck, A., & Teboulle, M. (2009). A fast iterative shrinkage-thresholding 
-    algorithm for linear inverse problems. *SIAM Journal on Imaging Sciences*, 
-    2(1), 183-202.
-
-[2] Rockafellar, R. T., & Wets, R. J. B. (2009). *Variational analysis* (Vol. 317). 
-    Springer Science + Business Media.
-
-[3] Boyd, S., Parikh, N., & Chu, E. (2011). Distributed optimization and 
-    statistical learning via the alternating direction method of multipliers. 
-    *Foundations and Trends® in Machine Learning*, 3(1), 1-122.
-```
+Citation *commands* are a formatting matter and belong with the manuscript's bibliography backend —
+`\citep` / `\citet` under natbib, `\parencite` / `\textcite` under biblatex. See
+`../../guides/latex-conventions.md`.
 
 ---
 

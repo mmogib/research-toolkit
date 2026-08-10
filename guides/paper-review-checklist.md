@@ -121,7 +121,9 @@ For each theorem, lemma, proposition:
 
 ## 12. Bibliography Integrity
 
-**CRITICAL**: `references.bib` is Zotero-managed. Do NOT add, remove, or edit entries in it directly. If new references are needed, write them to `paper/temp_refs_to_add.bib` for Mohammed to verify and import through Zotero.
+**CRITICAL**: `references.bib` is Zotero-managed. Do NOT add, remove, or edit entries in it directly. New references go to `paper/temp_refs_to_add.bib` as **unverified leads** — never fabricated entries — for Mohammed to verify and import through Zotero. `/litrev` owns that flow.
+
+The checks below are mechanical. **For the semantic layer — whether what the paper says about each cited work is actually true — run `/litrev` in `audit-manuscript` mode.**
 
 - [ ] All `\cite` keys resolve (no undefined references)
 - [ ] No orphan bib entries (in .bib but never cited) — report to Mohammed for cleanup via Zotero

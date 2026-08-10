@@ -81,9 +81,19 @@ your-project/
 | 6 | Parameter Search | Tuned defaults found via LHS | 1-2 sessions |
 | 7 | Large-Scale Experiments | Multi-dim x multi-problem x multi-start results | 1-2 sessions |
 | 8 | Application Experiments | Domain-specific results (CS, traffic, etc.) | 1-3 sessions |
-| 9 | Paper Writing | Results tables, profiles, discussion | 2-3 sessions |
-| 10 | Literature Review | Introduction, related work | 1-2 sessions |
+| 9 | Paper Writing | Results tables, profiles, discussion — **`/numerics-audit` clean** | 2-3 sessions |
+| 10 | Literature Review | Introduction, related work — **`/litrev` inventory clear** | 1-2 sessions |
 | 11 | Polish & Submit | Notation, proofs, abstract, final check | 1-2 sessions |
+
+### Skill touchpoints
+
+| # | Phase | Invoke |
+|---|---|---|
+| 0 | Project Setup | `/init-project` (or `adopt` for an existing directory) — it owns the hub |
+| 1 | Theory Review | `/litrev` while reading the reference papers, so the record exists before the citations do |
+| 9 | Paper Writing | **`/numerics-audit`, mode `self-owned`** — gates 9 → 10. A gap found here costs a script re-run; the same gap found at phase 11 costs a submission delay |
+| 10 | Literature Review | `/litrev` in `audit-manuscript` mode once the related-work section exists |
+| 11 | Polish & Submit | `/review-paper`, which delegates items 12–14 to `/litrev`, `/numerics-audit`, and `/ai-slop` |
 
 **See `../../guides/experiment-workflow.md` for detailed phase descriptions, decision rules, and common pitfalls.**
 
@@ -119,8 +129,8 @@ your-project/
 1. **DO NOT compile LaTeX.** The user compiles.
 2. **DO NOT run scripts automatically.** The user runs scripts unless they explicitly ask.
 3. **All shared deps in `deps.jl`.** Never add `using` in other `src/` files.
-4. **Notes workflow.** Plans go to `notes/plan_*.md`. Session findings go to `notes/`.
-5. **Status tracking.** Keep `CLAUDE.md` current with completed items, findings, next steps.
+4. **Notes workflow.** `notes/` is flat, topical, and **undated** — one note per open topic, updated in place. Settled notes move to `notes/done/`. See `../../guides/project-hub.md`.
+5. **Status tracking.** The root `CLAUDE.md` is a **hub**: three Status lines (Phase / Now / Next) and an `## Active notes` index of pointers. Findings and completed-item logs go in the note that owns them, never in the hub — a hub that accumulates findings becomes a stale second copy of the project. Detail belongs in `jcode/CLAUDE.md`, which stays long. See `../../guides/project-hub.md`.
 
 ## Reference Files
 
