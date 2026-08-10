@@ -1,10 +1,10 @@
 ---
 name: join-revision
 description: Join a fully developed manuscript in its review-and-revision phase and take it to submission
-  quality without running any code. Sets up the working system (lean CLAUDE.md hub, flat undated notes,
-  litrev records, channels/ correspondence with an external AI reviewer, \rev blue markup), then drives an
-  eight-step review - proofs, literature, consistency, adversarial numerics audit, front matter, mechanical
-  passes, style. Numerical experiments are audited and specified for a collaborator, never run.
+  quality without running any code. Sets up the working system through /init-project adopt and /channels,
+  then drives an eight-step review - proofs, literature, consistency, adversarial numerics audit, front
+  matter, mechanical passes, style - delegating each procedure to its own skill while owning the order and
+  the arrangement. Numerical experiments are audited and specified for a collaborator, never run.
 invocation: user
 ---
 
@@ -24,11 +24,19 @@ the paper's state, now and always — not the notes, not the conversation, not w
 
 | Skill | Job |
 |---|---|
-| **`/join-revision`** | Owns the whole revision phase of a finished manuscript. Sets up the system, drives the order, owns the numerics audit. Writes no code and runs nothing. |
-| `/review-paper` | Builds and tracks the item checklist. Invoked from step 1 below, not instead of this skill. |
+| **`/join-revision`** | Owns the whole revision phase of a finished manuscript: the order of the work, and the arrangement every other skill runs under. Writes no code and runs nothing. |
+| `/init-project adopt` | Scaffolding and the hub. Invoked at Phase 2. |
+| `/channels` | External-reviewer correspondence. Invoked at Phase 4. |
+| `/review-paper` | Builds the item checklist. Invoked `checklist-only` at step 1. |
+| `/litrev` | Cite-with-confidence audit. Invoked at step 3. |
+| `/numerics-audit` | Adversarial numerics audit. Invoked at step 5. |
 | `/ai-slop` | Deep multi-agent prose sweep. Invoked last, at step 8. |
 | `/math-research-writer` | Writing a paper from scratch or drafting new theory. Different job. |
 | `/optimization-research-workflow` | Code-first projects where you implement and run the algorithm. The opposite of this skill. |
+
+This skill is an orchestrator. When a procedure lives in another skill, invoke it and supply the
+arrangement — do not restate the procedure here, or the two copies drift and the one in front of you
+wins.
 
 The defining constraint: **the numerics already exist and you cannot run them.** You audit the experiments,
 find what the paper claims versus what the tables show, and write a specification when new runs are needed.
@@ -55,7 +63,7 @@ them rather than assuming.
    text-only and every gap becomes a note, not a spec.
 2. *Is an external AI reviewer in the loop?* Default: yes — Codex (OpenAI) running Codex CLI inside the
    project with read access to all files, corresponding through `channels/`, with Mohammed relaying both
-   ways. If no, skip Phase 5 and drop every Codex step from the workflow; verification then rests on your
+   ways. If no, skip Phase 4 and drop every helper step from the workflow; verification then rests on your
    own derivations plus independent Opus agents.
 3. *Where do reference PDFs live?* Default: `refs/`. Ask for the actual subdirectory and whether a `.bib`
    index sits there whose `file = {...}` fields give relative paths.
@@ -65,107 +73,77 @@ them rather than assuming.
 4. *First submission or resubmission?* A resubmission means reviewer-response framing has probably leaked
    into the prose — flag it for step 8 and tell `/ai-slop` to weight those categories.
 5. *Is a revision macro already in the preamble?* If `\rev` or an equivalent exists, use it and skip the
-   macro insertion in Phase 6. If a different name is already in use, keep the project's name.
+   macro insertion in Phase 5. If a different name is already in use, keep the project's name.
 6. *Confirm the review focus areas.* Default set: consistency; correctness; complete literature review;
    solid and coherent introduction; plain human language; aggressive scrutiny of the numerical experiments
    — do the experiments actually serve the paper's claims? Let Mohammed add or drop.
 
-Record the answers; they populate the Roles section of the hub `CLAUDE.md` in Phase 3.
+Record the answers; you pass them to `/init-project adopt` in Phase 2, which writes the hub's Roles
+block from them. Do not let it ask the same questions again.
 
-## Phase 2 — Scaffold with `/init-project`
+## Phase 2 — Scaffold with `/init-project adopt`
 
-`/init-project` has not been run. Invoke it now. During its interactive questions, choose the simplest
-options and confirm each choice with Mohammed. Two constraints override everything that skill would
-otherwise do:
+The manuscript exists, so this is an adoption, not a new project. Invoke `/init-project adopt`. It
+owns the root `CLAUDE.md` hub and the migration — you do not write one by hand.
+
+**Pass in what you already know**, so nothing is asked twice: the arrangement from Round 1 (who owns
+code, whether an external reviewer is in the loop, the helper's name), and these two constraints,
+which are yours as the host:
 
 - **Never touch or overwrite anything under `paper/`.** `main.tex` and `references.bib` exist and are
-  authoritative. `/init-project` skips existing files by design — verify it did.
-- **Keep `jcode/` scaffolding minimal.** That folder belongs to the code collaborator. You will never work
-  in it, so do not populate it with templates that will only rot. A bare directory with the project file is
-  enough unless Mohammed says otherwise.
+  authoritative.
+- **Keep `jcode/` scaffolding minimal or absent.** That folder belongs to the code collaborator. You
+  will never work in it, so nothing may be scaffolded into it.
 
-The `CLAUDE.md` that `/init-project` generates is a starting point only. Phase 3 replaces it.
+Verify the result: `paper/` untouched, `jcode/` unchanged, and the hub carrying the Roles block for
+the arrangement you supplied. If a legacy `CLAUDE.md` was migrated, review the extracted notes before
+continuing — they were derived from a file you did not write.
 
-## Phase 3 — Rewrite `CLAUDE.md` as a lean hub
+## Phase 3 — Notes discipline
 
-Use `references/claude-md-hub.md` as the skeleton. Keep only:
+`/init-project adopt` creates `notes/`, `notes/done/`, and `notes/litrev/`. The discipline —
+flat, topical, **undated** filenames, one note per open topic, updated in place — is in
+`<toolkit>/guides/project-hub.md`. Date individual decisions inline where ordering matters.
 
-- A one-paragraph project description, written from your own read of `main.tex`.
-- A three-line **Status**: Phase / Now / Next.
-- An **Active notes** hub index — one line per open note, pointers not summaries. Settled notes leave the
-  index when they move to `notes/done/`.
-- **Structure**, **Roles** (from the Phase 1 answers), **Rules** (the seven below).
-
-No session history, ever. The hub says where things stand and where to look; it is not a log.
-
-Updating Status and the hub index is part of finishing any task. Not optional, not a separate chore.
-
-## Phase 4 — Notes discipline
-
-`notes/` is flat, with carefully chosen topical, **undated** filenames. One note per open topic, updated in
-place. Date individual decisions inline where ordering matters. Settled or superseded notes move to
-`notes/done/`.
-
-Create at minimum:
+Create these two beyond what adopt scaffolds:
 
 - `notes/review-checklist.md` — the checklist from step 1, tracked to completion.
 - `notes/review-findings.md` — findings as they accumulate, especially while `main.tex` is frozen.
-- `notes/litrev/` with a `README.md` — one note per reference actually read from its PDF, named by citation
-  key. This is the cite-with-confidence record. See `references/litrev.md` for the README text and the
-  per-key note skeleton.
 
-Spec notes for the code collaborator are `notes/spec-<topic>.md`. See `references/spec-note.md`.
+Both get a line in the hub's `## Active notes`.
 
-## Phase 5 — Create `channels/`
+Spec notes for the code collaborator are `notes/spec-<topic>.md`, from
+`<toolkit>/templates/spec-note.md`.
+
+## Phase 4 — Create `channels/`
 
 Skip if there is no external AI reviewer in the loop.
 
-Create `channels/` with `claude_to_codex/`, `codex_to_claude/`, and a `README.md` holding the protocol.
-Copy the protocol text from `references/channels-protocol.md`, substituting the helper's name if it is not
-Codex.
+**Invoke `/channels`** to scaffold. Supply the two values it needs, which are yours to decide:
 
-The parts that matter most, and why:
+- **Frozen artifact:** `paper/main.tex`
+- **Findings destination:** `notes/review-findings.md`
 
-- Messages are `NNN_short-title.md`; replies are `NNN_short-title_reply.md`. One task per message, with a
-  definite done-state.
-- Files are immutable once relayed. A follow-up is a new number carrying "Re: NNN".
-- The helper's only output is the reply file. It never edits project files, never fabricates citations
-  (anything it suggests is flagged UNVERIFIED), and does not run code or compile LaTeX.
-- **On your side: a Codex verdict is input to your verification, never a substitute for it.**
-- Decisions adopted from an exchange are recorded in the relevant topic note with a pointer ("per 003
-  reply"). `channels/` is correspondence, not the record.
+That skill owns the protocol, message composition, and the reply lifecycle. What matters here is the
+consequence for your workflow: **while an exchange is open, `main.tex` is frozen.** Findings
+accumulate in `notes/review-findings.md` and are applied in one batch after the reply lands.
 
-## Phase 6 — Add `\rev` and use it for everything
+A helper verdict is input to your verification, never a substitute for it. Adversarial exchanges go
+out without sharing your suspicions.
 
-Unless the manuscript already has a revision macro, add this to the preamble of `main.tex`, near the other
-macros:
+## Phase 5 — Add `\rev` and use it for everything
 
-```latex
-\usepackage{xcolor}   % only if not already loaded
-% Revised material is wrapped in \rev{...} and rendered blue in the marked manuscript.
-\newcommand{\rev}[1]{{\color{blue}#1}}
-```
+Unless the manuscript already has a revision macro, add the `\rev` setup from
+`<toolkit>/guides/latex-conventions.md` § Revision Markup to the preamble, near the other macros.
+That guide owns the convention and the three integrity checks — brace balance, dangling references,
+duplicate labels.
 
-Conventions — follow them exactly:
+What this skill adds: **every** textual change you make to `main.tex` is wrapped, and **you run all
+three integrity checks after every batch of edits.** Not occasionally, not when something looks off.
+Mohammed tracks the whole review trail in blue and compiles it; a broken group means a manuscript
+that does not build, found by him rather than you.
 
-- **Every** textual change you make to `main.tex` is wrapped in `\rev{...}`: new sentences, rewritten
-  clauses, changed math tokens. Mohammed tracks the whole review trail in blue.
-- Inside math, wrap only the changed tokens: `$\rev{x_0}-x^\dagger$`, `-\rev{2}\mu^2`.
-- A `\rev{...}` block may span paragraphs and displayed equations, but any LaTeX environment (`enumerate`,
-  `align`, `proof`, …) must open **and** close inside the same `\rev` group. Never split an environment
-  across two `\rev` blocks — the braces break the compile.
-- Deletions leave no blue. Flag important deletions in your summaries to Mohammed.
-- The markup is stripped in one pass before submission, after Mohammed approves the blue text.
-
-**Integrity checks after every batch of edits** — all three, every time:
-
-1. *Brace balance.* For each hunk you edited, confirm `\rev{` closes where you intended and that no
-   `\begin{...}` inside it lacks its `\end{...}` within the same group.
-2. *Dangling references.* Extract every `\ref{...}` and `\eqref{...}` key and every `\label{...}` key;
-   confirm each reference resolves. `Grep` with `-o` on `\\(eq)?ref\{[^}]*\}` and `\\label\{[^}]*\}`.
-3. *Duplicate labels.* The same `\label{...}` key twice silently misdirects every reference to it.
-
-## Phase 7 — Report and propose
+## Phase 6 — Report and propose
 
 Only now: the baseline full read (step 1 below). Then report to Mohammed:
 
@@ -182,7 +160,7 @@ at step 1. Track the checklist in
 `notes/review-checklist.md` and findings in `notes/review-findings.md`. Then work this order.
 
 **1. Baseline full read.** Read `main.tex` end to end and build the manuscript map. Trust nothing you have
-not read. This is Phase 7.
+not read. This is Phase 6.
 
 **2. Proofs first.** Re-derive every proof from scratch, including ones that "were verified before" —
 rewrites reintroduce gaps. Triangulate three ways: your own derivation, independent Opus verification
@@ -190,28 +168,39 @@ agents, and a Codex adversarial exchange, run in parallel **without sharing your
 is the whole point; compare afterwards. Any repair is chosen with Mohammed, second-opinioned by Codex,
 applied in one `\rev` batch, then re-verified end to end by a fresh Codex pass.
 
-**3. Literature.** Inventory every cited key against `notes/litrev/`. Read the gaps — agents may read PDFs
-and write litrev notes. Verify every characterization of a cited work and every benchmark parameter
-attribution against the source itself. Then check coverage the other way: what essential lineage or
-competing method is *uncited*?
+**3. Literature.** **Invoke `/litrev` in `audit-manuscript` mode.** It inventories every cited key
+against `notes/litrev/`, reads the gaps, verifies every characterization and every benchmark
+parameter attribution against the source, and checks the reverse direction for uncited lineage. A
+missing PDF is a request to Mohammed, never a guess.
 
 **4. Consistency sweep.** Notation unified, theorem counters correct, terminology stable, claims aligned
 across abstract ↔ introduction ↔ theorems ↔ numerics, every cross-reference resolving.
 
-**5. Numerics audit, adversarial.** The heart of this skill. Extract every empirical claim and test it
-against the tables. Derive the mathematical character of every test problem and ask whether it exercises the
-paper's selling points or is degenerate or self-undermining. Check stopping-criterion comparability,
-evaluation accounting, timing credibility, baseline fairness, parameter provenance, figure–table agreement.
-Full procedure in `references/numerics-audit.md`.
+**5. Numerics audit, adversarial.** **Invoke `/numerics-audit`** in the mode matching the Round 1
+answer:
 
-Text-only fixes you apply. Anything needing runs or logs becomes a spec note. **Never write a claim about a
-run you cannot verify.**
+| Who owns the experiments | Mode |
+|---|---|
+| A named collaborator, available | `collaborator-owned` |
+| Nobody available | `no-runner` |
+
+Supply the arrangement values: evidence lookup `notes/litrev/<Key>.md`, findings sink
+`notes/review-findings.md`, markup policy `\rev{...}` batch, experiment handoff
+`<toolkit>/templates/spec-note.md` → `notes/spec-<topic>.md`, decision owner Mohammed.
+
+Findings come back in three buckets. Text-only fixes you apply in a `\rev` batch — softening a claim
+to match the data is the correct move, not a concession. Anything needing runs becomes a spec note.
+Scope changes go to Mohammed with one recommendation.
+
+**Never write a claim about a run you cannot verify.**
 
 **6. Conclusion, title, abstract.** Draft whatever is missing or weak. Naming decisions are Mohammed's —
 offer options with one recommendation. `/title-abstract` covers the title and abstract patterns.
 
 **7. Mechanical passes.** Section transitions, redundancy, algorithm-box completeness, captions and orphan
 labels, bibliography integrity (every cited key resolves; orphan entries reported for Zotero cleanup).
+The semantic half of bibliography integrity was already done at step 3 by `/litrev` — this pass is the
+mechanical remainder.
 
 **8. Style pass, then `/ai-slop` last.** Run it after all other text has stabilized, including any late
 experiment write-ups, so it sweeps everything once. A resubmission needs the reviewer-response and
@@ -223,19 +212,21 @@ before moving on. Expect it to catch your long sentences.
 ## Rules (non-negotiable)
 
 1. **No code, whatsoever.** Never run or write code of any kind. Use Edit and Write for file changes only.
-   When the revision needs experiments, write a spec note — `notes/spec-<topic>.md`, math-first, confirmed
-   against the manuscript before drafting. Mohammed compiles specs to PDF and forwards them.
+   When the revision needs experiments, write a spec note — `notes/spec-<topic>.md` from
+   `<toolkit>/templates/spec-note.md`, math-first, confirmed against the manuscript before drafting.
+   Mohammed compiles specs to PDF and forwards them.
 2. **No LaTeX compilation.** Mohammed compiles on Overleaf. If he reports errors, you fix them.
 3. **Never edit `paper/references.bib`** — it is Zotero-managed. New references go to
-   `paper/temp_refs_to_add.bib` as a request with the reason. Never generate a bib entry from memory;
-   AI-generated references pair real authors with fabricated titles, journals, and DOIs. Mohammed verifies
-   and imports through Zotero. Wait for confirmation before citing a new key.
-4. **Cite with confidence.** Before citing or characterizing any paper, check `notes/litrev/<Key>.md`. If
-   the note is absent, read the PDF and write the note first. Locate the PDF through the `.bib` index in the
-   refs directory (its `file = {...}` fields give relative paths), otherwise match by title and author. PDF
-   missing → ask Mohammed to download it. Never invent a citation.
-5. **Freeze rule.** While a Codex exchange is open, `main.tex` is FROZEN. Findings accumulate in
-   `notes/review-findings.md`; edits are applied in one batch after the reply lands.
+   `paper/temp_refs_to_add.bib` as an unverified lead with the reason. Never generate a bib entry from
+   memory; AI-generated references pair real authors with fabricated titles, journals, and DOIs. Mohammed
+   verifies and imports through Zotero. Wait for confirmation before citing a new key. `/litrev` owns the
+   flow.
+4. **Cite with confidence.** Before citing or characterizing any paper, check `notes/litrev/<Key>.md`. No
+   note means you have not read it. PDF missing → ask Mohammed to download it. Never invent a citation.
+   `/litrev` owns the procedure; this rule stays here because it binds every session, invoked or not.
+5. **Freeze rule.** While a `channels/` exchange is open, `main.tex` is FROZEN. Findings accumulate in
+   `notes/review-findings.md`; edits are applied in one batch after the reply lands. This skill owns
+   both values and supplies them to `/channels`.
 6. **Language.** Human tone. Short, direct sentences. No long-winded constructions. No overuse of ";" or
    ":" in prose. No AI-slop vocabulary. This applies to everything you write into the manuscript, and you
    will be audited on it.
@@ -254,14 +245,23 @@ before moving on. Expect it to catch your long sentences.
   parameter, admissibility condition, stopping rule, and deliverable spelled out, and nothing left to
   interpretation.
 
+## What this skill delegates
+
+It owns the order and the arrangement. Five skills own the procedures.
+
+| Where | Skill | This skill supplies |
+|---|---|---|
+| Phase 2 | `/init-project adopt` | The Round 1 answers, and the `paper/` and `jcode/` constraints |
+| Phase 4 | `/channels` | Frozen artifact (`paper/main.tex`), findings destination |
+| Step 1 | `/review-paper checklist-only` | The Phase 1 focus areas |
+| Step 3 | `/litrev` | Mode `audit-manuscript` |
+| Step 5 | `/numerics-audit` | Mode `collaborator-owned` or `no-runner`, and all five values |
+| Step 8 | `/ai-slop` | Resubmission weighting for the revision-cycle categories |
+
 ## Reference files
 
-- `references/claude-md-hub.md` — lean hub `CLAUDE.md` skeleton (Phase 3).
-- `references/channels-protocol.md` — text for `channels/README.md` (Phase 5).
-- `references/litrev.md` — `notes/litrev/README.md` text plus the per-key note skeleton (Phase 4, step 3).
-- `references/spec-note.md` — experiment specification template for the code collaborator (step 5).
-- `references/numerics-audit.md` — full adversarial numerics audit procedure (step 5).
-- `../review-paper/SKILL.md` — the checklist builder invoked at step 1.
-- `../ai-slop/SKILL.md` — the multi-agent prose sweep invoked at step 8.
+- `../../guides/project-hub.md` — hub shape and notes discipline (Phases 2–3).
+- `../../guides/latex-conventions.md` — `\rev` convention and the three integrity checks (Phase 5),
+  plus writing style, theorem environments, notation, cross-references.
 - `../../guides/paper-review-checklist.md` — the 14-item universal checklist.
-- `../../guides/latex-conventions.md` — writing style, theorem environments, notation, cross-references.
+- `../../templates/spec-note.md` — experiment specification for the code collaborator (step 5).

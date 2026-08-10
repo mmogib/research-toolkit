@@ -201,6 +201,40 @@ MOP1 & 2 & 2 & 51/51 & 12 & \num{3.2e-7} & 0.01 \\
 \end{algorithm}
 ```
 
+## Revision Markup (`\rev`)
+
+For a manuscript under revision, where the changes have to be visible to a co-author or a referee.
+
+```latex
+\usepackage{xcolor}   % only if not already loaded
+% Revised material is wrapped in \rev{...} and rendered blue in the marked manuscript.
+\newcommand{\rev}[1]{{\color{blue}#1}}
+```
+
+Conventions:
+
+- **Every** textual change is wrapped: new sentences, rewritten clauses, changed math tokens.
+- Inside math, wrap only the changed tokens: `$\rev{x_0}-x^\dagger$`, `-\rev{2}\mu^2`.
+- A `\rev{...}` block may span paragraphs and displayed equations, but any environment (`enumerate`,
+  `align`, `proof`, …) must open **and** close inside the same `\rev` group. **Never split an
+  environment across two `\rev` blocks** — the braces break the compile.
+- Deletions leave no blue. Flag important deletions explicitly when summarizing.
+- The markup is stripped in one pass before submission, after the blue text is approved.
+
+### Integrity checks after every batch of edits
+
+All three, every time. Each has bitten a real manuscript.
+
+1. **Brace balance.** For each edited hunk, confirm `\rev{` closes where intended and that no
+   `\begin{...}` inside it lacks its `\end{...}` within the same group.
+2. **Dangling references.** Extract every `\ref{...}`, `\eqref{...}`, and `\label{...}` key; confirm
+   each reference resolves. `Grep` with `-o` on `\\(eq)?ref\{[^}]*\}` and `\\label\{[^}]*\}`.
+3. **Duplicate labels.** The same `\label{...}` key twice silently misdirects every reference to it —
+   no error, wrong numbers.
+
+These apply to any batch of LaTeX edits, `\rev` markup or not. Checks 2 and 3 are worth running
+before any submission.
+
 ## Section Structure
 
 ### Typical Paper Structure
