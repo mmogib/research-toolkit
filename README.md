@@ -33,6 +33,7 @@ mklink /D ai-slop research-toolkit\skills\ai-slop
 mklink /D init-project research-toolkit\skills\init-project
 mklink /D jcode-script research-toolkit\skills\jcode-script
 mklink /D join-revision research-toolkit\skills\join-revision
+mklink /D litrev research-toolkit\skills\litrev
 mklink /D math-research-writer research-toolkit\skills\math-research-writer
 mklink /D optimization-research-workflow research-toolkit\skills\optimization-research-workflow
 mklink /D prepare-submission research-toolkit\skills\prepare-submission
@@ -113,6 +114,7 @@ research-toolkit/
     ├── init-project/                      #   /init-project — project scaffolding
     ├── jcode-script/                      #   /jcode-script — experiment scripts
     ├── join-revision/                     #   /join-revision — revision-phase workflow
+    ├── litrev/                            #   /litrev — cite-with-confidence record
     ├── math-research-writer/              #   /math-research-writer — paper writing
     ├── optimization-research-workflow/    #   /optimization-research-workflow — 12 phases
     ├── prepare-submission/                #   /prepare-submission — journal packaging
@@ -143,6 +145,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 | `/init-project` | Interactive scaffolding for new projects. **DFMethods.jl-aware** for NLE projects (opt-in). |
 | `/jcode-script` | Experiment script generator (ARGS, CSV, resume, TeeIO). **DFMethods.jl-aware** when `adapter.jl` is detected. |
 | `/join-revision` | Revision-phase workflow for a finished manuscript: working system + eight-step review, no code run |
+| `/litrev` | Cite-with-confidence record: one note per reference read from its PDF; audits every characterization and parameter attribution against the source |
 | `/math-research-writer` | Theorem/proof structure, LaTeX, notation |
 | `/optimization-research-workflow` | 12-phase research pipeline. DFMethods.jl touchpoints in all 12 phases (only for projects that opted in). |
 | `/prepare-submission` | Package a finished manuscript for one journal, one cycle: flattened `source_files/`, template transformation, trimmed `.bib`, cover letter |

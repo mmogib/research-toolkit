@@ -95,8 +95,9 @@ work that is not yours.
    and get approval.
 4. Ask only the questions that are still open. If a host skill invoked `adopt` and already asked who
    owns the code, it passes those answers in — **do not ask twice**.
-5. Write: backup → new notes → new hub. Create missing directories (`notes/`, `notes/done/`, `refs/`)
-   but nothing under `jcode/`.
+5. Write: backup → new notes → new hub. Create missing directories (`notes/`, `notes/done/`,
+   `notes/litrev/` with its README, `refs/`) but nothing under `jcode/`. If `notes/litrev/` already
+   exists, leave it and its notes untouched.
 6. Verify and report:
    - the backup's content matches the pre-adoption root
    - `jcode/` is byte-for-byte unchanged
@@ -259,7 +260,9 @@ Create the following directory tree:
 │   └── results/
 │       └── logs/
 ├── notes/
-│   └── done/
+│   ├── done/
+│   └── litrev/                   ← One note per reference read from its PDF, by citation key
+│       └── README.md             ← From /litrev's reference file
 └── refs/                         ← Reference papers (PDFs) for Claude to read
 ```
 
@@ -335,6 +338,19 @@ Create the following directory tree:
 **jcode/src/benchmark.jl** (storage-dependent):
 - If SQLite: from `templates/benchmark_db_template.jl`
 - If CSV-only: create minimal file with CSV helpers (header writing, append, Set-based skip, backup)
+
+**notes/litrev/**:
+- Created for every project, with `README.md` copied from
+  `<toolkit>/skills/litrev/references/litrev-notes.md` (the README block), substituting `refs/` as
+  the PDF root.
+- This is the cite-with-confidence record: one note per reference actually read from its PDF, named
+  by citation key. Scaffolded at init so the rule is in place before the first citation rather than
+  retrofitted after a wrong characterization ships.
+- Add one line to `## Active notes` in the hub:
+  `` - `notes/litrev/` — one note per reference read from its PDF, by citation key ``
+- The detailed procedure lives in `/litrev`. The hub's Rule 4 states the always-on constraint; do not
+  move it into the skill, because a session that never invokes `/litrev` still must not fabricate
+  references.
 
 **refs/**:
 - Empty directory. Mohammed downloads reference papers (PDFs) here when Claude needs to consult them.
