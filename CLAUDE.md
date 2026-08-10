@@ -53,6 +53,12 @@ At project start, choose one:
 
 See `guides/coding-style.md` for full comparison and patterns.
 
+## Path Convention in Skills
+
+Skills refer to shared files as `<toolkit>/guides/...` and `<toolkit>/templates/...`. **`<toolkit>` is this repository's root** — at runtime usually `~/.claude/skills/research-toolkit/`, in development wherever the clone lives.
+
+Do **not** write `../../guides/...` in a skill. Skills are exposed at `~/.claude/skills/<name>/` via symlink or junction, and a two-level escape normalizes *lexically* to `~/.claude/guides/`, which does not exist. The read fails silently — the skill loads, the junction resolves, and only the referenced guide is missing. Single-level sibling references (`../review-paper/SKILL.md`) are fine: they resolve correctly from both the exposed and the real path.
+
 ## Guides (Reference Documents)
 | Guide | Purpose |
 |-------|---------|

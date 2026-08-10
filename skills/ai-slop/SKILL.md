@@ -34,9 +34,9 @@ Phase 8. Final verification grep  ← confirm zero hits in body text
 
 ## Phase 1 — Context Discovery
 
-1. Read the project's `CLAUDE.md` to find the manuscript file path, paper topic, structure, and any revision context (revision cycle? AI-drafted?). **If it is missing or contains a `## Paper Key Elements` block, it predates the project hub** — say so and suggest `/init-project adopt` before continuing (`../../guides/project-hub.md`). Under the hub, the paper's detail lives in `notes/manuscript-map.md`; read that too when it exists.
+1. Read the project's `CLAUDE.md` to find the manuscript file path, paper topic, structure, and any revision context (revision cycle? AI-drafted?). **If it is missing or contains a `## Paper Key Elements` block, it predates the project hub** — say so and suggest `/init-project adopt` before continuing (`<toolkit>/guides/project-hub.md`). Under the hub, the paper's detail lives in `notes/manuscript-map.md`; read that too when it exists.
 2. Locate the main `.tex` file and any `\input` / `\include` structure.
-3. If the project uses a revision-tracking macro (`\rev{...}` for blue-coloring revisions — the convention and its integrity checks are in `../../guides/latex-conventions.md`), note it. Patterns inside such wraps are typically the highest-density slop targets.
+3. If the project uses a revision-tracking macro (`\rev{...}` for blue-coloring revisions — the convention and its integrity checks are in `<toolkit>/guides/latex-conventions.md`), note it. Patterns inside such wraps are typically the highest-density slop targets.
 4. Check `notes/` for a prior `ai-slop*` report — if a sweep already ran, focus on newly added content rather than re-flagging.
 
 ## Phase 2 — Define Chunks
@@ -93,7 +93,7 @@ Build a consolidated view organized by **theme**, not by chunk.
 - Citations, labels, table cell values, model/author names.
 - Established technical terms (e.g., "robust optimization" is a term of art).
 
-For the canonical banned-words list and wordy-phrase replacement table, see `../../guides/paper-review-checklist.md` item 14. The skill extends that list with the two revision-cycle categories (reviewer-response framing and revision-tracking language).
+For the canonical banned-words list and wordy-phrase replacement table, see `<toolkit>/guides/paper-review-checklist.md` item 14. The skill extends that list with the two revision-cycle categories (reviewer-response framing and revision-tracking language).
 
 ## Phase 6 — Apply Tier 1 + Recurring (Batch)
 
@@ -131,7 +131,7 @@ If hits remain, decide each: false positive (technical context, leave) or residu
 
 - During execution: reports go to `notes/ai-slop-<chunk>.md`.
 - After all fixes are applied and the user is satisfied: consolidate the chunk reports into a single `notes/ai-slop.md` and move it to `notes/done/` (manual step — the skill does not auto-archive). A later sweep reopens and updates that topic note rather than creating a dated hierarchy.
-- Flat, topical, undated — see `../../guides/project-hub.md`. Dated directories give one folder per session and none per topic, so the current state has to be reconstructed by reading every folder in order.
+- Flat, topical, undated — see `<toolkit>/guides/project-hub.md`. Dated directories give one folder per session and none per topic, so the current state has to be reconstructed by reading every folder in order.
 
 ## Common Pitfalls
 
@@ -158,6 +158,6 @@ Run the grep, eyeball the hits, decide each.
 ## Reference Files
 
 - `references/agent-prompt-template.md` — parameterized prompt for the chunk agents (Phase 3).
-- `../../guides/paper-review-checklist.md` — canonical banned-words list, wordy-phrase table, structural patterns (item 14). This skill extends item 14 with the revision-cycle categories.
-- `../../skills/review-paper/SKILL.md` — single-pass review skill. `/review-paper` references this skill as the deeper option for revision cycles.
-- `../../skills/join-revision/SKILL.md` — full revision-phase workflow; invokes this skill as its last step, after all other text has stabilized. Projects set up by it use the `\rev{...}` macro noted in Phase 1.
+- `<toolkit>/guides/paper-review-checklist.md` — canonical banned-words list, wordy-phrase table, structural patterns (item 14). This skill extends item 14 with the revision-cycle categories.
+- `../review-paper/SKILL.md` — single-pass review skill. `/review-paper` references this skill as the deeper option for revision cycles.
+- `../join-revision/SKILL.md` — full revision-phase workflow; invokes this skill as its last step, after all other text has stabilized. Projects set up by it use the `\rev{...}` macro noted in Phase 1.

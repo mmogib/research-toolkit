@@ -21,7 +21,7 @@ Find suitable journals for a research paper. Gathers topic context, applies stan
 
 Before asking questions, gather project context:
 
-**Old-hub preflight**: if `CLAUDE.md` is missing, or contains a `## Paper Key Elements` block, it predates the project hub — say so and suggest `/init-project adopt` before continuing. See `../../guides/project-hub.md`. Under the hub, the paper's detail lives in `notes/manuscript-map.md`; read that too when it exists.
+**Old-hub preflight**: if `CLAUDE.md` is missing, or contains a `## Paper Key Elements` block, it predates the project hub — say so and suggest `/init-project adopt` before continuing. See `<toolkit>/guides/project-hub.md`. Under the hub, the paper's detail lives in `notes/manuscript-map.md`; read that too when it exists.
 
 1. **Read the project's `CLAUDE.md`** to determine:
    - Research topic and field/subfield

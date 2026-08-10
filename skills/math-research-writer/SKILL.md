@@ -728,7 +728,7 @@ it: no note means you have not read the paper, which means you may not character
 
 Citation *commands* are a formatting matter and belong with the manuscript's bibliography backend —
 `\citep` / `\citet` under natbib, `\parencite` / `\textcite` under biblatex. See
-`../../guides/latex-conventions.md`.
+`<toolkit>/guides/latex-conventions.md`.
 
 ---
 

@@ -29,7 +29,7 @@ prose sweep at the moment the checklist is created, which is the opposite of wha
 ## Item identity
 
 Items have **stable canonical numbers and slugs**, listed in
-`../../guides/paper-review-checklist.md`. An item that does not apply is marked `N/A` and **keeps its
+`<toolkit>/guides/paper-review-checklist.md`. An item that does not apply is marked `N/A` and **keeps its
 number**. Never renumber the survivors: dispatch is by slug, and a renumbered list makes "item 12"
 mean different things in different papers.
 
@@ -41,7 +41,7 @@ Before asking questions, gather project context:
 
 1. Read the project's `CLAUDE.md` to understand: paper topic, structure, LaTeX setup.
    **If it is missing, or contains a `## Paper Key Elements` block, it predates the project hub** —
-   say so and suggest `/init-project adopt` before continuing. See `../../guides/project-hub.md`.
+   say so and suggest `/init-project adopt` before continuing. See `<toolkit>/guides/project-hub.md`.
    If a `notes/manuscript-map.md` exists, read it too; under the hub the paper's detail lives there
    rather than in `CLAUDE.md`.
 2. Locate `.tex` files — identify the main file and any `\input`/`\include` structure
@@ -57,9 +57,9 @@ Before asking questions, gather project context:
 
 ### Phase 2: Universal Checklist
 
-Generate `notes/review-checklist.md` with the items from `../../guides/paper-review-checklist.md`.
+Generate `notes/review-checklist.md` with the items from `<toolkit>/guides/paper-review-checklist.md`.
 Flat, topical, undated — one checklist per project, updated in place across review cycles. See
-`../../guides/project-hub.md`.
+`<toolkit>/guides/project-hub.md`.
 
 Format — canonical number, slug, and status, with inapplicable items kept and marked `N/A`:
 
@@ -189,8 +189,8 @@ After completing all Claude items, print a summary of remaining user tasks.
 
 ## Reference Files
 
-- `../../guides/paper-review-checklist.md` — Full universal checklist, canonical numbers and slugs
-- `../../guides/project-hub.md` — Hub shape and notes discipline; the source of the undated checklist filename
+- `<toolkit>/guides/paper-review-checklist.md` — Full universal checklist, canonical numbers and slugs
+- `<toolkit>/guides/project-hub.md` — Hub shape and notes discipline; the source of the undated checklist filename
 - `../litrev/SKILL.md` — Cite-with-confidence audit (item 12's semantic layer)
 - `../numerics-audit/SKILL.md` — Adversarial numerics audit (item 13)
 - `../ai-slop/SKILL.md` — Multi-agent deep sweep for revision cycles (complements item 14)

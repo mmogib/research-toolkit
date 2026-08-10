@@ -1,6 +1,6 @@
 # Output Template
 
-Use this template when generating the journal suggestions note. Save to `notes/journal-suggestions.md` — flat, topical, undated, updated in place across searches. See `../../guides/project-hub.md`.
+Use this template when generating the journal suggestions note. Save to `notes/journal-suggestions.md` — flat, topical, undated, updated in place across searches. See `<toolkit>/guides/project-hub.md`.
 
 ## Template
 

@@ -260,8 +260,8 @@ It owns the order and the arrangement. Five skills own the procedures.
 
 ## Reference files
 
-- `../../guides/project-hub.md` — hub shape and notes discipline (Phases 2–3).
-- `../../guides/latex-conventions.md` — `\rev` convention and the three integrity checks (Phase 5),
+- `<toolkit>/guides/project-hub.md` — hub shape and notes discipline (Phases 2–3).
+- `<toolkit>/guides/latex-conventions.md` — `\rev` convention and the three integrity checks (Phase 5),
   plus writing style, theorem environments, notation, cross-references.
-- `../../guides/paper-review-checklist.md` — the 14-item universal checklist.
-- `../../templates/spec-note.md` — experiment specification for the code collaborator (step 5).
+- `<toolkit>/guides/paper-review-checklist.md` — the 14-item universal checklist.
+- `<toolkit>/templates/spec-note.md` — experiment specification for the code collaborator (step 5).

@@ -10,11 +10,11 @@ How to instantiate and customize the optimization research project template.
 Run `/init-project` to interactively set up the complete project structure from the toolkit's templates.
 
 **Option B — Manual copy**:
-Copy individual templates from the toolkit (`../../templates/`) into your project directory:
+Copy individual templates from the toolkit (`<toolkit>/templates/`) into your project directory:
 ```bash
 mkdir YOUR_PROJECT_NAME && cd YOUR_PROJECT_NAME
 # Then copy the templates you need, e.g.:
-# ../../templates/CLAUDE.md.template, ../../templates/main.tex.template, etc.
+# <toolkit>/templates/CLAUDE.md.template, <toolkit>/templates/main.tex.template, etc.
 ```
 
 ## Step 2: Initialize Git

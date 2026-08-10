@@ -15,7 +15,7 @@ End-to-end workflow for developing, benchmarking, and publishing optimization al
 
 1. **Scaffold a new project** using one of:
    - **Full project**: Run `/init-project` — interactive scaffolding with all templates.
-   - **Single template**: Copy from `../../templates/` (e.g., `../../templates/main.tex.template`).
+   - **Single template**: Copy from `<toolkit>/templates/` (e.g., `<toolkit>/templates/main.tex.template`).
 
 2. **Customize `CLAUDE.md`** — fill in algorithm name, problem class, constraint types.
 
@@ -31,7 +31,7 @@ callbacks, `solve(prob, alg)` API), opt into the integration at
 `/init-project`'s NLE-path solver-framework question. The 12 phases
 below are unchanged in shape, but each gains a DFMethods touchpoint
 (see "DFMethods Touchpoints" below the table). Single source of truth
-for the integration patterns: `../../guides/dfmethods-integration.md`.
+for the integration patterns: `<toolkit>/guides/dfmethods-integration.md`.
 
 ## Project Structure
 
@@ -95,7 +95,7 @@ your-project/
 | 10 | Literature Review | `/litrev` in `audit-manuscript` mode once the related-work section exists |
 | 11 | Polish & Submit | `/review-paper`, which delegates items 12–14 to `/litrev`, `/numerics-audit`, and `/ai-slop` |
 
-**See `../../guides/experiment-workflow.md` for detailed phase descriptions, decision rules, and common pitfalls.**
+**See `<toolkit>/guides/experiment-workflow.md` for detailed phase descriptions, decision rules, and common pitfalls.**
 
 ### DFMethods.jl touchpoints (only if the project opted into DFMethods at init time)
 
@@ -103,7 +103,7 @@ your-project/
 |---|---|---|
 | 0 | Project Setup | Confirm `julia --project=jcode/ -e 'using DFMethods; println(pkgversion(DFMethods))'` prints `0.3.2+`. |
 | 1 | Theory Review | Library docstrings carry DOI citations for each component (Solodov–Svaiter, La Cruz, Ibrahim 2024 STTDFPM, Halpern, Maingé). Read alongside your reference papers. Extension templates at `DFMethods.jl/examples/`. |
-| 2 | Core Implementation | Custom algorithm parts (direction / line-search / inertial / iterate-update) subtype the relevant abstract type and live in `jcode/src/extras.jl`. The library's `step!` framework handles the iteration. See `../../guides/dfmethods-integration.md` § 12. |
+| 2 | Core Implementation | Custom algorithm parts (direction / line-search / inertial / iterate-update) subtype the relevant abstract type and live in `jcode/src/extras.jl`. The library's `step!` framework handles the iteration. See `<toolkit>/guides/dfmethods-integration.md` § 12. |
 | 3 | Reference Algorithms | Comparison methods register in the palette via `sweep_helpers.jl::resolve_method`. Built-in DFMethods options (e.g., `ResidualNormBacktrack`, `AdaptiveClampedBacktrack`) cost zero implementation work — just add a label + a `resolve_method` branch. Non-DFMethods baselines go through their own adapter (e.g., `solve_with_nonlinearsolve` wrapping NonlinearSolve.jl into `SolverResult`). |
 | 4 | Smoke Tests | `s01_smoke_test.jl` exercises the adapter + palette + config-hash flow on a small problem; verifies `using DFMethods; using SciMLBase` loads and `solve_with_alg(F, set, x0, DFProjection())` returns a `SolverResult`. |
 | 5 | Sensitivity Analysis | `s10_oat_sensitivity.jl` sweeps the algorithm-level params (`r` for `SpectralThreeTerm`, `σ`/`ρ` for line searches, `θ` for `Inertial`, `ζ` for the iterate-update step, `γ` for `SolodovSvaiterProjection` if the relaxation factor is in scope). Use `build_params` for hash canonicalization. |
@@ -118,25 +118,25 @@ your-project/
 
 - **SQLite + config hashing** — All experiment results stored in `experiments.db` with content-addressable config hashes. The SAME NamedTuple is hashed AND splatted to the solver — zero divergence.
 - **Skip-by-default + `--force`** — Completed runs are skipped automatically. Use `--force` to re-run. No accidental data loss.
-- **CLI flags** — Scripts support `--all`, `--quick`, `--force`, `--verbose`, `--summary`, `--export`, `--problems=`, `--dims=`, `--methods=`. See `../../guides/script-patterns.md`.
-- **Solver contract** — Every solver returns `SolverResult`, accepts `track=false` + `callback=nothing`, declares `VERSION` and `DEFAULTS`. See `../../guides/coding-style.md`.
+- **CLI flags** — Scripts support `--all`, `--quick`, `--force`, `--verbose`, `--summary`, `--export`, `--problems=`, `--dims=`, `--methods=`. See `<toolkit>/guides/script-patterns.md`.
+- **Solver contract** — Every solver returns `SolverResult`, accepts `track=false` + `callback=nothing`, declares `VERSION` and `DEFAULTS`. See `<toolkit>/guides/coding-style.md`.
 - **`main()` wrapping** — All scripts wrap body in `function main() ... end` for Julia scoping safety.
 - **TeeIO logging** — All scripts log to both console and timestamped file via `setup_logging`.
-- **DFMethods.jl adapter** (DFMethods projects only) — `solve_with_alg(F, set, x0, alg::DFProjection)` in `src/adapter.jl` bridges `SciMLBase.NonlinearSolution` to `SolverResult` at the script boundary. See `../../guides/dfmethods-integration.md`.
+- **DFMethods.jl adapter** (DFMethods projects only) — `solve_with_alg(F, set, x0, alg::DFProjection)` in `src/adapter.jl` bridges `SciMLBase.NonlinearSolution` to `SolverResult` at the script boundary. See `<toolkit>/guides/dfmethods-integration.md`.
 
 ## Rules
 
 1. **DO NOT compile LaTeX.** The user compiles.
 2. **DO NOT run scripts automatically.** The user runs scripts unless they explicitly ask.
 3. **All shared deps in `deps.jl`.** Never add `using` in other `src/` files.
-4. **Notes workflow.** `notes/` is flat, topical, and **undated** — one note per open topic, updated in place. Settled notes move to `notes/done/`. See `../../guides/project-hub.md`.
-5. **Status tracking.** The root `CLAUDE.md` is a **hub**: three Status lines (Phase / Now / Next) and an `## Active notes` index of pointers. Findings and completed-item logs go in the note that owns them, never in the hub — a hub that accumulates findings becomes a stale second copy of the project. Detail belongs in `jcode/CLAUDE.md`, which stays long. See `../../guides/project-hub.md`.
+4. **Notes workflow.** `notes/` is flat, topical, and **undated** — one note per open topic, updated in place. Settled notes move to `notes/done/`. See `<toolkit>/guides/project-hub.md`.
+5. **Status tracking.** The root `CLAUDE.md` is a **hub**: three Status lines (Phase / Now / Next) and an `## Active notes` index of pointers. Findings and completed-item logs go in the note that owns them, never in the hub — a hub that accumulates findings becomes a stale second copy of the project. Detail belongs in `jcode/CLAUDE.md`, which stays long. See `<toolkit>/guides/project-hub.md`.
 
 ## Reference Files
 
-- `../../guides/experiment-workflow.md` — Detailed 12-phase guide with decision rules
-- `../../guides/script-patterns.md` — Reusable Julia script patterns
-- `../../guides/dfmethods-integration.md` — DFMethods.jl integration patterns (only for projects that opted into DFMethods at init time)
+- `<toolkit>/guides/experiment-workflow.md` — Detailed 12-phase guide with decision rules
+- `<toolkit>/guides/script-patterns.md` — Reusable Julia script patterns
+- `<toolkit>/guides/dfmethods-integration.md` — DFMethods.jl integration patterns (only for projects that opted into DFMethods at init time)
 - `references/benchmark-patterns.md` — Benchmarking infrastructure patterns
 - `references/claude-md-guide.md` — How to write effective CLAUDE.md files
 - `references/template-usage.md` — How to instantiate and customize the template

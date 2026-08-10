@@ -195,7 +195,7 @@ Assemble the script from the selected feature blocks. The script follows this st
 16. main()
 ```
 
-See `../../guides/script-patterns.md` for the code block for each feature.
+See `<toolkit>/guides/script-patterns.md` for the code block for each feature.
 
 **DFMethods-aware variants (rows 4a / 5a / 6a) bypass the 16-step generic composition** — they are full ported scripts from the user's DFMethods-starter reference. Step 2 for those variants reduces to: (a) copy the corresponding `templates/dfmethods/script_*.jl` file to `scripts/`, (b) edit the `{METHOD_LABELS}` placeholder and the project-specific palette/problem names, (c) skip the per-block composition. Generic script blocks 29 and 30 in `<toolkit>/guides/script-patterns.md` describe the load-bearing `register_palette` + `run_sweep` calls inside the DFMethods-aware variants for reference.
 
@@ -222,6 +222,6 @@ After generating, verify:
 
 ## Reference Files
 
-- `../../guides/script-patterns.md` — 28 composable code blocks for each feature
+- `<toolkit>/guides/script-patterns.md` — 28 composable code blocks for each feature
 - `references/infrastructure-patterns.md` — Canonical io_utils.jl code
 - `references/dependency-guide.md` — Feature → package mapping, installation instructions
