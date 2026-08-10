@@ -3,6 +3,15 @@
 ## What This Is
 A portable, topic-independent reference for Claude to understand Mohammed's exact research workflow, coding style, and engineering practices. Load this at the start of any new research project.
 
+## Status
+- **Phase:** Stable. Thirteen skills, seven guides. The skill-extraction work is complete, deployed, and forward-tested.
+- **Now:** Nothing in flight on the toolkit itself.
+- **Next:** Migrate the twelve legacy projects onto the hub, one at a time — see `notes/migration-register.md`.
+
+## Active notes
+- `notes/migration-register.md` — twelve projects whose root `CLAUDE.md` predates the hub. Eight have no git; for those the per-adoption snapshot and hash manifest are the only rollback. Never bulk-adopt.
+- `channels/` — correspondence with Codex. The exchange that reviewed the extraction plan is closed and adopted; the directory stays as the working example of the protocol `/channels` scaffolds.
+
 ## How to Use
 In any new research project, add to the project's `CLAUDE.md`:
 ```
@@ -110,7 +119,11 @@ Do **not** write `../../guides/...` in a skill. Skills are exposed at `~/.claude
 | `templates/script_figure.jl` | (Legacy) Simple figure generation skeleton |
 
 ## Notes (Development Plans & Discussions)
-The `notes/` folder holds development discussions, design plans, and session findings for the toolkit itself. Completed/implemented notes are moved to `notes/done/`. These are internal development artifacts — not part of the toolkit that projects consume.
+The `notes/` folder holds development discussions, design plans, and session findings for the toolkit itself. Flat, topical, undated; completed/implemented notes move to `notes/done/`. These are internal development artifacts — not part of the toolkit that projects consume.
+
+The toolkit follows its own doctrine: this file is a hub (Status + Active notes above), and open work lives in notes rather than here.
+
+`notes/done/skill-extraction-plan.md` is worth reading before changing how the skills interlock. It records not just what was decided but what each review round overturned — including three cases where a fix made the original defect worse.
 
 ## Rules (Apply to All Projects)
 1. **Never run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
