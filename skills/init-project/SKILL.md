@@ -160,8 +160,19 @@ Ask the user the following interactively using AskUserQuestion. Ask one group at
 `CLAUDE.md` and delete the other along with its marker comments. If a collaborator owns the code, add
 the matching rule: "`jcode/` belongs to [Collaborator]. Do not run it, edit it, or rely on it."
 
+- **Is an external AI reviewer in the loop?** — ask this **only** in `adopt` mode or when the project
+  is manuscript-flavored (a `paper/main.tex` exists or is being created). Do not put it in every new
+  project's interview; it is one feature, not a universal question.
+  - **No** (default) — skip.
+  - **Yes** — a second model with read access to the project, corresponding through `channels/` with
+    Mohammed relaying by hand. Ask for its name (default: Codex). Then: invoke `/channels` to
+    scaffold, append the external-reviewer overlay to the Roles block, add `channels/` to the
+    Structure tree, and add the freeze rule to Rules — supplying the two values `/channels` needs,
+    the frozen artifact and the findings destination.
+
 In `adopt` mode, infer the arrangement from the old root's Roles section where one exists and confirm
-it rather than asking cold.
+it rather than asking cold. An existing `channels/` directory answers the reviewer question by
+itself — confirm the helper's name rather than asking whether one is in use.
 
 ## Step 4: Read Templates
 

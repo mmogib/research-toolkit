@@ -30,6 +30,7 @@ done
 ```cmd
 cd %USERPROFILE%\.claude\skills
 mklink /D ai-slop research-toolkit\skills\ai-slop
+mklink /D channels research-toolkit\skills\channels
 mklink /D init-project research-toolkit\skills\init-project
 mklink /D jcode-script research-toolkit\skills\jcode-script
 mklink /D join-revision research-toolkit\skills\join-revision
@@ -111,6 +112,7 @@ research-toolkit/
 │   └── runtests.jl.template               #   Style A test suite
 └── skills/                                # Claude Code skills (slash commands)
     ├── ai-slop/                           #   /ai-slop — multi-agent AI-slop sweep
+    ├── channels/                          #   /channels — external-reviewer correspondence
     ├── init-project/                      #   /init-project — project scaffolding
     ├── jcode-script/                      #   /jcode-script — experiment scripts
     ├── join-revision/                     #   /join-revision — revision-phase workflow
@@ -142,7 +144,8 @@ See `guides/coding-style.md` for full comparison and patterns.
 | Slash Command | Description |
 |---|---|
 | `/ai-slop` | Multi-agent AI-slop and revision-language sweep (deep style pass for revision cycles) |
-| `/init-project` | Interactive scaffolding for new projects. **DFMethods.jl-aware** for NLE projects (opt-in). |
+| `/channels` | Correspondence with an external AI reviewer relayed by hand: bounded numbered messages, separate receipt/verification/adoption |
+| `/init-project` | Scaffolding for new projects, plus `adopt` for existing ones. Sole owner of the root `CLAUDE.md` hub. **DFMethods.jl-aware** for NLE projects (opt-in). |
 | `/jcode-script` | Experiment script generator (ARGS, CSV, resume, TeeIO). **DFMethods.jl-aware** when `adapter.jl` is detected. |
 | `/join-revision` | Revision-phase workflow for a finished manuscript: working system + eight-step review, no code run |
 | `/litrev` | Cite-with-confidence record: one note per reference read from its PDF; audits every characterization and parameter attribution against the source |

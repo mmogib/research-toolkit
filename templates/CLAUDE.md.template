@@ -30,9 +30,13 @@ this file is for. See `<toolkit>/guides/project-hub.md`.]
 ```
 paper/          main.tex (authoritative), references.bib (Zotero-managed), imgs/, submissions/
 jcode/          Julia implementation — see jcode/CLAUDE.md
-notes/          flat, topical, undated. done/ for settled.
+notes/          flat, topical, undated. done/ for settled. litrev/ for reference records.
 refs/           reference PDFs
 ```
+
+<!-- /init-project: if an external reviewer is in the loop, add to the tree above:
+     channels/       correspondence with <helper>. claude_to_<helper>/, <helper>_to_claude/ -->
+
 
 <!-- ═══ /init-project: emit EXACTLY ONE of the two Roles blocks below. ═══════════
      Delete the other and these comments. -->
@@ -56,6 +60,13 @@ refs/           reference PDFs
   Mohammed, never delegated.
 <!-- ─── end collaborator ────────────────────────────────────────────────────── -->
 
+<!-- ─── Roles — external reviewer overlay (ADDITIVE: append to whichever block above
+     was kept, if /init-project's channels question was answered yes) ──────────── -->
+- **[Helper, e.g. Codex (OpenAI)]** — independent reviewer with read access to the project,
+  corresponding through `channels/`. Mohammed relays both ways. Its verdicts are input to Claude's
+  verification, never a substitute for it.
+<!-- ─── end external reviewer overlay ───────────────────────────────────────── -->
+
 ## Rules
 
 1. **Never run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
@@ -72,8 +83,13 @@ refs/           reference PDFs
 7. **Keep this hub current** — finishing a task means updating **Status** and **Active notes**. This
    file points; it never accumulates findings, session history, or summaries.
 
-<!-- /init-project: append any project-specific rules here. If a collaborator owns the code, add:
-     "8. `jcode/` belongs to [Collaborator]. Do not run it, edit it, or rely on it." -->
+<!-- /init-project: append any project-specific rules here.
+     If a collaborator owns the code, add:
+       "8. `jcode/` belongs to [Collaborator]. Do not run it, edit it, or rely on it."
+     If an external reviewer is in the loop, add:
+       "9. Freeze rule — while a `channels/` exchange is open, [frozen artifact] does not change;
+           findings accumulate in [findings destination] and are applied in one batch after the
+           reply lands." -->
 
 ## Toolkit
 
