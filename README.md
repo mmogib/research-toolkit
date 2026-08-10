@@ -36,6 +36,7 @@ mklink /D jcode-script research-toolkit\skills\jcode-script
 mklink /D join-revision research-toolkit\skills\join-revision
 mklink /D litrev research-toolkit\skills\litrev
 mklink /D math-research-writer research-toolkit\skills\math-research-writer
+mklink /D numerics-audit research-toolkit\skills\numerics-audit
 mklink /D optimization-research-workflow research-toolkit\skills\optimization-research-workflow
 mklink /D prepare-submission research-toolkit\skills\prepare-submission
 mklink /D review-paper research-toolkit\skills\review-paper
@@ -118,6 +119,7 @@ research-toolkit/
     ├── join-revision/                     #   /join-revision — revision-phase workflow
     ├── litrev/                            #   /litrev — cite-with-confidence record
     ├── math-research-writer/              #   /math-research-writer — paper writing
+    ├── numerics-audit/                    #   /numerics-audit — adversarial numerics audit
     ├── optimization-research-workflow/    #   /optimization-research-workflow — 12 phases
     ├── prepare-submission/                #   /prepare-submission — journal packaging
     ├── review-paper/                      #   /review-paper — 13-item checklist
@@ -150,6 +152,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 | `/join-revision` | Revision-phase workflow for a finished manuscript: working system + eight-step review, no code run |
 | `/litrev` | Cite-with-confidence record: one note per reference read from its PDF; audits every characterization and parameter attribution against the source |
 | `/math-research-writer` | Theorem/proof structure, LaTeX, notation |
+| `/numerics-audit` | Adversarial audit of numerical experiments against the paper's claims. Four modes, including a referee mode for someone else's paper |
 | `/optimization-research-workflow` | 12-phase research pipeline. DFMethods.jl touchpoints in all 12 phases (only for projects that opted in). |
 | `/prepare-submission` | Package a finished manuscript for one journal, one cycle: flattened `source_files/`, template transformation, trimmed `.bib`, cover letter |
 | `/review-paper` | 13-item paper polish checklist |

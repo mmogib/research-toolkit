@@ -29,7 +29,7 @@ This toolkit is a git repo. Skills are discovered by Claude Code via symlinks fr
 **Never edit the deployed clone.** Everything installed resolves into it, so a local edit there diverges silently from what is pushed.
 
 ## Skills (Slash Commands)
-Twelve custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
+Thirteen custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):
 - `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns. **DFMethods.jl-aware**: per-phase touchpoints for projects that opted into DFMethods at init time.
 - `/math-research-writer` — Theorem/proof structure, LaTeX patterns, notation consistency
 - `/title-abstract` — Academic paper titles and abstracts (structure, examples, journal requirements)
@@ -37,6 +37,7 @@ Twelve custom skills in `skills/` (discovered by Claude Code via symlinks from `
 - `/jcode-script` — Experiment script generator: type selection, SQLite/CSV backend, CLI flags, DB infrastructure. **DFMethods.jl-aware**: detects `jcode/src/adapter.jl` to auto-select DFMethods-aware variants of s30 / s40 / s70.
 - `/review-paper` — Paper review & polish checklist: 13-item universal checklist + project-specific items
 - `/join-revision` — Join a fully developed manuscript in its review-and-revision phase. Sets up the working system (lean CLAUDE.md hub, flat undated notes, `notes/litrev/` cite-with-confidence records, `channels/` correspondence with an external AI reviewer, `\rev` blue markup), then drives an eight-step review ending in `/ai-slop`. No code is ever run or written — numerical experiments are audited adversarially and requested via a spec note.
+- `/numerics-audit` — Adversarial audit of numerical experiments against the paper's claims: claim inventory with verdicts, whether the test problems can exercise the selling points at all, stopping-criterion comparability, evaluation accounting, timing credibility, baseline fairness, figure–table agreement, reproducibility. Four modes — `collaborator-owned`, `self-owned`, `no-runner`, `referee` — each supplying evidence lookup, findings sink, markup policy, experiment handoff, and decision owner, so nothing is hardcoded. Optional fan-out is **by lens, not by chunk**, with read-only subagents. `/ai-slop` audits the prose; this audits the numbers.
 - `/channels` — Run a `channels/` correspondence with an external AI reviewer that has read access but no direct link to Claude, with Mohammed relaying by hand. Scaffolds the protocol, composes bounded numbered messages (one task, a definite done-state, no hints on adversarial checks), maintains the exchange index, and closes the loop through **separate receipt, verification, and adoption** steps — a reply landing is not a decision. The freeze rule is arrangement: the host supplies the frozen artifact and the findings destination.
 - `/litrev` — Cite with confidence. Maintains `notes/litrev/` (one note per reference actually read from its PDF, keyed by citation key) and audits a manuscript against it: what is cited but unread, whether every characterization and benchmark-parameter attribution matches the source, and which essential lineage is uncited. Two modes — `audit-manuscript` and `build-from-reading`. Owns the unverified-lead request flow for `paper/temp_refs_to_add.bib`. The always-on never-fabricate rule stays in Rule 4 above, because a session that never invokes the skill still must not fabricate.
 - `/suggest-journals` — Find suitable Q1–Q2 journals for publication
@@ -73,6 +74,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 | `templates/jcode-CLAUDE.md.template` | Both | Implementation subdirectory CLAUDE.md |
 | `templates/Project.toml.template` | Both | Julia project skeleton |
 | `templates/runtests.jl.template` | A | Test suite skeleton |
+| `templates/spec-note.md` | Both | Experiment specification for an implementer — used by `/numerics-audit`'s `collaborator-owned` handoff |
 
 ### Architecture templates (src/ files)
 | Template | Style | Purpose |
