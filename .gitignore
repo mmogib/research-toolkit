@@ -1,1 +1,4 @@
 .claude/
+
+# Local operational metadata — session IDs / resume commands, not toolkit content
+session_ids.txt

@@ -18,9 +18,15 @@ This toolkit is a git repo. Skills are discovered by Claude Code via symlinks fr
 **After making changes** (editing templates, guides, or skills), remember to:
 1. Commit and push from the development location.
 2. `git pull` at the deployed location if it differs (e.g., if you develop on one machine and deploy on another, or if the Dropbox sync is not the same directory the symlinks point to).
-3. Verify symlinks still resolve: `ls -la ~/.claude/skills/mohammed-research-skills/` should point to this repo's `skills/` directory.
+3. Verify the installed entries still resolve. Each skill is exposed as its own entry under `~/.claude/skills/<name>` (a symlink or junction into the deployed clone's `skills/<name>/`), so check the entries themselves and read one `SKILL.md` through its exposed path:
+   ```bash
+   ls -la ~/.claude/skills/                              # every entry → research-toolkit/skills/<name>
+   head -3 ~/.claude/skills/<any-skill>/SKILL.md         # readable through the link
+   ```
 
-**Quick check:** `cd <deployed-path> && git status` — if behind, `git pull`.
+**Quick check:** compare full SHAs, not branch names — `git -C <deployed-path> rev-parse HEAD` against the development clone. Deployed clone must be clean; pull with `--ff-only`.
+
+**Never edit the deployed clone.** Everything installed resolves into it, so a local edit there diverges silently from what is pushed.
 
 ## Skills (Slash Commands)
 Ten custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.claude/skills/`):

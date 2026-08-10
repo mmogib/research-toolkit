@@ -51,16 +51,30 @@ mklink /D title-abstract research-toolkit\skills\title-abstract
 
 To improve the toolkit (add guides, update skills, fix templates):
 
-```bash
-# Edit anywhere (e.g., Dropbox clone, or the ~/.claude copy itself)
-# Then push:
-cd <your-development-copy>
-git add . && git commit -m "description" && git push
+**Edit only the development clone.** The runtime copy at `~/.claude/skills/research-toolkit` is
+read-only: everything installed under `~/.claude/skills/` resolves into it, so a local edit there is
+invisible to the development clone and silently diverges from what is pushed.
 
-# Pull into the runtime copy:
+```bash
+# 1. Edit in the development clone only
+cd <your-development-copy>
+
+# 2. Stage named paths — never `git add .`, which sweeps up working notes,
+#    correspondence, and local operational files
+git add <paths> && git commit -m "description" && git push
+
+# 3. Pull into the runtime copy, fast-forward only
 cd ~/.claude/skills/research-toolkit
-git pull
+git status --porcelain=v1   # must be empty; stop if not
+git pull --ff-only
+
+# 4. Confirm the two clones agree — compare full SHAs, not branch names
+git -C <your-development-copy> rev-parse HEAD
+git -C ~/.claude/skills/research-toolkit rev-parse HEAD
 ```
+
+Deploy in a maintenance window with Claude Code sessions closed. An already-invoked `SKILL.md` stays
+in its conversation and is not reread, so a session spanning a deployment runs a mix of old and new.
 
 ### Starting a new project
 
