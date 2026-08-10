@@ -322,9 +322,11 @@ for a personal toolkit.
 - **Scenarios written into this note** for all three skills.
 - **Forward-tested for real**, on the two highest-risk paths only:
   1. `/numerics-audit` in `referee` mode — no `notes/`, no litrev, no `\rev`; every value at its
-     unusual setting.
+     unusual setting. **PASSED.**
   2. `/init-project adopt` on a copy of a live project — non-git, hand-edited `CLAUDE.md`, existing
-     `jcode/`.
+     `jcode/`. **PASSED**, including the second-run no-op.
+
+Both gates cleared. The migration register is open for real adoptions, one at a time.
 
 ## Settled decisions
 
