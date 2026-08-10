@@ -1,15 +1,31 @@
 ---
 name: init-project
-description: Interactive scaffolding for new research projects. Creates the full
-  directory structure (paper/, jcode/, notes/, refs/), populates CLAUDE.md files,
-  sets up Julia project with chosen architecture (Style A Module or Style B Flat
-  Include), and copies templates from the research toolkit.
+description: Interactive scaffolding for research projects, and the sole owner of the root CLAUDE.md
+  hub. Default mode creates the full directory structure (paper/, jcode/, notes/, refs/), populates
+  CLAUDE.md files, sets up Julia with a chosen architecture (Style A Module or Style B Flat Include),
+  and copies templates. Adopt mode brings an existing or legacy project onto the hub — migrating an
+  old CLAUDE.md, scaffolding only what is missing, and never touching existing code. Use for a new
+  project, for joining an existing one, or when a project's CLAUDE.md predates the hub shape.
 invocation: user
 ---
 
-# /init-project — Interactive Research Project Scaffolding
+# /init-project — Research Project Scaffolding and Adoption
 
-You are setting up a new research project for Mohammed. Follow these steps exactly.
+This skill owns "make this directory conform to the toolkit." Every other skill that can be the first
+thing run in a directory routes here rather than scaffolding on its own.
+
+## Modes
+
+| Mode | Situation |
+|---|---|
+| `/init-project` | New project. Empty or nearly empty directory. |
+| `/init-project adopt` | Existing project: legacy `CLAUDE.md`, no `CLAUDE.md`, or partial structure. Migrates to the hub, scaffolds only what is missing. |
+
+Do not guess the mode from the directory alone — Step 2 detects, then confirms with Mohammed.
+
+**The root `CLAUDE.md` is a hub.** Read `<toolkit>/guides/project-hub.md` before writing one, in
+either mode. It is the single source of truth for the hub's shape and the notes discipline. The hub
+points; it never accumulates findings, session history, or summaries of notes.
 
 ## Step 1: Find the Research Toolkit
 
@@ -29,14 +45,66 @@ The research toolkit contains templates, guides, and conventions. Find it:
    - Option A: "Enter the path to your research-toolkit directory"
    - Option B: "Clone from GitHub" — run `git clone https://github.com/mmogib/research-toolkit.git` to a location the user specifies, then use that path.
 
-## Step 2: Detect Existing Content
+## Step 2: Detect Existing Content and Choose the Mode
 
 Check the current working directory:
-- Does `paper/main.tex` exist? If yes, note it — do not overwrite it.
-- Does `CLAUDE.md` exist? If yes, warn the user and ask if they want to continue (this may be an existing project).
-- Is the directory empty (or nearly empty)? Note this.
 
-Report what you found and proceed.
+- Does `paper/main.tex` exist? If yes, note it — never overwrite it.
+- Does `CLAUDE.md` exist? Read it and classify:
+  - contains `## Active notes` → **already a hub**, no migration needed
+  - contains `## Paper Key Elements`, a dated `## Current Status`, or a findings/changelog section →
+    **legacy shape**, needs `adopt`
+  - neither → hand-written or unknown shape, needs `adopt` with extra care
+- Does `jcode/` exist and contain source files? If yes, this is a live code project.
+- Is `notes/` present? `refs/`? Is this a git repository?
+- Is the directory empty (or nearly empty)?
+
+Report what you found, state which mode applies, and confirm before doing anything.
+
+**If anything already exists, you are in `adopt` — go to the Adopt section below before Step 3.**
+
+## Adopt Mode
+
+For an existing project. The goal is to reach the hub without losing anything and without touching
+work that is not yours.
+
+### Safety requirements — all mandatory
+
+1. **No-op if the root already matches the hub.** If `CLAUDE.md` contains `## Active notes`, report
+   that and stop. A second or interrupted run must never re-migrate.
+2. **Verbatim backup before writing anything.** Copy the existing root to
+   `notes/done/CLAUDE_pre_hub.md`. If that file already exists, **do not overwrite it** — write
+   `CLAUDE_pre_hub_2.md` (etc.) and report both. The original verbatim copy is the only rollback for
+   a project without git.
+3. **Read the backup back and compare before proceeding.** Abort before writing the new hub if it
+   cannot be read back identically.
+4. **Never scaffold into existing code.** If `jcode/` has content, skip Group 2 (architecture),
+   Group 3 (storage and problem domain), and every DFMethods follow-up. Create no `src/` or
+   `scripts/` files. That folder is not yours.
+5. **Never overwrite any existing file.** Only create what is missing.
+6. **Propose, then write.** Show the extraction plan and the root diff and get approval first.
+
+### Procedure
+
+1. Inventory the old root: every heading, every content block, every linked path.
+2. Map content to destinations per the migration table in `<toolkit>/guides/project-hub.md`:
+   `## Paper Key Elements` → `notes/manuscript-map.md`; known issues → topic notes; session history
+   and findings → the note that owns that topic, or a one-line summary if superseded; authors,
+   structure, roles, rules → carried into the new hub.
+3. If `notes/manuscript-map.md` already exists, **do not merge silently** — show the proposed diff
+   and get approval.
+4. Ask only the questions that are still open. If a host skill invoked `adopt` and already asked who
+   owns the code, it passes those answers in — **do not ask twice**.
+5. Write: backup → new notes → new hub. Create missing directories (`notes/`, `notes/done/`, `refs/`)
+   but nothing under `jcode/`.
+6. Verify and report:
+   - the backup's content matches the pre-adoption root
+   - `jcode/` is byte-for-byte unchanged
+   - every old heading appears in the new hub or in a named note, listed explicitly
+7. Tell Mohammed to start a fresh session for this project — the old `CLAUDE.md` may still be loaded
+   in the current one.
+
+A syntactically valid hub is not evidence of success. Report the mapping, not just the result.
 
 **LaTeX template handling:**
 - If `paper/main.tex` does NOT exist: create it from `templates/main.tex.template`, filling in the title from the user's answer in Step 3. Also create an empty `paper/references.bib` and an empty `paper/temp_refs_to_add.bib` (with a header comment: `% Suggested references for Mohammed to verify and import via Zotero`). Create `paper/submissions/` directory.
@@ -80,6 +148,19 @@ Ask the user the following interactively using AskUserQuestion. Ask one group at
 **Group 4 — Project scope (optional, can be filled later):**
 - Co-authors (names and emails), or use default (Mohammed only)?
 - Brief description of the core problem (one sentence) — or skip for now?
+
+**Group 5 — Arrangement (determines which Roles block the hub gets):**
+- **Who owns code and numerical experiments?**
+  - **Mohammed and Claude** (default) — Claude writes scripts, Mohammed runs them.
+  - **A named collaborator owns `jcode/`** — Claude never runs, writes, or edits code there;
+    experiments are requested through a spec note. Ask for the collaborator's name.
+
+`templates/CLAUDE.md.template` carries both Roles blocks. **Emit exactly one** into the project's
+`CLAUDE.md` and delete the other along with its marker comments. If a collaborator owns the code, add
+the matching rule: "`jcode/` belongs to [Collaborator]. Do not run it, edit it, or rely on it."
+
+In `adopt` mode, infer the arrangement from the old root's Roles section where one exists and confirm
+it rather than asking cold.
 
 ## Step 4: Read Templates
 
@@ -184,12 +265,18 @@ Create the following directory tree:
 
 ### File Population Rules
 
-**CLAUDE.md** (project-level):
-- Fill in: project title, codename, authors, toolkit path, structure diagram
-- Include the toolkit reference line: `See [toolkit-path] for coding style, templates, and workflow guides.`
-- Include skills reference: `Skills: ~/.claude/skills/research-toolkit/`
-- Include all standard rules (never run scripts, never compile LaTeX, etc.)
-- Leave sections like "Key Contributions" and "Paper Sections" with placeholder text for the user to fill in
+**CLAUDE.md** (project-level) — this is the **hub**. Read `<toolkit>/guides/project-hub.md` first.
+- Fill in: project title, the one-paragraph description, authors and affiliations, structure diagram,
+  toolkit path
+- `## Status` — three lines, Phase / Now / Next. For a new project: Phase "Project initialized",
+  Now and Next from the user's answers or left as single-line placeholders
+- `## Active notes` — starts empty, with the comment explaining that settled notes are not listed
+- Emit **exactly one** Roles block per Group 5; delete the other and its marker comments
+- Include the standard rules; append project-specific ones
+- Uncomment the DFMethods pointer only if the NLE + DFMethods path was chosen
+- **Do not add** per-section status tables, contribution lists, known-issues sections, or anything
+  that duplicates `paper/main.tex`. The hub points; it does not restate the paper. If the user wants
+  a manuscript map, it goes in `notes/manuscript-map.md` and gets one line in `## Active notes`.
 
 **jcode/CLAUDE.md**:
 - Fill in: module name, structure (matching chosen style)
@@ -266,21 +353,44 @@ Create the following directory tree:
 
 ## Step 6: Summary
 
-After generating all files, print a summary:
+### New project
+
 - List all files created (with full paths)
 - List any files skipped (because they already existed)
-- Remind the user of next steps:
+- Next steps:
   1. Run `julia --project=jcode/ -e 'import Pkg; Pkg.instantiate()'` to install dependencies
-  2. Fill in the placeholder sections in CLAUDE.md
+  2. Fill in the one-paragraph description and the three Status lines in `CLAUDE.md`
   3. Define test problems in the appropriate `problems_*.jl` file
   4. Implement the algorithm in `jcode/src/algorithm.jl`
   5. Add your solver to the `solvers` list in `s01_smoke_test.jl`
   6. Run the smoke test to verify basic functionality
   7. Use `/jcode-script` to create additional scripts (OAT, LHS, benchmark, figures)
 
+### Adopt
+
+Different summary — most of the above does not apply, and claiming it does would be wrong.
+
+- **Backup**: path written, and confirmation it matches the pre-adoption root
+- **Migration map**: every heading from the old root and where its content went. Anything dropped is
+  named explicitly, with why
+- **Created**: new notes and directories
+- **Untouched**: `jcode/` (with the hash comparison result), `paper/`, and every pre-existing file
+- **Next steps**:
+  1. Review `notes/manuscript-map.md` and the other extracted notes — they were derived from the old
+     root and may need editing
+  2. Fill in the three Status lines
+  3. Confirm `## Active notes` lists every note that is genuinely open
+  4. **Start a fresh session for this project** — the old `CLAUDE.md` may still be loaded in this one
+  5. Once satisfied, `notes/done/CLAUDE_pre_hub.md` can be deleted; until then it is the rollback
+
 ## Important Rules
 - NEVER overwrite existing files. If a file exists, skip it and report that you skipped it.
 - NEVER create `paper/main.tex` if it already exists — the user's preliminary notes are there.
+- In `adopt`, the root `CLAUDE.md` is the **only** file that may be replaced, and only after a
+  verified verbatim backup. Everything else is create-if-missing.
+- NEVER write anything under `jcode/` in `adopt` mode when that folder already has content.
+- The hub never carries findings, session history, or per-section status. If you are tempted to add
+  one, it belongs in a note. See `<toolkit>/guides/project-hub.md`.
 - Use the Write tool for new files. Use Edit only for existing files (which should not happen in a fresh project).
 - All generated files should have real content, not just "TODO" — fill in as much as possible from the user's answers. Use placeholders only for information you genuinely don't have yet.
 - The generated CLAUDE.md files should be immediately useful to Claude in future sessions.

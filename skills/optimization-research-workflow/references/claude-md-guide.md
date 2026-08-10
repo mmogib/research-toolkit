@@ -1,67 +1,32 @@
-# How to Write Effective CLAUDE.md Files
+# CLAUDE.md files in an optimization project
 
-CLAUDE.md files are the primary way Claude Code understands your project. Well-written CLAUDE.md files dramatically improve session quality by providing context, rules, and current status.
+Two files, two different jobs. They follow different rules, and conflating them is the mistake this
+document exists to prevent.
 
----
+## Root `CLAUDE.md` — the hub
 
-## Project-Level CLAUDE.md
+**See `<toolkit>/guides/project-hub.md`.** That guide is the single source of truth for the root
+file's shape, the `## Active notes` index, and the flat undated notes discipline. `/init-project`
+writes it; `/init-project adopt` migrates an existing one.
 
-Located at the project root. Provides high-level context about the entire project.
+The short version: the hub answers *where does the project stand* and *where do I look next*, in
+about one screen. It carries a one-paragraph description, three Status lines (Phase / Now / Next), the
+Active notes index, structure, roles, rules, and the toolkit path.
 
-### Structure
+It does **not** carry session history, completed-item logs, key findings with numbers, next-step
+lists, or per-section status tables. Those rot, and a session that reads them believes things that
+stopped being true. Findings go in the note that owns the experiment; the hub points at the note.
 
-```markdown
-# PROJECT_NAME Project
-
-## Overview
-One paragraph: what algorithm, what problem class, where the paper is.
-
-## Structure
-Directory tree showing top-level folders with brief descriptions.
-
-## Rules
-Numbered list of constraints:
-1. DO NOT compile LaTeX.
-2. Respect .claudeignore.
-3. Code execution instructions (Python/Julia paths).
-4. Available skills/tools.
-5. Notes workflow conventions.
-
-## Pointers
-Bullet list of cross-references:
-- Implementation details: see `jcode/CLAUDE.md`
-- Paper: `paper/main.tex` — where to find key sections
-- Reference algorithms: list with file locations
-
-## Current Status (date)
-
-### Completed
-Bullet list of completed milestones with dates and brief descriptions.
-Include key metrics and outcomes.
-
-### Key findings
-Organized by experiment/analysis.
-Include the most important numerical results.
-
-### Next steps
-Numbered list of immediate next actions.
-
-### Results & analysis files
-Bullet list mapping result types to file locations.
-```
-
-### Key principles
-
-1. **Keep Current Status updated.** This is the most-read section. Update after every major milestone.
-2. **Include key findings with numbers.** "MISTTDFPM has fewest iterations at every dimension: mean 8.9 vs 14.6" is more useful than "MISTTDFPM performs well".
-3. **Cross-reference liberally.** Point to `jcode/CLAUDE.md` for implementation details, to notes files for analysis.
-4. **Rules are enforced.** Claude follows rules in CLAUDE.md strictly. Use this for project conventions.
+> **If you are working in a project whose root has a `## Paper Key Elements` block, a dated
+> `## Current Status`, or an inline findings section, it predates this doctrine.** Run
+> `/init-project adopt` rather than continuing to append to it.
 
 ---
 
-## Implementation-Level CLAUDE.md
+## `jcode/CLAUDE.md` — implementation reference
 
-Located at `jcode/CLAUDE.md`. Provides detailed implementation context.
+A different kind of document, and **the hub discipline does not apply to it**. This one is expected to
+be long, detailed, and full of tables. Do not trim it to match the root.
 
 ### Structure
 
@@ -117,41 +82,27 @@ Where to find the algorithm, theorems, lemmas in the paper.
 
 ### Key principles
 
-1. **Document every parameter.** A table with name, default, description is essential for parameter search.
-2. **Show usage examples.** Claude learns from examples. Show constructor calls, solve calls, iterator usage.
+1. **Document every parameter.** A table with name, default, and description is essential for
+   parameter search.
+2. **Show usage examples.** Claude learns from examples — constructor calls, solve calls, iterator
+   usage.
 3. **ARGS reference table.** Quick lookup for which parts each script supports.
-4. **Connection to paper.** Helps when writing results sections or checking implementation.
+4. **Connection to paper.** Helps when writing results sections or checking an implementation against
+   its theorem.
+5. **Detail belongs here, not in the root.** This is the right home for parameter tables, retcode
+   mappings, and integration specifics.
 
 ---
 
-## Status Tracking Conventions
+## Anti-patterns
 
-### Completed items format
-```markdown
-- **Brief description** (date): More details. Key metric. File location.
-```
+Applying to either file:
 
-### Key findings format
-```markdown
-### Key findings — Experiment Name
-- **Headline result**: Numbers in context.
-- **Head-to-head ratios** (<1 = our algo wins):
-  - vs Reference1: 0.63x iters, 0.70x fevals, **0.76x CPU**
-```
-
-### Next steps format
-```markdown
-### Next steps
-1. **Action verb + description** — context if needed.
-2. **Action verb + description** — depends on step 1.
-```
-
----
-
-## Anti-Patterns
-
-1. **Stale status.** A CLAUDE.md with outdated "Next steps" is worse than no status section. Update or remove.
-2. **Too much detail.** CLAUDE.md is context, not documentation. Don't paste entire file contents.
-3. **Missing rules.** If you want Claude to behave a certain way, put it in Rules. Don't assume.
-4. **No pointers.** Without cross-references, Claude doesn't know where to look.
-5. **Vague findings.** "Results are good" tells Claude nothing. Include numbers.
+1. **Status that is a log.** Appending rather than replacing. The root's Status is three lines,
+   rewritten in place; anything historical belongs in a note.
+2. **Findings in the root.** "MISTTDFPM: mean 8.9 vs 14.6 iterations" is valuable and belongs in the
+   note that owns that experiment, with the root's Active-notes index pointing at it.
+3. **Missing rules.** If you want Claude to behave a certain way, write it in Rules. Do not assume.
+4. **No pointers.** Without cross-references, a session does not know where to look.
+5. **Trimming `jcode/CLAUDE.md`.** The one-screen limit is a rule about the root hub. Cutting the
+   parameter tables here removes the reason the file exists.

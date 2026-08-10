@@ -1,110 +1,86 @@
-# [Project Title] — [Short Description]
+# [Project Title]
 
-## Overview
-[One paragraph: what this project is about, the core problem, the approach.]
+[One paragraph, present tense. What problem the project addresses, what the method is, what the main
+results claim, what the experiments cover. No history of how the project got here — that is not what
+this file is for. See `<toolkit>/guides/project-hub.md`.]
 
 **Authors**:
 - Dr. Mohammed Alshahrani (main & corresponding author) <mshahrani@kfupm.edu.sa>
-- [Co-author Name] <email>
 - [Co-author Name] <email>
 
 **Affiliations**:
 - [1] Department of Mathematics, KFUPM, Saudi Arabia
 - [2] [Other affiliation]
 
-**Paper status**: [Draft / Theory complete / Experiments in progress / Under review]
+## Status
+
+- **Phase:** [e.g. Theory complete, experiments in progress]
+- **Now:** [the single thing being worked on right now]
+- **Next:** [the single thing that follows it]
+
+## Active notes
+
+- `notes/[topic].md` — [one line. A pointer, not a summary.]
+
+<!-- Settled notes are not listed here. They live in notes/done/. A note leaves this index in the
+     same edit that moves it. -->
 
 ## Structure
+
 ```
-project-name/
-├── CLAUDE.md              # This file
-├── paper/
-│   ├── main.tex              # LaTeX manuscript
-│   ├── references.bib        # Bibliography — Zotero-managed, NEVER edit directly
-│   ├── temp_refs_to_add.bib  # Claude's suggested references for Mohammed to verify
-│   ├── imgs/                 # Figures (copied from jcode/results/figures/)
-│   └── submissions/          # Managed by /prepare-submission
-│       ├── journals_templates/       # Publisher templates you download
-│       │   └── JOURNAL/              # e.g., elsarticle.cls + sample + .bst
-│       └── JOURNAL/                  # e.g., AMC/, JCAM/, SIOPT/
-│           └── first_submission_Month_Year/
-│               ├── source_files/     # Derived from main.tex: flat, upload-ready
-│               ├── journal_files/    # Yours: portal downloads, proofs, reports
-│               ├── cover_letter.tex
-│               └── submission_manifest.md
-├── jcode/                 # Julia implementation (see jcode/CLAUDE.md)
-│   ├── src/               # Source code (types, benchmark DB, problems, algorithm)
-│   ├── test/              # Tests
-│   ├── scripts/           # Numbered experiment scripts (s01_, s30_, s70_, ...)
-│   └── results/           # experiments.db, logs/, figures/
-├── notes/                 # Working notes
-│   └── done/              # Completed/archived notes
-└── refs/                  # Reference papers (PDFs)
+paper/          main.tex (authoritative), references.bib (Zotero-managed), imgs/, submissions/
+jcode/          Julia implementation — see jcode/CLAUDE.md
+notes/          flat, topical, undated. done/ for settled.
+refs/           reference PDFs
 ```
 
-## Delegation
-- **jcode/**: Julia implementation — see `jcode/CLAUDE.md`
+<!-- ═══ /init-project: emit EXACTLY ONE of the two Roles blocks below. ═══════════
+     Delete the other and these comments. -->
 
-## Toolkit
-See `<path-to-research-toolkit>` for coding style, templates, and workflow guides.
-Skills: `~/.claude/skills/research-toolkit/` (workflow, writing, title-abstract, jcode-script)
-
+<!-- ─── Roles — solo (Mohammed + Claude) ─────────────────────────────────────── -->
 ## Roles
-- **Mohammed**: Main author, decides direction, compiles LaTeX, runs scripts
-- **Claude**: Assists with brainstorming, reviewing, editing, checking proofs, improving writing
+
+- **Mohammed** — direction, and the lead. Runs Julia scripts, compiles LaTeX, downloads reference
+  PDFs. Never assume his approval; ask when a decision is his.
+- **Claude** — theory, implementation, writing, review. Writes scripts but never runs them.
+<!-- ─── end solo ────────────────────────────────────────────────────────────── -->
+
+<!-- ─── Roles — a collaborator owns the code ─────────────────────────────────── -->
+## Roles
+
+- **Mohammed** — direction, and the lead. Compiles LaTeX, liaison to co-authors, downloads reference
+  PDFs. Never assume his approval; ask when a decision is his.
+- **[Collaborator]** — all code and numerical experiments; owns `jcode/`. Claude never runs, writes,
+  or edits code there. Experiments are requested through a spec note.
+- **Claude** — review, proofs, writing, editing. Math, proofs, and writing stay with Claude and
+  Mohammed, never delegated.
+<!-- ─── end collaborator ────────────────────────────────────────────────────── -->
 
 ## Rules
-1. **DO NOT run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
-2. **DO NOT compile LaTeX** — Mohammed compiles locally.
-3. **DO NOT use Python scripts** — Use the Edit tool for all file modifications.
-4. **References**: Never edit `references.bib` — it is Zotero-managed. If new references are needed, write suggested entries to `paper/temp_refs_to_add.bib` with a comment explaining why. Mohammed verifies, imports through Zotero, and confirms. Only then cite the new keys in the manuscript. Never generate bib entries from AI memory — they are frequently hallucinated.
-5. **Reference papers**: If you need to consult a cited paper, ask Mohammed to download the PDF into `refs/`. Then read it with the Read tool.
-6. **Notes workflow**: Plans and session findings go to `notes/`. Move completed to `notes/done/`.
-7. **Keep this CLAUDE.md current** after significant sessions.
 
-## Paper Key Elements
+1. **Never run Julia scripts** — Mohammed runs them locally. Only create/edit scripts. Tests may be run.
+2. **Never compile LaTeX** — Mohammed compiles locally.
+3. **Never use Python scripts** — use the Edit tool for file modifications.
+4. **Never edit `references.bib`** — it is Zotero-managed. New references go to
+   `paper/temp_refs_to_add.bib` with a comment explaining why each is needed. Mohammed verifies via
+   Google Scholar, imports through Zotero, and confirms. Only then cite the new keys. Never generate
+   bib entries from AI memory — they pair real authors with fabricated titles, journals, and DOIs.
+5. **Reference papers** — if you need to consult a cited paper, ask Mohammed to download the PDF into
+   `refs/`, then read it.
+6. **Notes** — flat, topical, undated, one per open topic, updated in place. Settled notes move to
+   `notes/done/`. See `<toolkit>/guides/project-hub.md`.
+7. **Keep this hub current** — finishing a task means updating **Status** and **Active notes**. This
+   file points; it never accumulates findings, session history, or summaries.
 
-### Title
-[Paper title]
+<!-- /init-project: append any project-specific rules here. If a collaborator owns the code, add:
+     "8. `jcode/` belongs to [Collaborator]. Do not run it, edit it, or rely on it." -->
 
-### Core Problem
-[Mathematical formulation of the problem]
+## Toolkit
 
-### Key Contributions
-1. [Contribution 1]
-2. [Contribution 2]
-3. [Contribution 3]
+See `<path-to-research-toolkit>` for coding style, templates, and workflow guides.
 
-### Paper Sections
-1. **Introduction** — [status]
-2. **Preliminaries** — [status]
-3. **[Theory section]** — [status]
-4. **[Algorithm section]** — [status]
-5. **Convergence Analysis** — [status]
-6. **Numerical Experiments** — [status]
-7. **Conclusion** — [status]
-
-### Known Issues / WIP
-- [Issue 1]
-- [Issue 2]
-
-## Status
-[Current state of the project. Updated after each session.]
-
-<!-- ─── DFMethods.jl integration (uncomment if /init-project opted in) ───────
-## DFMethods.jl integration
-
-This project uses [DFMethods.jl](https://github.com/mmogib/DFMethods.jl)
-v0.3.2+ as the solver framework for the F(x) = 0 path. The harness adapter
-at `jcode/src/adapter.jl` bridges `SciMLBase.NonlinearSolution` to the
-toolkit's canonical `SolverResult`; `jcode/src/callbacks.jl` provides
-`ProgressUpdateCallback` for live `‖F‖` display; `jcode/src/sweep_helpers.jl`
-holds `WorkItem` / `register_palette` / `run_sweep` for the s30 benchmark
-loop. Constraint set lives on the problem (`set_factory::Function` on each
-`TestProblem`), not on the algorithm.
-
-See `<path-to-research-toolkit>/guides/dfmethods-integration.md` for the
-full integration reference. **Do not edit `DFMethods.jl` itself** — it
-ships from the Julia General registry. Custom extensions live in
-`jcode/src/extras.jl`.
+<!-- ─── DFMethods.jl (uncomment if /init-project opted in) ───────────────────────
+This project uses [DFMethods.jl](https://github.com/mmogib/DFMethods.jl) as the solver framework for
+the F(x) = 0 path. Implementation detail lives in `jcode/CLAUDE.md`; the integration reference is
+`<toolkit>/guides/dfmethods-integration.md`.
 -->

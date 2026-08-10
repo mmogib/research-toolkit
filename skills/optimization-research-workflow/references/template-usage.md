@@ -29,13 +29,22 @@ git commit -m "Initial project from optimization-research-template"
 
 Edit the root `CLAUDE.md`:
 
+The root file is a **hub** — see `<toolkit>/guides/project-hub.md`. Prefer `/init-project`, which
+writes it correctly; edit by hand only to adjust what it produced.
+
 1. **Replace `ALGORITHM_NAME`** throughout with your algorithm's abbreviation (e.g., MISTTDFPM, IHSCG, ADMM).
-2. **Update Overview** with your problem class and algorithm description.
-3. **Update Rules** section:
-   - Keep rules 1-3 (LaTeX, code execution, notes workflow) as-is.
+2. **Update the opening paragraph** with your problem class and algorithm description, present tense.
+3. **Update Rules**:
+   - Keep the standard rules (LaTeX, code execution, references, notes) as-is.
    - Add any project-specific constraints.
-4. **Clear Current Status** — start fresh with "Project initialized from template."
-5. **Update Pointers** if you rename files or add new source files.
+4. **Set the three Status lines** — Phase / Now / Next. For a fresh project: Phase
+   "Project initialized"; Now and Next as single lines.
+5. **Leave `## Active notes` empty** until there is an open note to list. One line each, pointers
+   rather than summaries.
+6. **Update `## Structure`** if you rename or add top-level folders.
+
+Do not add a completed-items log, a findings section, or per-section status. Those go in notes, and
+`## Active notes` points at them.
 
 ## Step 4: Customize jcode/CLAUDE.md
 

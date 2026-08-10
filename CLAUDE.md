@@ -33,7 +33,7 @@ Ten custom skills in `skills/` (discovered by Claude Code via symlinks from `~/.
 - `/optimization-research-workflow` — 12-phase research workflow, script patterns, benchmark patterns. **DFMethods.jl-aware**: per-phase touchpoints for projects that opted into DFMethods at init time.
 - `/math-research-writer` — Theorem/proof structure, LaTeX patterns, notation consistency
 - `/title-abstract` — Academic paper titles and abstracts (structure, examples, journal requirements)
-- `/init-project` — Interactive scaffolding for new research projects. **DFMethods.jl-aware**: when the user picks NLE/NLSE as the problem domain, an opt-in question wires in the DFMethods.jl adapter, callbacks, sweep helpers, constraints / problem registry, and the 28-problem canonical benchmark library (default yes).
+- `/init-project` — Scaffolding for research projects, and **sole owner of the root `CLAUDE.md` hub**. Default mode creates a new project; `adopt` mode brings an existing or legacy project onto the hub (verbatim backup, extract-then-trim migration, never touches existing `jcode/`). Emits one Roles variant per the arrangement interview. **DFMethods.jl-aware**: when the user picks NLE/NLSE as the problem domain, an opt-in question wires in the DFMethods.jl adapter, callbacks, sweep helpers, constraints / problem registry, and the 28-problem canonical benchmark library (default yes).
 - `/jcode-script` — Experiment script generator: type selection, SQLite/CSV backend, CLI flags, DB infrastructure. **DFMethods.jl-aware**: detects `jcode/src/adapter.jl` to auto-select DFMethods-aware variants of s30 / s40 / s70.
 - `/review-paper` — Paper review & polish checklist: 13-item universal checklist + project-specific items
 - `/join-revision` — Join a fully developed manuscript in its review-and-revision phase. Sets up the working system (lean CLAUDE.md hub, flat undated notes, `notes/litrev/` cite-with-confidence records, `channels/` correspondence with an external AI reviewer, `\rev` blue markup), then drives an eight-step review ending in `/ai-slop`. No code is ever run or written — numerical experiments are audited adversarially and requested via a spec note.
@@ -53,6 +53,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 ## Guides (Reference Documents)
 | Guide | Purpose |
 |-------|---------|
+| `guides/project-hub.md` | The root `CLAUDE.md` hub: anatomy, hard limits, the Active-notes index, flat undated notes discipline, and the migration procedure for legacy projects. Single source of truth — `/init-project` writes it. |
 | `guides/coding-style.md` | Both architectures: types, dispatch, naming, iterators, presets, error handling |
 | `guides/script-patterns.md` | Experiment script structure: ARGS, --resume, CSV I/O, TeeIO, progress bars. Blocks 29 + 30 cover DFMethods.jl palette + run_sweep. |
 | `guides/experiment-workflow.md` | End-to-end experiment pipeline: planning, OAT, LHS, benchmark, ablation, figures |
