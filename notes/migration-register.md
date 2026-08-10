@@ -47,7 +47,10 @@ Run on **copies**, not the originals:
 2. **`SGM_MixedVIEPS`** — 161 lines and **no Git**. Tests the case where the snapshot is the only
    rollback that exists.
 
-Both must satisfy the per-adoption checks below before the register opens for real work.
+**Status: both forward tests passed, including the second-run no-op. The register is open.**
+Adoptions proceed one at a time, each against the per-adoption procedure below. Passing the forward
+tests is not a licence to batch — the twelve roots differ from each other more than any of them
+differs from the test copy.
 
 ## Per-adoption procedure
 
