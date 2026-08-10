@@ -1,12 +1,12 @@
 ---
 name: litrev
 description: Cite with confidence. Maintains notes/litrev/ — one note per reference actually read
-  from its PDF, named by citation key — and audits a manuscript's citations against that record:
-  what is cited but unread, whether every characterization and benchmark-parameter attribution
-  matches the source, and which essential lineage is uncited. Also owns the request flow for
-  references that are not yet in the bibliography. Use when auditing a manuscript's literature or
-  building a reading record. Not for discovering new papers to read, and not for formatting
-  bibliographies.
+  from its PDF, named by citation key — and audits a manuscript's citations against that record.
+  Finds what is cited but unread, checks whether every characterization and benchmark-parameter
+  attribution matches the source, and looks for essential lineage that is uncited. Also owns the
+  request flow for references not yet in the bibliography. Use when auditing a manuscript's
+  literature or building a reading record. Not for discovering new papers to read, and not for
+  formatting bibliographies.
 invocation: user
 ---
 
