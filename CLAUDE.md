@@ -11,7 +11,7 @@ A portable, topic-independent reference for Claude to understand Mohammed's exac
 ## Active notes
 - `notes/migration-register.md` — twelve projects whose root `CLAUDE.md` predates the hub. Eight have no git; for those the per-adoption snapshot and hash manifest are the only rollback. Never bulk-adopt.
 - `notes/toolkit-litrev-proposal.md` — `/litrev` attribution checks: the VNQEP proposal, the toolkit's response (§9), Claude vs Jev test (§10), Codex review and decision (§11), hard-case test (§12). Open for the Jev trial.
-- `channels/` — correspondence with Codex. No exchange open; 003 (the `/litrev` edits) is closed and adopted with changes.
+- `channels/` — correspondence with Codex. No exchange open; 003 and 004 closed and adopted.
 
 ## How to Use
 In any new research project, add to the project's `CLAUDE.md`:
@@ -25,14 +25,20 @@ Claude will then have access to all guides and templates.
 ## Deployment
 This toolkit is a git repo. Skills are discovered by Claude Code via symlinks from `~/.claude/skills/` pointing into this repo.
 
+**Codex uses the same deployed clone** (per channels 004). One junction, `~/.agents/skills/research-toolkit` → `~/.claude/skills/research-toolkit/skills`, exposes all thirteen skills to Codex, and `~/.codex/AGENTS.md` resolves `<toolkit>` to the deployed clone. So one `git pull` updates both. Never copy toolkit skills into `~/.codex/skills/`.
+
+**Codex is included in every new skill and every skill update.** Claude owns the deployed clone and the `~/.claude/skills/` entries. Codex owns Codex-side compatibility review, discovery and configuration, and a fresh-session check that every toolkit skill loads exactly once. Ask for that check through `channels/` after deploying.
+
 **After making changes** (editing templates, guides, or skills), remember to:
 1. Commit and push from the development location.
 2. `git pull` at the deployed location if it differs (e.g., if you develop on one machine and deploy on another, or if the Dropbox sync is not the same directory the symlinks point to).
-3. Verify the installed entries still resolve. Each skill is exposed as its own entry under `~/.claude/skills/<name>` (a symlink or junction into the deployed clone's `skills/<name>/`), so check the entries themselves and read one `SKILL.md` through its exposed path:
+3. Verify the installed entries still resolve. Each skill is exposed as its own entry under `~/.claude/skills/<name>` (a symlink or junction into the deployed clone's `skills/<name>/`), so check the entries themselves and read one `SKILL.md` through its exposed path. Check Codex's junction too:
    ```bash
    ls -la ~/.claude/skills/                              # every entry → research-toolkit/skills/<name>
    head -3 ~/.claude/skills/<any-skill>/SKILL.md         # readable through the link
+   ls ~/.agents/skills/research-toolkit/                 # Codex: all thirteen skill directories
    ```
+4. For a new skill or a changed one, ask Codex for its fresh-session load check.
 
 **Quick check:** compare full SHAs, not branch names — `git -C <deployed-path> rev-parse HEAD` against the development clone. Deployed clone must be clean; pull with `--ff-only`.
 

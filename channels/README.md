@@ -77,3 +77,4 @@ whose title carries `Re: NNN`.
 | 001 | Skill extraction plan — design review | 2026-08-10 | 2026-08-10 | **adopted** → `notes/skill-extraction-plan.md` v3 |
 | 002 | Deployment and migration risk | 2026-08-10 | 2026-08-10 | **adopted** → `notes/skill-extraction-plan.md` v4 + `notes/migration-register.md` |
 | 003 | `/litrev` attribution-check design — review of three proposed edits | 2026-09-18 | 2026-09-18 | **adopted with changes** → `notes/toolkit-litrev-proposal.md` §11 |
+| 004 | Install the toolkit's skills for Codex, from one source | 2026-09-18 | 2026-09-18 | **adopted** → `CLAUDE.md` "Deployment" |
