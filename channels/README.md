@@ -64,7 +64,8 @@ whose title carries `Re: NNN`.
    compare afterwards.
 3. **Freeze rule.** While an exchange is open, **no implementation commits land against
    `skills/`, `templates/`, or `guides/`**. Findings accumulate in
-   `notes/skill-extraction-plan.md` and are applied in one batch after the reply lands.
+   the topic note named in the open exchange's index row, and are applied in one batch after the
+   reply lands.
 4. Decisions adopted from an exchange are recorded in the relevant topic note with a pointer — "per
    003 reply". This directory is correspondence, not the record. Nobody should have to read the
    channel to know what was decided.
@@ -75,3 +76,4 @@ whose title carries `Re: NNN`.
 |-----|-------|------|---------|---------------------|
 | 001 | Skill extraction plan — design review | 2026-08-10 | 2026-08-10 | **adopted** → `notes/skill-extraction-plan.md` v3 |
 | 002 | Deployment and migration risk | 2026-08-10 | 2026-08-10 | **adopted** → `notes/skill-extraction-plan.md` v4 + `notes/migration-register.md` |
+| 003 | `/litrev` attribution-check design — review of three proposed edits | 2026-09-18 | 2026-09-18 | **adopted with changes** → `notes/toolkit-litrev-proposal.md` §11 |

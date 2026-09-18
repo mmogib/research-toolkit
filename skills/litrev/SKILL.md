@@ -87,19 +87,33 @@ not write a note for a paper you have not opened. A note is a claim that you rea
 
 ### 3. Verify every characterization
 
-This is the part that earns the skill. For each cited key, check the manuscript's sentences about it
-against the note:
+This is the part that earns the skill. For each cited key, take the manuscript's **current**
+sentences about it — never the copy stored in the note, which may be out of date. A sentence
+identical to the stored one, on a record marked **Verified**, needs no second look. Check the rest
+against the note, choosing the check by the kind of claim (`references/attribution-checks.md`). A
+record with no source excerpt cannot be checked from the note; reopen the PDF.
 
-- Does the manuscript describe what the paper actually does?
-- Is a theorem cited **inside the setting it was proved in**? Manuscripts routinely cite a result
-  under weaker hypotheses than the source assumed. The note's "Assumptions and setting" section
-  exists for exactly this comparison.
-- **Benchmark parameter attributions.** "The parameters recommended in [X]" requires knowing what [X]
-  recommends. Check every value against the note's parameter table. An unattributed or altered
-  competitor parameter is the single most effective thing a referee can attack.
+- **What the paper does.** Does the source excerpt state or directly imply what the manuscript says?
+  Supports, contradicts, or does not settle it — and "does not settle it" goes back to the PDF.
+- **Result applicability.** First confirm that the note's "Assumptions and setting" for that result
+  is marked **complete**, standing assumptions and alternatives included. If it is not, reopen the
+  PDF or mark the citation **Unverifiable** — absence from an incomplete record proves nothing. Then,
+  for each condition the source requires, find where the manuscript meets it: stated at the point of
+  use, covered by a standing assumption, or implied by a stronger condition. Mark each **Satisfied**,
+  **Violated**, or **Unclear**, with the manuscript location. An allowed alternative counts as
+  meeting the condition. Extra conditions in the manuscript are fine, unless it says the source
+  requires them.
+- **Benchmark parameter attributions.** For each value the manuscript attributes to the source,
+  compare the value, units, method or problem variant, and status — recommended, default,
+  admissible, or only tested — with the note's parameter table. Mark **Match**, **Altered**, or
+  **Unverifiable**. "The parameters recommended in [X]" needs status *recommended*. An unattributed
+  or altered competitor parameter is the single most effective thing a referee can attack.
 - Is anything claimed as new that the cited work already does? Flag it loudly.
 
-Each verified attribution gets marked **Verified** in the note, with the source location.
+**Outcomes.** Only a check against the PDF — by a reader or a reading agent — marks a record
+**Verified**, with the date. Every other outcome is a finding: report it with the manuscript location
+and what the note says, and reopen the PDF before changing the note. A check against the note alone
+never removes a **Verified** mark; it flags the record for a PDF re-check.
 
 ### 4. Coverage, the other direction
 
@@ -161,4 +175,6 @@ is worse than nothing.
 ## Reference files
 
 - `references/litrev-notes.md` — the `notes/litrev/README.md` text and the per-key note skeleton.
+- `references/attribution-checks.md` — which check to run for which kind of claim, how to word it,
+  and the tests behind the wording.
 - `<toolkit>/guides/project-hub.md` — notes discipline and the Active-notes index.

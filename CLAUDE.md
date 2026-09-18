@@ -5,12 +5,13 @@ A portable, topic-independent reference for Claude to understand Mohammed's exac
 
 ## Status
 - **Phase:** Stable. Thirteen skills, seven guides. The skill-extraction work is complete, deployed, and forward-tested.
-- **Now:** Nothing in flight on the toolkit itself.
+- **Now:** `/litrev` attribution-check edits landed (per Codex 003). Open: a Jev trial at VNQEP's next re-check.
 - **Next:** Migrate the twelve legacy projects onto the hub, one at a time — see `notes/migration-register.md`.
 
 ## Active notes
 - `notes/migration-register.md` — twelve projects whose root `CLAUDE.md` predates the hub. Eight have no git; for those the per-adoption snapshot and hash manifest are the only rollback. Never bulk-adopt.
-- `channels/` — correspondence with Codex. The exchange that reviewed the extraction plan is closed and adopted; the directory stays as the working example of the protocol `/channels` scaffolds.
+- `notes/toolkit-litrev-proposal.md` — `/litrev` attribution checks: the VNQEP proposal, the toolkit's response (§9), Claude vs Jev test (§10), Codex review and decision (§11), hard-case test (§12). Open for the Jev trial.
+- `channels/` — correspondence with Codex. No exchange open; 003 (the `/litrev` edits) is closed and adopted with changes.
 
 ## How to Use
 In any new research project, add to the project's `CLAUDE.md`:

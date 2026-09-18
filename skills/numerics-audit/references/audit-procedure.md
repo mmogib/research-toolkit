@@ -75,7 +75,10 @@ Two failure modes to name explicitly if you find them:
   flagging.
 - **Baseline fairness.** Are competitors run with the parameters recommended in their own papers?
   Check each against the **evidence lookup**. An unattributed or altered competitor parameter is the
-  single most effective thing a referee can attack.
+  single most effective thing a referee can attack. Compare as in the parameter check of
+  `<toolkit>/skills/litrev/references/attribution-checks.md` — value, units, variant, and whether the
+  source recommended the value or only tested it. A value counts as absent from the source only when
+  the evidence is complete for that method and variant; otherwise it is **unverifiable** (below).
 - **Parameter provenance.** Every parameter in the experiment section traces to either the
   manuscript's own theory (with its admissibility condition satisfied — check the inequality with the
   actual numbers) or to a cited source. Values with neither are findings.
