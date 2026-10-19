@@ -1,0 +1,84 @@
+\documentclass[11pt,a4paper]{article}
+
+% Comments to the authors. This document is seen by the authors: nothing confidential goes here,
+% and nothing that identifies the referee. Standard packages only; the user compiles it.
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{needspace}  % keeps each major-comment heading with its first lines
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdfauthor={}, pdftitle={Referee report}}  % no identity in the PDF metadata
+
+\title{Referee Report\\[4pt]
+  \large Manuscript <ID> --- <Journal>}
+\author{}  % referee anonymous
+\date{<Month Day, Year>}  % a fixed date; \today prints the compiling server's date
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Title:} <title of the manuscript>\\
+\textbf{Type:} <article type>\\  % omit this line if the journal gives no article type
+\textbf{Round:} <N>
+% Include only if the journal's form puts the recommendation in the authors' report:
+% \\\textbf{Recommendation:} <recommendation>
+
+\medskip
+\noindent Page numbers refer to <the PDF of the submitted manuscript>; reference numbers refer to
+its bibliography.
+
+% =====================================================================
+\section*{Summary of the manuscript}
+% =====================================================================
+
+<What the manuscript claims to do, in neutral terms. One paragraph.>
+
+% =====================================================================
+\section*{General assessment}
+% =====================================================================
+
+<Main strengths. Main problems. What a revision would need. The recommendation sentence, if the
+recommendation is included.>
+
+\needspace{8\baselineskip}  % keeps the heading with the first major item; after the heading, a
+                            % \needspace break could leave the heading alone at the foot of a page
+% =====================================================================
+\section*{Major comments}
+% =====================================================================
+
+\begin{enumerate}[label=\textbf{M\arabic*.}, leftmargin=*, itemsep=1.2ex]
+
+\item \textbf{<Topic-style heading.>}
+<Location. The problem and its evidence.>
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+  \item <A separate request, if the item has several.>
+  \item <…>
+\end{enumerate}
+<Direct request: "must" only where the paper is wrong or not reproducible; "Please …" elsewhere.>
+
+\needspace{5\baselineskip}
+\item \textbf{<Topic-style heading.>}
+<…>
+
+\end{enumerate}
+
+% =====================================================================
+\section*{Minor comments}
+% =====================================================================
+
+\begin{enumerate}[label=\textbf{m\arabic*.}, leftmargin=*, itemsep=0.8ex]
+\item <Location. The point and what to do.>
+\end{enumerate}
+
+% =====================================================================
+\section*{Typos and presentation}
+% =====================================================================
+
+\begin{enumerate}[label=\textbf{t\arabic*.}, leftmargin=*, itemsep=0.5ex]
+\item <Location. The correction.>
+\end{enumerate}
+
+\end{document}
