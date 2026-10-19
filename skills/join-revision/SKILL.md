@@ -32,6 +32,7 @@ the paper's state, now and always — not the notes, not the conversation, not w
 | `/numerics-audit` | Adversarial numerics audit. Invoked at step 5. |
 | `/ai-slop` | Deep multi-agent prose sweep. Invoked last, at step 8. |
 | `/math-research-writer` | Writing a paper from scratch or drafting new theory. Different job. |
+| `/referee` | Refereeing someone else's manuscript for a journal. Different job. |
 | `/optimization-research-workflow` | Code-first projects where you implement and run the algorithm. The opposite of this skill. |
 
 This skill is an orchestrator. When a procedure lives in another skill, invoke it and supply the

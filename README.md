@@ -39,6 +39,7 @@ mklink /D math-research-writer research-toolkit\skills\math-research-writer
 mklink /D numerics-audit research-toolkit\skills\numerics-audit
 mklink /D optimization-research-workflow research-toolkit\skills\optimization-research-workflow
 mklink /D prepare-submission research-toolkit\skills\prepare-submission
+mklink /D referee research-toolkit\skills\referee
 mklink /D review-paper research-toolkit\skills\review-paper
 mklink /D suggest-journals research-toolkit\skills\suggest-journals
 mklink /D title-abstract research-toolkit\skills\title-abstract
@@ -103,6 +104,7 @@ research-toolkit/
 │   └── latex-conventions.md               #   Writing style, theorems, biblatex
 ├── templates/                             # Copy-paste starters
 │   ├── CLAUDE.md.template                 #   Project-level CLAUDE.md
+│   ├── CLAUDE-referee.md.template         #   Referee-project CLAUDE.md hub
 │   ├── jcode-CLAUDE.md.template           #   Implementation CLAUDE.md
 │   ├── main.tex.template                  #   LaTeX manuscript starter
 │   ├── Project.toml.template              #   Julia project skeleton
@@ -124,6 +126,7 @@ research-toolkit/
     ├── numerics-audit/                    #   /numerics-audit — adversarial numerics audit
     ├── optimization-research-workflow/    #   /optimization-research-workflow — 12 phases
     ├── prepare-submission/                #   /prepare-submission — journal packaging
+    ├── referee/                           #   /referee — refereeing someone else's manuscript
     ├── review-paper/                      #   /review-paper — 14-item checklist
     ├── suggest-journals/                  #   /suggest-journals — journal search
     └── title-abstract/                    #   /title-abstract — titles & abstracts
@@ -157,6 +160,7 @@ See `guides/coding-style.md` for full comparison and patterns.
 | `/numerics-audit` | Adversarial audit of numerical experiments against the paper's claims. Four modes, including a referee mode for someone else's paper |
 | `/optimization-research-workflow` | 12-phase research pipeline. DFMethods.jl touchpoints in all 12 phases (only for projects that opted in). |
 | `/prepare-submission` | Package a finished manuscript for one journal, one cycle: flattened `source_files/`, template transformation, trimmed `.bib`, cover letter |
+| `/referee` | Journal peer review of someone else's manuscript, from the first read to the submitted report and later rounds. Read-only on the authors' material; the user owns every judgment |
 | `/review-paper` | 14-item paper polish checklist, canonical slugs, checklist-only mode |
 | `/suggest-journals` | Find Q1–Q2 journals for publication |
 | `/title-abstract` | Academic titles and abstracts |
