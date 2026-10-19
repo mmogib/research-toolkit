@@ -5,7 +5,7 @@ A portable, topic-independent reference for Claude to understand Mohammed's exac
 
 ## Status
 - **Phase:** Stable. Fourteen skills, seven guides. The skill-extraction work is complete, deployed, and forward-tested.
-- **Now:** `/litrev` attribution-check edits landed (per Codex 003). Open: a Jev trial at VNQEP's next re-check.
+- **Now:** `/referee` released (`dc50146`), deployed, and checked in fresh Claude and Codex sessions — record in `notes/done/referee-rollout.md`. Open: a Jev trial at VNQEP's next re-check.
 - **Next:** Migrate the twelve legacy projects onto the hub, one at a time — see `notes/migration-register.md`.
 
 ## Active notes
