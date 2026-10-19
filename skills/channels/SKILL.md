@@ -1,18 +1,19 @@
 ---
 name: channels
 description: Run a `channels/` correspondence with an external AI reviewer that has read access to
-  the project but no direct link to Claude, with the user relaying by hand. Scaffolds the protocol,
+  the project but no direct link to the main agent, with the user relaying by hand. Scaffolds the protocol,
   composes bounded numbered messages that state one task and a definite done-state, maintains the
   exchange index, and closes the loop when a reply lands through separate receipt, verification, and
   adoption steps. Use when setting up such a reviewer, writing a message to one, or processing a
-  reply. Not for subagents, which Claude spawns directly.
+  reply. Not for subagents, which the main agent spawns directly.
 invocation: user
 ---
 
 # /channels — Correspondence with an External Reviewer
 
 An external AI reviewer runs inside the project with read access to all files. It has no channel to
-Claude: the user relays messages both ways by hand. `channels/` is the whole conversation.
+you, the main agent: the user relays messages both ways by hand. `channels/` is the whole
+conversation.
 
 The value is **independence**. A second model reading the same files, given a bounded question and no
 hint of where you suspect the problem, finds things you do not. That only holds if the exchange is
@@ -50,17 +51,24 @@ blocks new messages under the freeze rule.
 
 ## Scaffold
 
-Ask for the helper's name (default: Codex). Then create:
+Ask for the helper's name (default: Codex), unless the host supplied it. Then create:
 
 ```
 channels/
 ├── README.md                 ← protocol, from references/channels-protocol.md
-├── claude_to_<helper>/
-└── <helper>_to_claude/
+├── <main>_to_<helper>/
+└── <helper>_to_<main>/
 ```
 
-Copy the protocol text from `references/channels-protocol.md`, substituting the helper's name
-throughout and **filling the two placeholders the host supplies**:
+`<main>` is the main agent (the one running this skill) and `<helper>` is the reviewer. Directory
+labels are their names in lowercase unless the host supplies labels. **Defaults: main agent
+Claude, helper Codex**, which gives `claude_to_codex/` and `codex_to_claude/` as before. A host may
+supply other names, for example Codex as the main agent and Claude as the helper. The two labels
+must differ: refuse a collision rather than create one directory for both directions. Never rename
+the directories of an existing `channels/`.
+
+Copy the protocol text from `references/channels-protocol.md`, substituting both names throughout
+and **filling the two placeholders the host supplies**:
 
 - `<frozen artifact>` — what may not change while an exchange is open. For a manuscript project,
   `paper/main.tex`. For a code project, whatever is under review.
@@ -68,6 +76,12 @@ throughout and **filling the two placeholders the host supplies**:
 
 Those two values are *arrangement*: they belong to whoever invoked this skill, not to the protocol.
 Never leave the placeholders unfilled — an unfilled freeze rule is not a rule.
+
+A host may also supply, optionally, a **reading scope** (what the helper may read, for example
+"the submitted material and the files a message names; not `notes/` or earlier replies unless a
+message names them") and **extra constraints** (for example confidentiality, or no execution).
+Append each as a further numbered item under "Standing constraints for <helper>". With neither,
+add nothing: the protocol is as before.
 
 Add a line to `## Active notes` in the project hub pointing at `channels/`.
 

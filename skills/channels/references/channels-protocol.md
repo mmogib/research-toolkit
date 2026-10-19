@@ -1,8 +1,9 @@
 # `channels/README.md` — the protocol text
 
 Copy the block below into `channels/README.md`. Substitute `<helper>` throughout with the reviewer's
-name (default: Codex), and create `channels/claude_to_<helper>/` and `channels/<helper>_to_claude/`
-alongside it.
+name (default: Codex) and `<main>` with the main agent's name (default: Claude); directory names use
+their lowercase labels. Create `channels/<main>_to_<helper>/` and `channels/<helper>_to_<main>/`
+alongside it. With the defaults the result is as before: `claude_to_codex/` and `codex_to_claude/`.
 
 **Two placeholders are supplied by the host, not by this protocol.** Fill both before writing the
 file:
@@ -14,18 +15,22 @@ file:
 
 An unfilled freeze rule is not a rule. If the host has not said what is frozen, ask.
 
+**Optional host additions.** If the host supplies a reading scope or extra constraints (for example
+confidentiality, or no execution), append each as a further numbered item under "Standing
+constraints for <helper>". If it supplies neither, add nothing.
+
 ---
 
 ```markdown
 # Channels — correspondence with <helper>
 
-<helper> runs inside this project with read access to all files. It has no channel to Claude
-directly: Mohammed relays messages both ways by hand. This directory is the whole conversation.
+<helper> runs inside this project with read access to all files. It has no channel to <main>
+directly: the user relays messages both ways by hand. This directory is the whole conversation.
 
 ## Directories
 
-- `claude_to_<helper>/` — messages Claude writes for <helper>.
-- `<helper>_to_claude/` — replies <helper> writes back.
+- `<main>_to_<helper>/` — messages <main> writes for <helper>.
+- `<helper>_to_<main>/` — replies <helper> writes back.
 
 ## Naming
 
@@ -67,22 +72,22 @@ whose title carries `Re: NNN`. A message not yet relayed is not yet frozen.
 
 ## Standing constraints for <helper>
 
-1. Its only output is the reply file in `<helper>_to_claude/`. Nothing else.
+1. Its only output is the reply file in `<helper>_to_<main>/`. Nothing else.
 2. It never edits project files unless a message explicitly grants it permission for that message.
 3. It never fabricates citations. Anything it suggests from memory is flagged **UNVERIFIED**.
 4. It does not run code and does not compile LaTeX.
 5. When it disagrees, it says so with a derivation, not a verdict.
 
-## Standing constraints on Claude's side
+## Standing constraints on <main>'s side
 
-1. A <helper> verdict is input to Claude's own verification, never a substitute for it. "<helper>
+1. A <helper> verdict is input to <main>'s own verification, never a substitute for it. "<helper>
    confirmed it" settles nothing.
-2. Adversarial exchanges are sent **without** sharing Claude's suspicions. Independence is the point;
+2. Adversarial exchanges are sent **without** sharing <main>'s suspicions. Independence is the point;
    compare afterwards.
 3. **Freeze rule.** While an exchange is open, `<frozen artifact>` does not change. Findings
    accumulate in `<findings destination>` and are applied in one batch after the reply lands.
 4. A reply landing is not a decision. Receipt, verification, and adoption are three separate steps;
-   the outcome field below is filled only after Mohammed accepts.
+   the outcome field below is filled only after the user accepts.
 5. Decisions adopted from an exchange are recorded in the relevant topic note with a pointer — "per
    003 reply". This directory is correspondence, not the record. Nobody should have to read the
    channel to know what was decided.
