@@ -1,0 +1,102 @@
+# Referee Review — [Journal], [Manuscript ID]
+
+**Review**: [Journal] — manuscript [ID], [article type]
+
+[One paragraph, present tense, neutral: what the submitted manuscript is about and what it claims,
+enough for a fresh session to orient. No findings.] This is a review project, not a writing
+project: the manuscript is read, never edited. The deliverables for each round are in
+`report/round-N/`. See `<toolkit>/guides/project-hub.md`.
+
+**Referee**: [name, affiliation — optional; never in anything the authors see]
+**Review form**: [how the form is reached: a local file, or the portal route, e.g. "the journal's
+reviewer portal; the link is in the invitation email in `paper/round-k/`", naming the email's
+actual folder — never the link itself]
+
+## Status
+
+- **Phase:** Round [N] — [preparing | reviewing | ready | submitted, awaiting decision] (due [date])
+- **Now:** [the single thing being worked on right now]
+- **Next:** [the single thing that follows it]
+
+## Active notes
+
+- `notes/litrev/` — one note per source read from its PDF, by source ID
+
+<!-- /referee adds one line for each note when it is created: review-brief, review-plan,
+     manuscript-map, review-findings, review-synthesis, and in a later round round-[N]-check.
+     Settled notes are not listed here. They live in notes/done/. A note leaves this index in the
+     same edit that moves it. -->
+
+## Structure
+
+```
+paper/round-1/, …   what arrived for each round, as received. Read-only.
+report/round-1/, …  the deliverables for each round, per the journal's form
+notes/              flat, topical, undated. done/ for settled. litrev/ for reading records.
+                    manuscript-round-N.txt — text copy of round N's manuscript (search aid; the
+                    original file rules)
+```
+
+<!-- /init-project (referee arrangement): if an external reviewer is in the loop, add to the tree:
+     channels/       correspondence with [Helper]. [main]_to_[helper]/, [helper]_to_[main]/
+     If an AGENTS.md pointer is written or already present (with or without a reviewer), add:
+     AGENTS.md       one line pointing to this hub -->
+
+## Roles
+
+- **[Referee name, or "The user"]** — the referee, and the lead. Owns the recommendation and every
+  judgment that reaches the editor or the authors. Compiles the report, submits it through the
+  journal's form, and says where the reference PDFs are. Never assume their approval; ask when a
+  decision is theirs.
+- **The main agent** ([the agent or agents that run `/referee` here]) — reads and checks the
+  manuscript (proofs, assumptions, claims, literature, numerics), records findings in notes, and
+  drafts the deliverables. Writes no code unless a numerical claim needs independent checking and
+  the referee asks for it.
+
+<!-- /init-project (referee arrangement): if an external reviewer is in the loop, append:
+- **[Helper]** — independent reviewer with read access to the project, corresponding through
+  `channels/`. The referee relays both ways. Its verdicts are input to the main agent's
+  verification, never a substitute for it. -->
+
+## Rules
+
+1. **The manuscript is read-only.** Nothing under `paper/` is edited, moved, renamed, or deleted,
+   including code or data the authors supplied.
+2. **Never compile LaTeX.** The referee compiles [where, e.g. on Overleaf]; when they say the
+   report is compiled, read the PDF they put in `report/round-N/`, and never rebuild or overwrite
+   it. Keep the report self-contained: standard packages only, no files outside its folder.
+3. **No Python** unless the referee approves it for a specific document operation, each time.
+   **Never run the authors' code or experiments.**
+4. **Confidentiality.** The submitted material, including any code or data, and the notes derived
+   from it are confidential review material. Never send their text, equations, figures, data, or
+   distinctive unpublished details to web search or any outside service. General literature
+   searches never contain submission content. [Journal-specific terms, e.g. on AI tools, as
+   recorded in the brief.]
+5. **No claims about the literature from memory.** Before a deliverable says anything about a
+   paper, read its PDF from [the reference locations, in search order] and record it in
+   `notes/litrev/`. Anything not yet checked is marked UNVERIFIED and stays out of the report.
+   Never fabricate a reference to recommend.
+6. **Every report comment is anchored and verified.** It names its location and is checked against
+   the original file before it enters the report. Findings go to a note first; the report takes
+   only those the referee has accepted.
+7. **Anonymity.** Nothing in a file the authors see identifies the referee, PDF metadata included.
+8. **Notes** — flat, topical, undated, one per open topic, updated in place. Settled notes move to
+   `notes/done/`, with the round in the filename. See `<toolkit>/guides/project-hub.md`.
+9. **Keep this hub current** — finishing a task means updating **Status** and **Active notes**.
+   This file points; it never accumulates findings, session history, or summaries.
+
+<!-- /init-project (referee arrangement): if an external reviewer is in the loop, append to Rule 4:
+       "[Helper] is the one exception, by the referee's choice and within the journal's terms."
+     and add:
+       "10. **Freeze rule** — each exchange names the round it was sent in. While it is open
+           (until its reply is verified and the referee has decided), that round's deliverables
+           in `report/round-N/` do not change, and this hub does not move to a new round or
+           archive that round's notes. Findings accumulate in `notes/review-findings.md` (in a
+           later round, verified replies about earlier requests go to `notes/round-N-check.md`)
+           and are applied in one batch once the referee accepts." -->
+
+## Toolkit
+
+This review runs under `/referee` (`<toolkit>/skills/referee/SKILL.md`), which uses `/init-project`,
+`/litrev`, `/numerics-audit` (referee mode), and `/channels` if a reviewer is in the loop.
+Toolkit: [toolkit path].

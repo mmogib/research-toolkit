@@ -5,7 +5,8 @@ description: Interactive scaffolding for research projects, and the sole owner o
   CLAUDE.md files, sets up Julia with a chosen architecture (Style A Module or Style B Flat Include),
   and copies templates. Adopt mode brings an existing or legacy project onto the hub — migrating an
   old CLAUDE.md, scaffolding only what is missing, and never touching existing code. Use for a new
-  project, for joining an existing one, or when a project's CLAUDE.md predates the hub shape.
+  project, for joining an existing one, or when a project's CLAUDE.md predates the hub shape. Also
+  scaffolds a referee project when /referee passes its referee arrangement.
 invocation: user
 ---
 
@@ -20,8 +21,9 @@ thing run in a directory routes here rather than scaffolding on its own.
 |---|---|
 | `/init-project` | New project. Empty or nearly empty directory. |
 | `/init-project adopt` | Existing project: legacy `CLAUDE.md`, no `CLAUDE.md`, or partial structure. Migrates to the hub, scaffolds only what is missing. |
+| Referee arrangement | Host-only: `/referee` passes it explicitly for a review project. See § Referee arrangement. Never inferred from the directory, and never offered as a mode. |
 
-Do not guess the mode from the directory alone — Step 2 detects, then confirms with Mohammed.
+Do not guess the mode from the directory alone — Step 2 detects, then confirms with the user.
 
 **The root `CLAUDE.md` is a hub.** Read `<toolkit>/guides/project-hub.md` before writing one, in
 either mode. It is the single source of truth for the hub's shape and the notes discipline. The hub
@@ -29,7 +31,8 @@ points; it never accumulates findings, session history, or summaries of notes.
 
 ## Step 1: Find the Research Toolkit
 
-The research toolkit contains templates, guides, and conventions. Find it:
+The research toolkit contains templates, guides, and conventions. If a host skill passed a verified
+toolkit root, use it and skip the search. Otherwise, find it:
 
 1. Search for a directory containing `CLAUDE.md` with the text "Mohammed's Research Toolkit" in these locations (use Glob and Grep, search in parallel):
    - `~/.claude/skills/research-toolkit/`
@@ -46,6 +49,9 @@ The research toolkit contains templates, guides, and conventions. Find it:
    - Option B: "Clone from GitHub" — run `git clone https://github.com/mmogib/research-toolkit.git` to a location the user specifies, then use that path.
 
 ## Step 2: Detect Existing Content and Choose the Mode
+
+**If a host passed the referee arrangement, go to § Referee arrangement now.** This step, the Adopt
+section, and Steps 3–6 apply only without it, except the Adopt steps that section names.
 
 Check the current working directory:
 
@@ -102,14 +108,79 @@ work that is not yours.
    - the backup's content matches the pre-adoption root
    - `jcode/` is byte-for-byte unchanged
    - every old heading appears in the new hub or in a named note, listed explicitly
-7. Tell Mohammed to start a fresh session for this project — the old `CLAUDE.md` may still be loaded
+7. Tell the user to start a fresh session for this project — the old `CLAUDE.md` may still be loaded
    in the current one.
 
 A syntactically valid hub is not evidence of success. Report the mapping, not just the result.
 
 **LaTeX template handling:**
-- If `paper/main.tex` does NOT exist: create it from `templates/main.tex.template`, filling in the title from the user's answer in Step 3. Also create an empty `paper/references.bib` and an empty `paper/temp_refs_to_add.bib` (with a header comment: `% Suggested references for Mohammed to verify and import via Zotero`). Create `paper/submissions/` directory.
+- If `paper/main.tex` does NOT exist: create it from `templates/main.tex.template`, filling in the title from the user's answer in Step 3. Also create an empty `paper/references.bib` and an empty `paper/temp_refs_to_add.bib` (with a header comment: `% Suggested references for the user to verify and import via Zotero`). Create `paper/submissions/` directory.
 - If `paper/main.tex` DOES exist: the user already has preliminary notes. Do NOT touch it. Offer to copy the LaTeX template as `paper/template_reference.tex` so the user can pull preamble/boilerplate from it if needed.
+
+## Referee arrangement (host-invoked)
+
+Reached only when a host skill (`/referee`) passes this arrangement explicitly, for a project in
+which the user referees someone else's manuscript. It is never inferred from the directory. It does
+not change the new or adopt modes, which run exactly as described when no arrangement is passed.
+Steps 3–6 do not apply.
+
+**Inputs from the host.** If one is missing, ask; do not guess.
+- the values for every placeholder in the hub template: the current round N; the host's setup
+  answers (the referee's identity, optional; journal; manuscript title and ID; article type, only
+  if the journal gives one; deadline; reference PDF locations in search order; the agents and the
+  external reviewer, if any, with their directory labels; where the user compiles, if a LaTeX
+  report is planned); a neutral one-paragraph overview of the manuscript; how the review form is
+  reached; the main agent's name; and the Status lines;
+- the journal's confidentiality and AI-use terms, as the host read them;
+- the verified toolkit root;
+- the hub template `<toolkit>/templates/CLAUDE-referee.md.template`;
+- the protected files: everything under `paper/`, and every file already in the project;
+- the permitted outputs: the referee hub, and whichever of `report/round-N/`, `notes/`,
+  `notes/done/`, and `notes/litrev/` are missing;
+- the request list for missing PDFs, named in the litrev README (for `/referee`, the "PDFs
+  needed" list in `notes/review-plan.md`);
+- whether to write an `AGENTS.md` pointer.
+
+**Before writing,** record an inventory of `paper/`: every file's path, size, and hash.
+
+**Detect, report, and confirm with the user:**
+- No root `CLAUDE.md`: create the referee hub.
+- A referee hub (it has `## Active notes` and a `**Review**:` line under its title): keep it
+  unchanged and create only the missing round folders.
+- Any other root `CLAUDE.md`: stop and report what it is. Propose a migration to the referee hub
+  under Adopt's safety requirements 2, 3, 5, and 6 and its procedure steps 1–3: inventory every
+  block of the old file, map each to the new hub or a named note, show the plan and the root diff,
+  and write only on approval. Afterwards verify, as in Adopt step 6, that every old heading
+  appears in the new hub or in a named note.
+
+**Write** (create if missing; the approved migration above is the only replacement):
+1. The hub, from the referee template. Fill every placeholder from the host's values; ask for any
+   value that is missing, and never put a personal review link in the Review form line. Delete the
+   optional parts that do not apply: the Referee line without an identity, the article type
+   without one, and Rule 2's compile location without a LaTeX report (the no-compiling rule
+   stays). Apply the template's commented overlays as the arrangement requires: with an external
+   reviewer, its Structure line, Roles entry, Rule 4 exception, and Rule 10, with the names and
+   directory labels the host supplies; with an `AGENTS.md` pointer written or already present,
+   its Structure line. Then delete the template comments.
+2. Whichever of `report/round-N/`, `notes/`, `notes/done/`, and `notes/litrev/` are missing.
+3. `notes/litrev/README.md` from the **referee README** in
+   `<toolkit>/skills/litrev/references/litrev-notes.md`, with the reference locations and the
+   request list substituted. An existing README is left untouched.
+4. If the host asked for it and there is no `AGENTS.md`: an `AGENTS.md` holding one line —
+   `Read CLAUDE.md in this directory first: it is the project hub, and its Roles and Rules apply to you.`
+   An existing `AGENTS.md` is never changed; report it instead.
+
+**Never, in this arrangement:** create, change, move, or delete anything under `paper/`; create
+`paper/main.tex`, any `.bib` file, `refs/`, `jcode/`, or code files; ask Step 3's research
+questions; run `/channels` (the host does that).
+
+**Verify and report:**
+- the inventory of `paper/` matches the one taken before writing;
+- what was created, and what already existed and was left alone;
+- if an `AGENTS.md` already existed: whether it points to the hub, adds compatible instructions, or
+  conflicts with the hub, without changing it;
+- if a `notes/litrev/README.md` already existed: whether it is the referee README; if not, report
+  it, so that the host can agree a reconciliation with the user before running `/litrev`.
 
 ## Step 3: Ask Project Questions
 
@@ -152,7 +223,7 @@ Ask the user the following interactively using AskUserQuestion. Ask one group at
 
 **Group 5 — Arrangement (determines which Roles block the hub gets):**
 - **Who owns code and numerical experiments?**
-  - **Mohammed and Claude** (default) — Claude writes scripts, Mohammed runs them.
+  - **The user and Claude** (default) — Claude writes scripts, the user runs them.
   - **A named collaborator owns `jcode/`** — Claude never runs, writes, or edits code there;
     experiments are requested through a spec note. Ask for the collaborator's name.
 
@@ -165,7 +236,7 @@ the matching rule: "`jcode/` belongs to [Collaborator]. Do not run it, edit it, 
   project's interview; it is one feature, not a universal question.
   - **No** (default) — skip.
   - **Yes** — a second model with read access to the project, corresponding through `channels/` with
-    Mohammed relaying by hand. Ask for its name (default: Codex). Then: invoke `/channels` to
+    the user relaying by hand. Ask for its name (default: Codex). Then: invoke `/channels` to
     scaffold, append the external-reviewer overlay to the Roles block, add `channels/` to the
     Structure tree, and add the freeze rule to Rules — supplying the two values `/channels` needs,
     the frozen artifact and the findings destination.
@@ -235,7 +306,7 @@ Create the following directory tree:
 ├── paper/
 │   ├── main.tex                  ← From LaTeX template (SKIP if already exists)
 │   ├── references.bib            ← Empty file (Zotero will populate)
-│   ├── temp_refs_to_add.bib      ← Claude puts suggested refs here for Mohammed to verify
+│   ├── temp_refs_to_add.bib      ← Claude puts suggested refs here for the user to verify
 │   ├── imgs/                     ← Empty directory
 │   └── submissions/              ← One subfolder per journal (cover letters, responses)
 ├── jcode/
@@ -364,8 +435,8 @@ Create the following directory tree:
   references.
 
 **refs/**:
-- Empty directory. Mohammed downloads reference papers (PDFs) here when Claude needs to consult them.
-- Workflow: Claude asks "Can you download [paper] into refs/?", Mohammed downloads it, Claude reads it with the Read tool.
+- Empty directory. The user downloads reference papers (PDFs) here when Claude needs to consult them.
+- Workflow: Claude asks "Can you download [paper] into refs/?", the user downloads it, Claude reads it with the Read tool.
 - Typical uses: verifying a cited formula, checking a proof technique, understanding a referenced algorithm.
 
 **jcode/scripts/s01_smoke_test.jl**:
@@ -413,6 +484,8 @@ Different summary — most of the above does not apply, and claiming it does wou
 ## Important Rules
 - NEVER overwrite existing files. If a file exists, skip it and report that you skipped it.
 - NEVER create `paper/main.tex` if it already exists — the user's preliminary notes are there.
+- In the referee arrangement, NEVER create, change, move, or delete anything under `paper/`. The
+  `paper/main.tex` rules above belong to the new and adopt modes.
 - In `adopt`, the root `CLAUDE.md` is the **only** file that may be replaced, and only after a
   verified verbatim backup. Everything else is create-if-missing.
 - NEVER write anything under `jcode/` in `adopt` mode when that folder already has content.
