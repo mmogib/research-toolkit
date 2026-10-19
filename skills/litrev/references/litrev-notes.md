@@ -1,6 +1,6 @@
 # `notes/litrev/` — the record and the note skeleton
 
-Two copy-into-place texts: the directory README, and the per-key note skeleton.
+Copy-into-place texts: the directory README, its referee variant, and the per-key note skeleton.
 
 ---
 
@@ -25,12 +25,12 @@ reference appearing in the bibliography proves nothing about its contents.
 
 Reference PDFs live in `<PDF root>`. Locate a key through the `.bib` index there — its `file = {...}`
 fields give paths relative to that directory. If that fails, match by title and author. If the PDF is
-not there, ask Mohammed to download it; do not proceed on memory.
+not there, ask the user to download it; do not proceed on memory.
 
 ## Requesting a new reference
 
 A reference not in the bibliography is requested as an **unverified lead** in
-`paper/temp_refs_to_add.bib` — never as a fabricated entry. Mohammed verifies and imports through
+`paper/temp_refs_to_add.bib` — never as a fabricated entry. The user verifies and imports through
 Zotero. Do not cite the key until it appears in the bibliography.
 
 ## Status
@@ -41,6 +41,52 @@ Zotero. Do not cite the key until it appears in the bibliography.
 
 Keys cited in the manuscript with no note here are the open list.
 ```
+
+---
+
+## `notes/litrev/README.md` — referee variant
+
+For the referee arrangement (`/litrev` § Referee arrangement). Substitute the PDF locations, in
+search order, for `<PDF locations>` and the host's request note for `<request list>`.
+
+```markdown
+# Literature review notes — referee
+
+One note per source read from its PDF, named by source ID (`Smith2019.md`). The manuscript under
+review is read-only; these notes record what the sources it cites, and any uncited sources the
+review needs, actually say.
+
+## The rule
+
+Before any deliverable characterizes a paper (what it proves, assumes, or recommends), check for its
+note here. If there is no note, read the PDF and write one first. Never characterize a paper from
+memory.
+
+## Finding a PDF
+
+PDFs are searched in this order: <PDF locations>. Match by title and authors, and record the exact
+path in the note. If the PDF is not found, add it to <request list> and ask the user; do not proceed
+on memory.
+
+## Source map
+
+| Round | Printed ref | Source ID | Note |
+|-------|-------------|-----------|------|
+| | | | |
+
+## Status
+
+| Source ID | Read | Cited in (round: printed refs) | Note |
+|-----------|------|--------------------------------|------|
+| | | | |
+
+Sources in the map with no note here are the open list.
+```
+
+In the referee arrangement, the per-key skeleton below changes in four places: the heading uses
+the source ID; **Full reference** is taken from the PDF itself; **PDF** is the exact path read;
+"What we cite it for" becomes "What the manuscript cites it for — round N" (one block per round),
+and "Relation to our work" becomes "Relation to the manuscript".
 
 ---
 

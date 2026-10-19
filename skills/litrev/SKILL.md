@@ -45,6 +45,10 @@ inventory changes.
 
 ## Phase 0 — Discovery
 
+If a host skill (`/referee`) supplied a **referee arrangement**, go to § Referee arrangement now:
+it replaces this discovery and the README creation below. Without one, this phase applies
+unchanged.
+
 Discover these; do not assume them. Projects differ, and a wrong assumption here silently audits the
 wrong file.
 
@@ -82,7 +86,7 @@ the note skeleton from `references/litrev-notes.md`, and **the sentences in the 
 that key** — so the "What we cite it for" section gets verified against the source rather than
 invented from the paper's abstract.
 
-If a PDF is absent, ask Mohammed to download it into the PDF root. Do not proceed on memory, and do
+If a PDF is absent, ask the user to download it into the PDF root. Do not proceed on memory, and do
 not write a note for a paper you have not opened. A note is a claim that you read it.
 
 ### 3. Verify every characterization
@@ -141,7 +145,7 @@ Same record, reversed inventory. The notes are the source of truth for what may 
 invented titles, journals, volumes, and DOIs, and they are convincing enough to survive casual
 review.
 
-What you write is a **lead**, not an entry — enough for Mohammed to find the paper, explicitly marked
+What you write is a **lead**, not an entry — enough for the user to find the paper, explicitly marked
 unverified, with no invented precision:
 
 ```bibtex
@@ -151,13 +155,51 @@ unverified, with no invented precision:
 % Do not cite this key until it appears in references.bib.
 ```
 
-Write it to the request file. Mohammed verifies via Google Scholar, imports through Zotero, and
+Write it to the request file. The user verifies via Google Scholar, imports through Zotero, and
 updates the bibliography. **Wait for confirmation before citing the key.** Never edit the
 Zotero-managed bibliography directly.
 
 If you cannot recall enough to make the lead findable, say that instead of padding it. "There is a
 known result on X that we should cite, which I cannot identify precisely" is useful. An invented DOI
 is worse than nothing.
+
+## Referee arrangement (host-supplied)
+
+Used only when a host skill (`/referee`) supplies it, for a manuscript the user is refereeing
+rather than writing. Without it, everything above applies unchanged. The host supplies:
+
+| What | Referee value |
+|---|---|
+| Manuscript | The round's submitted file, in whatever form it arrived (PDF, `.tex`, `.docx`, …). Read-only. |
+| Bibliography | The reference list printed in the manuscript. |
+| Source map | A map, kept per round in `notes/litrev/README.md`, from each printed reference number to a stable source ID (for example `AuthorYear`). A number can point to a different paper in another round; a source ID never changes. |
+| PDF roots | The locations the user gave at setup, searched in that order. No `.bib` index is assumed: match by title and authors. |
+| Note root | `notes/litrev/`, with the referee README from `references/litrev-notes.md`. Notes are named by source ID. |
+| Request list | A note the host names. Never a file under `paper/`. |
+
+In `audit-manuscript`, under this arrangement:
+1. **Inventory.** List the printed references, not TeX citation keys. Map each to a source ID and
+   note where the manuscript cites it. The map minus the notes present is the reading list.
+2. **Read the gaps.** Search the PDF locations in their stated order, matching title and authors;
+   no single PDF root or `.bib` index is assumed. A PDF not found is added to the request list and
+   requested from the user; no note is written for a source not yet opened. Read with the usual
+   standards (excerpts, complete assumptions, parameters), and record in each note the exact path
+   read. Only the main agent writes the notes, the README, and the source map: reading agents, if
+   used, return their proposed text to it.
+3. **Verify every characterization.** As above, unchanged: current citing sentences, complete
+   assumptions, Satisfied / Violated / Unclear, Match / Altered / Unverifiable. Keep the reading
+   record (what the source says) apart from each round's check (what this round's manuscript says
+   about it): "What we cite it for" becomes "What the manuscript cites it for — round N", one block
+   per round. An unchanged sentence does not carry a verdict into a new round if the result's
+   hypotheses or the surrounding argument changed.
+4. **Coverage.** As above. Leads go to the request list, marked UNVERIFIED LEAD, never as a
+   bibliography entry.
+5. **Naming a source the authors did not cite.** Once its note exists, the referee's report may name
+   it by the full reference taken from its PDF. No bibliography edit and no Zotero import is
+   involved.
+
+Rules 1, 2, 4, and 6 apply unchanged. Rule 3's request file is the request list, and Rule 5's
+citation key is the source ID.
 
 ## Rules
 
@@ -174,7 +216,7 @@ is worse than nothing.
 
 ## Reference files
 
-- `references/litrev-notes.md` — the `notes/litrev/README.md` text and the per-key note skeleton.
+- `references/litrev-notes.md` — the `notes/litrev/README.md` text (and its referee variant) and the per-key note skeleton.
 - `references/attribution-checks.md` — which check to run for which kind of claim, how to word it,
   and the tests behind the wording.
 - `<toolkit>/guides/project-hub.md` — notes discipline and the Active-notes index.
