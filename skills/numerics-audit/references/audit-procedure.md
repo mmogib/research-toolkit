@@ -11,7 +11,9 @@ supplied values — **evidence lookup**, **findings sink**, **markup policy**, *
 
 Extract every empirical claim in the manuscript into a table in the **findings sink**. Claims live in
 the abstract, the introduction's contribution list, the experiment section's prose, and the
-conclusion — the introduction and conclusion are where the overclaims are.
+conclusion — the introduction and conclusion are where the overclaims are. Under a `referee` host
+arrangement that supplies a claims ledger, give each verdict against its IDs instead of building a
+new table (SKILL.md § The four modes).
 
 | # | Claim (quoted) | Where | Supporting table/figure | Verdict |
 |---|---|---|---|---|
@@ -126,3 +128,4 @@ Every finding lands in one of three buckets, recorded in the **findings sink**:
 
 In `referee` mode there are no buckets: findings become numbered report points, split into those that
 block acceptance and those that would improve the paper, with anything unverifiable marked as such.
+Under a host arrangement, findings go to the host's sink as pending, in its format.

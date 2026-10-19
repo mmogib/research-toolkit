@@ -36,9 +36,9 @@ by name — nothing below is hardcoded.
 
 | Mode | Evidence lookup | Findings sink | Markup / edit policy | Experiment handoff | Decision owner |
 |---|---|---|---|---|---|
-| `collaborator-owned` | `notes/litrev/<Key>.md` | `notes/review-findings.md` | `\rev{...}` batch in the manuscript | `templates/spec-note.md` → `notes/spec-<topic>.md` | Mohammed |
-| `self-owned` | litrev note, else the cited PDF | `notes/review-findings.md` | direct edit, project convention | a new or modified script via `/jcode-script` | Mohammed |
-| `no-runner` | litrev note, else the cited PDF | `notes/review-findings.md` | text-only fixes | **none** — every gap becomes a note | Mohammed |
+| `collaborator-owned` | `notes/litrev/<Key>.md` | `notes/review-findings.md` | `\rev{...}` batch in the manuscript | `templates/spec-note.md` → `notes/spec-<topic>.md` | the user |
+| `self-owned` | litrev note, else the cited PDF | `notes/review-findings.md` | direct edit, project convention | a new or modified script via `/jcode-script` | the user |
+| `no-runner` | litrev note, else the cited PDF | `notes/review-findings.md` | text-only fixes | **none** — every gap becomes a note | the user |
 | `referee` | the cited paper directly | the referee report itself | **no edits at all** | none | the referee |
 
 Choosing:
@@ -49,11 +49,28 @@ Choosing:
 - **`no-runner`** — nobody can run anything. Every gap becomes a recorded finding, and claims that
   rest on missing runs get softened or dropped rather than supported.
 - **`referee`** — someone else's paper. There is no `notes/`, no litrev record, and nothing to edit.
-  Findings become numbered report points.
+  Findings become numbered report points. (A host may run it inside a review project instead: see
+  the host arrangement below.)
 
 In `referee` mode, lens C cannot check baseline parameters against a litrev note because there is
 none. Check attributions against the cited paper directly where you have it, and otherwise **mark
 them unverifiable and say so in the report** — an unverifiable attribution is itself a referee point.
+
+**Host arrangement for `referee`.** A host skill (`/referee`) may run `referee` mode inside its own
+review project and supply the five values. Its values replace the `referee` row, and the standalone
+text above and in § `referee` mode output gives way to these:
+- **Evidence lookup:** the host's litrev note, else the cited PDF. A source you cannot access is
+  pending evidence: record it and ask for the PDF. It is not by itself a finding against the
+  authors.
+- **Findings sink:** the host's file. Write findings there as **pending**, each anchored (the claim,
+  its location, the table cell, the evidence). Writing the sink is not an edit.
+- **Edit policy:** no edits to the authors' material or to any report.
+- **Claim inventory:** if the host supplies a claims ledger, lens A returns a verdict for each of its
+  IDs instead of building a second inventory. A claim the ledger lacks gets a new ID, marked new.
+- **Disposition:** severity, acceptance, and the report belong to the host and its decision owner.
+  No numbered report points.
+
+Without a host arrangement, `referee` mode runs exactly as described above.
 
 ## Phase 0 — Establish the mode and the scope
 
@@ -117,10 +134,12 @@ support it, and what the authors would need to do. Separate points that block ac
 that would improve the paper, and mark anything you could not verify from the manuscript alone rather
 than asserting it.
 
+Under a host arrangement, the host's sink and format apply instead (§ The four modes).
+
 ## Rules
 
 1. **Never write a claim about a run you cannot verify.**
-2. **Never edit anything in `referee` mode.**
+2. **Never edit anything in `referee` mode.** Under a host arrangement, the only write is pending findings to the host's sink.
 3. **A finding is a quotation plus a number**, not an impression. Cite the claim's location and the
    table cell that contradicts it.
 4. **Recompute rather than trust.** Percentages, speedups, averages, and win tallies are all
